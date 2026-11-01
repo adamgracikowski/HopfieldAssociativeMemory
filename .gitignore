@@ -1,0 +1,27 @@
+# Local-only documentation and notes
+CLAUDE.md
+notes/*
+.claude/*
+
+# Rust
+src/compute/target/
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+
+# Experiment artifacts
+data/experiments/**/artifacts/
+data/experiments/**/runs/
+data/experiments/*/*/results/*.png
+data/experiments/**/plots/*.png
+
+# Logs of scripts
+logs/
+
+# Report build output
+docs/.latexbuild/
+docs/*.pdf
+docs/*.log
