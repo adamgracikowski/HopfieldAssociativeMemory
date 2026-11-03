@@ -1,0 +1,16 @@
+# Conversion of cat photos to 300x200 bipolar bitmaps (N = 60000).
+# Run from src/compute:
+#   cargo run --release -- convert-images --config ../../data/images/cats/config.toml
+
+width = 300
+height = 200
+sources = "sources.tsv"
+images = "raw"
+
+[[outputs]]
+method = "median"
+file = "../../datasets/cats-300x200-median.npy"
+
+[[outputs]]
+method = "floyd-steinberg"
+file = "../../datasets/cats-300x200-dither.npy"

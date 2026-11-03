@@ -25,3 +25,6 @@ logs/
 docs/.latexbuild/
 docs/*.pdf
 docs/*.log
+
+# Source images of converted datasets
+data/images/*/raw/
