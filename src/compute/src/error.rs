@@ -43,9 +43,41 @@ pub enum Error {
     Image {
         /// Image file.
         path: PathBuf,
-        /// Underlying image library error.
+        /// Underlying image library error, boxed because it is large.
         #[source]
-        source: image::ImageError,
+        source: Box<image::ImageError>,
+    },
+
+    /// A source image listed for conversion does not exist.
+    #[error("image `{path}` not found")]
+    #[diagnostic(
+        code(compute::missing_image),
+        help("download the images first, e.g. with `data/images/download.ps1`")
+    )]
+    MissingImage {
+        /// Expected image file.
+        path: PathBuf,
+    },
+
+    /// A configuration file could not be parsed.
+    #[error("invalid configuration `{path}`")]
+    #[diagnostic(code(compute::config))]
+    Config {
+        /// Configuration file.
+        path: PathBuf,
+        /// Underlying TOML error, boxed because it is large.
+        #[source]
+        source: Box<toml::de::Error>,
+    },
+
+    /// A configuration file has an invalid value.
+    #[error("invalid configuration `{path}`: {message}")]
+    #[diagnostic(code(compute::invalid_config))]
+    InvalidConfig {
+        /// Configuration file.
+        path: PathBuf,
+        /// What is wrong.
+        message: String,
     },
 
     /// A pattern file has invalid content at a known position.
@@ -84,9 +116,9 @@ pub enum Error {
     Registry {
         /// Registry file.
         path: PathBuf,
-        /// Underlying TOML error.
+        /// Underlying TOML error, boxed because it is large.
         #[source]
-        source: toml::de::Error,
+        source: Box<toml::de::Error>,
     },
 
     /// A registry entry has an invalid value.

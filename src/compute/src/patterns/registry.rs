@@ -77,7 +77,7 @@ impl Registry {
     pub fn parse(text: &str, path: &Path) -> Result<Self> {
         let file: RegistryFile = toml::from_str(text).map_err(|source| Error::Registry {
             path: path.to_owned(),
-            source,
+            source: Box::new(source),
         })?;
         for (name, entry) in &file.datasets {
             entry

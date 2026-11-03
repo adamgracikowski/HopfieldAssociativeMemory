@@ -1,7 +1,11 @@
 //! Integration tests of the `compute` command-line interface.
 
+use std::path::{Path, PathBuf};
+
 use assert_cmd::Command;
 use compute::build_info;
+use compute::patterns::npy::read_npy;
+use image::{GrayImage, Luma};
 use predicates::prelude::*;
 use predicates::str::contains;
 
@@ -95,4 +99,105 @@ fn inspect_rejects_a_missing_pattern() {
         .assert()
         .failure()
         .stderr(contains("pattern 5 does not exist"));
+}
+
+/// Writes a conversion configuration with two 8x4 gradient images (the second
+/// mirrored) and returns the configuration path.
+fn conversion_setup(dir: &Path) -> PathBuf {
+    let config = dir.join("config.toml");
+    std::fs::write(
+        &config,
+        "width = 4
+height = 2
+sources = \"sources.tsv\"
+images = \"raw\"
+
+         [[outputs]]
+method = \"median\"
+file = \"out/median.npy\"
+
+         [[outputs]]
+method = \"floyd-steinberg\"
+file = \"out/dither.npy\"
+",
+    )
+    .unwrap();
+    let mut sources = String::from(
+        "file	sha1	url	page	author	license
+",
+    );
+    std::fs::create_dir(dir.join("raw")).unwrap();
+    for (name, mirror) in [("a.png", false), ("b.png", true)] {
+        sources.push_str(&format!(
+            "{name}	00	https://example.org	https://example.org	A	CC0
+"
+        ));
+        GrayImage::from_fn(8, 4, |x, _| {
+            let x = if mirror { 7 - x } else { x };
+            Luma([(x * 32) as u8])
+        })
+        .save(dir.join("raw").join(name))
+        .unwrap();
+    }
+    std::fs::write(dir.join("sources.tsv"), sources).unwrap();
+    config
+}
+
+#[test]
+fn convert_images_writes_datasets_and_previews() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = conversion_setup(dir.path());
+    let preview = dir.path().join("preview");
+    compute()
+        .arg("convert-images")
+        .arg("--config")
+        .arg(&config)
+        .arg("--preview")
+        .arg(&preview)
+        .assert()
+        .success()
+        .stdout(contains("dataset      median"))
+        .stdout(contains(
+            "description  2 images, floyd-steinberg binarization",
+        ))
+        .stdout(contains("bitmap       4x2 (N = 8)"));
+
+    let median = read_npy(&dir.path().join("out").join("median.npy")).unwrap();
+    assert_eq!((median.len(), median.width(), median.height()), (2, 4, 2));
+    assert_eq!(
+        median.pattern(0).values().to_vec(),
+        [1, 1, -1, -1, 1, 1, -1, -1]
+    );
+    assert!(dir.path().join("out").join("dither.npy").is_file());
+    assert!(preview.join("dither").join("01-b.png").is_file());
+}
+
+#[test]
+fn convert_images_reports_a_missing_image() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = conversion_setup(dir.path());
+    std::fs::remove_file(dir.path().join("raw").join("a.png")).unwrap();
+    compute()
+        .arg("convert-images")
+        .arg("--config")
+        .arg(&config)
+        .assert()
+        .failure()
+        .stderr(contains("a.png").and(contains("not found")))
+        .stderr(contains("download.ps1"));
+}
+
+#[test]
+fn convert_images_rejects_an_unknown_method() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = conversion_setup(dir.path());
+    let text = std::fs::read_to_string(&config).unwrap();
+    std::fs::write(&config, text.replace("\"median\"", "\"otsu\"")).unwrap();
+    compute()
+        .arg("convert-images")
+        .arg("--config")
+        .arg(&config)
+        .assert()
+        .failure()
+        .stderr(contains("invalid configuration"));
 }

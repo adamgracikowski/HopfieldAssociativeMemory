@@ -1,6 +1,7 @@
 //! Conversion of photographs to bipolar bitmaps.
 
 pub mod binarization;
+pub mod config;
 
 use std::path::Path;
 
@@ -8,6 +9,7 @@ use image::imageops::FilterType;
 use image::{DynamicImage, GrayImage, ImageDecoder, ImageReader};
 
 pub use binarization::Binarization;
+pub use config::{Conversion, ConversionConfig};
 
 use crate::patterns::{Pattern, bitmap_size};
 use crate::{Error, Result};
@@ -56,7 +58,7 @@ impl ImageConverter {
         };
         let image_error = |source| Error::Image {
             path: path.to_owned(),
-            source,
+            source: Box::new(source),
         };
         let mut decoder = ImageReader::open(path)
             .map_err(io_error)?
