@@ -23,6 +23,7 @@ npyz = "0.9.1"
 rand = "0.10.3"
 rand_chacha = "0.10.0"
 serde = { version = "1.0.229", features = ["derive"] }
+sha1_smol = "1.0.1"
 thiserror = "2.0.21"
 toml = "1.1.8"
 

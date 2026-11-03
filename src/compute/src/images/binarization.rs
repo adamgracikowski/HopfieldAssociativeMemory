@@ -1,7 +1,7 @@
 //! Binarization of grayscale images to bipolar patterns.
 
 use image::GrayImage;
-use image::imageops::{BiLevel, dither};
+use image::imageops::{BiLevel, ColorMap, dither};
 use ndarray::Array1;
 use serde::Deserialize;
 
@@ -23,6 +23,8 @@ pub enum Binarization {
     /// Floyd-Steinberg error diffusion to black and white
     /// ([`image::imageops::dither`] with [`BiLevel`], which maps brightness
     /// above 127 to white). Black pixels become `1`, white pixels `-1`.
+    /// Images narrower than 2 pixels, which the image library cannot dither,
+    /// are thresholded the same way without error diffusion.
     FloydSteinberg,
 }
 
@@ -49,7 +51,13 @@ impl Binarization {
             }
             Self::FloydSteinberg => {
                 let mut dithered = image.clone();
-                dither(&mut dithered, &BiLevel);
+                if image.width() >= 2 {
+                    dither(&mut dithered, &BiLevel);
+                } else {
+                    for pixel in dithered.pixels_mut() {
+                        BiLevel.map_color(pixel);
+                    }
+                }
                 dithered
                     .as_raw()
                     .iter()
@@ -135,6 +143,15 @@ mod tests {
         let mid = Binarization::FloydSteinberg.apply(&gray(64, 64, |_, _| 128));
         let fraction = count_on(&mid) as f64 / mid.len() as f64;
         assert!((0.45..=0.55).contains(&fraction), "{fraction}");
+    }
+
+    #[test]
+    fn dithering_handles_images_one_pixel_wide() {
+        let image = gray(1, 4, |_, y| [0, 100, 200, 255][y as usize]);
+        let pattern = Binarization::FloydSteinberg.apply(&image);
+        assert_eq!(pattern.values().to_vec(), vec![1, 1, -1, -1]);
+        let single = Binarization::FloydSteinberg.apply(&gray(1, 1, |_, _| 128));
+        assert_eq!(single.values().to_vec(), vec![-1]);
     }
 
     #[test]

@@ -38,7 +38,7 @@ Converts photographs to bipolar bitmaps and writes them as `.npy` datasets (`int
 
 ```bash
 cargo run --release -- convert-images --config ../../data/images/cats/config.toml
-cargo run --release -- convert-images --config ../../data/images/cats/config.toml --preview previews
+cargo run --release -- convert-images --config ../../data/images/cats/config.toml --preview target/previews
 ```
 
 The configuration (paths relative to its directory):
@@ -46,7 +46,7 @@ The configuration (paths relative to its directory):
 ```toml
 width = 300
 height = 200
-sources = "sources.tsv"   # tab-separated: file, sha1, url, page, author, license
+sources = "sources.tsv"   # tab-separated: file, sha1, url, page, author, license, license_url
 images = "raw"            # directory with the source images
 
 [[outputs]]
@@ -58,7 +58,7 @@ method = "floyd-steinberg" # error diffusion dithering
 file = "../../datasets/cats-300x200-dither.npy"
 ```
 
-Patterns follow the order of the source list. `--preview <dir>` also writes every bitmap as a black-and-white PNG.
+Patterns follow the order of the source list. Every image must be a plain file name in `images` and match its SHA-1 checksum. Outputs must have distinct file names. `--preview <dir>` also writes every bitmap as a black-and-white PNG to `<dir>/<output file stem>/`.
 
 ## Checks
 

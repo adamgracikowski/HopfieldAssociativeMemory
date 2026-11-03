@@ -101,7 +101,8 @@ fn invalid(message: String) -> Error {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use image::{Rgb, RgbImage};
+    use image::codecs::jpeg::JpegEncoder;
+    use image::{ImageEncoder, Luma, Rgb, RgbImage};
 
     /// A `30 x 10` image with black left and right thirds and a white middle.
     fn three_stripes() -> DynamicImage {
@@ -142,6 +143,34 @@ mod tests {
             .unwrap();
         assert_eq!(pattern.values()[0], 1);
         assert_eq!(pattern.values()[15], -1);
+    }
+
+    /// Little-endian TIFF block with a single EXIF tag: orientation 6, which
+    /// means the stored image must be rotated 90 degrees clockwise for display.
+    const ORIENTATION_6: [u8; 26] = [
+        b'I', b'I', 42, 0, 8, 0, 0, 0, 1, 0, 0x12, 0x01, 3, 0, 1, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0,
+    ];
+
+    /// A stored 16x8 JPEG with a black left half and orientation 6 is shown as
+    /// an 8x16 image with a black top half. Without the rotation, scaling to
+    /// 8x16 would crop the centre and leave half-black rows.
+    #[test]
+    fn applies_the_exif_orientation() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("rotated.jpg");
+        let stored = GrayImage::from_fn(16, 8, |x, _| Luma([if x < 8 { 0 } else { 255 }]));
+        let mut file = std::io::BufWriter::new(std::fs::File::create(&path).unwrap());
+        let mut encoder = JpegEncoder::new_with_quality(&mut file, 100);
+        encoder.set_exif_metadata(ORIENTATION_6.to_vec()).unwrap();
+        stored.write_with_encoder(encoder).unwrap();
+        drop(file);
+
+        let converter = ImageConverter::new(8, 16).unwrap();
+        assert_eq!(converter.open(&path).unwrap().dimensions(), (8, 16));
+        let pattern = converter.convert_file(&path, Binarization::Median).unwrap();
+        let values = pattern.values();
+        assert!(values.iter().take(8).all(|&v| v == 1), "{pattern:?}");
+        assert!(values.iter().rev().take(8).all(|&v| v == -1), "{pattern:?}");
     }
 
     #[test]

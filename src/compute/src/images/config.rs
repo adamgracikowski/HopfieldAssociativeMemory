@@ -20,6 +20,7 @@ pub mod conversion;
 pub mod output;
 pub mod source;
 
+use std::collections::HashSet;
 use std::path::{Component, Path, PathBuf};
 
 use serde::Deserialize;
@@ -64,8 +65,10 @@ impl ConversionConfig {
     }
 
     /// Parses and validates configuration `text`: the bitmap size must be
-    /// valid for [`ImageConverter`] and there must be at least one output.
-    /// Relative paths are resolved against the parent directory of `path`.
+    /// valid for [`ImageConverter`], there must be at least one output, and
+    /// no two outputs may share a file or a file stem (which names their
+    /// preview directory). Relative paths are resolved against the parent
+    /// directory of `path`.
     pub fn parse(text: &str, path: &Path) -> Result<Self> {
         let raw: RawConfig = toml::from_str(text).map_err(|source| Error::Config {
             path: path.to_owned(),
@@ -81,19 +84,30 @@ impl ConversionConfig {
             return Err(invalid("no outputs".to_owned()));
         }
         let base = path.parent().unwrap_or(Path::new(""));
+        let outputs: Vec<Output> = raw
+            .outputs
+            .into_iter()
+            .map(|output| Output {
+                file: resolve(base, &output.file),
+                ..output
+            })
+            .collect();
+        let mut stems = HashSet::new();
+        if let Some(output) = outputs
+            .iter()
+            .find(|output| !stems.insert(output.file.file_stem()))
+        {
+            return Err(invalid(format!(
+                "two outputs share the file name of `{}`",
+                output.file.display()
+            )));
+        }
         Ok(Self {
             path: path.to_owned(),
             converter,
             sources: resolve(base, &raw.sources),
             images: resolve(base, &raw.images),
-            outputs: raw
-                .outputs
-                .into_iter()
-                .map(|output| Output {
-                    file: resolve(base, &output.file),
-                    ..output
-                })
-                .collect(),
+            outputs,
         })
     }
 
@@ -128,8 +142,9 @@ impl ConversionConfig {
     }
 
     /// Converts every source image once to a grayscale bitmap and binarizes
-    /// it with the method of each output. Patterns follow the order of the
-    /// source list. Nothing is written.
+    /// it with the method of each output. Each image must exist and match its
+    /// listed SHA-1 checksum. Patterns follow the order of the source list.
+    /// Nothing is written.
     pub fn convert(&self) -> Result<Vec<Conversion>> {
         let sources = self.read_sources()?;
         let grays = sources
@@ -139,6 +154,7 @@ impl ConversionConfig {
                 if !path.is_file() {
                     return Err(Error::MissingImage { path });
                 }
+                source.verify(&path)?;
                 self.converter.open(&path)
             })
             .collect::<Result<Vec<_>>>()?;
@@ -206,18 +222,18 @@ mod tests {
     /// horizontal gradient and its mirror.
     fn setup(dir: &Path) -> ConversionConfig {
         std::fs::write(dir.join("config.toml"), CONFIG).unwrap();
-        let mut sources = String::from("file\tsha1\turl\tpage\tauthor\tlicense\n");
+        let mut sources = String::from("file\tsha1\turl\tpage\tauthor\tlicense\tlicense_url\n");
         std::fs::create_dir(dir.join("raw")).unwrap();
         for (name, mirror) in [("a.png", false), ("b.png", true)] {
-            sources.push_str(&format!(
-                "{name}\t00\thttps://example.org\thttps://example.org\tA\tCC0\n"
-            ));
+            let path = dir.join("raw").join(name);
             GrayImage::from_fn(8, 4, |x, _| {
                 let x = if mirror { 7 - x } else { x };
                 Luma([(x * 32) as u8])
             })
-            .save(dir.join("raw").join(name))
+            .save(&path)
             .unwrap();
+            let sha1 = Source::checksum(&path).unwrap();
+            sources.push_str(&format!("{name}\t{sha1}\turl\tpage\tA\tCC0\tlicense\n"));
         }
         std::fs::write(dir.join("sources.tsv"), sources).unwrap();
         ConversionConfig::from_file(&dir.join("config.toml")).unwrap()
@@ -268,6 +284,16 @@ mod tests {
     }
 
     #[test]
+    fn rejects_outputs_sharing_a_file_name() {
+        let parse = |text: &str| ConversionConfig::parse(text, Path::new("c.toml"));
+        let same_file = CONFIG.replace("out/dither.npy", "out/./median.npy");
+        let error = parse(&same_file).unwrap_err();
+        assert!(error.to_string().contains("share the file name"), "{error}");
+        let same_stem = CONFIG.replace("out/dither.npy", "other/median.npy");
+        assert!(parse(&same_stem).is_err());
+    }
+
+    #[test]
     fn converts_every_image_for_every_output() {
         let dir = tempfile::tempdir().unwrap();
         let conversions = setup(dir.path()).convert().unwrap();
@@ -280,6 +306,17 @@ mod tests {
         let median = &conversions[0].set;
         assert_eq!(median.pattern(0).values()[0], 1);
         assert_eq!(median.pattern(1).values()[0], -1);
+    }
+
+    #[test]
+    fn reports_a_changed_image() {
+        let dir = tempfile::tempdir().unwrap();
+        let config = setup(dir.path());
+        GrayImage::new(8, 4)
+            .save(dir.path().join("raw").join("a.png"))
+            .unwrap();
+        let error = config.convert().unwrap_err();
+        assert!(matches!(error, Error::ChecksumMismatch { .. }), "{error}");
     }
 
     #[test]

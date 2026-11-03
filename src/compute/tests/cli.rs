@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 
 use assert_cmd::Command;
 use compute::build_info;
+use compute::images::config::Source;
 use compute::patterns::npy::read_npy;
 use image::{GrayImage, Luma};
 use predicates::prelude::*;
@@ -101,43 +102,39 @@ fn inspect_rejects_a_missing_pattern() {
         .stderr(contains("pattern 5 does not exist"));
 }
 
-/// Writes a conversion configuration with two 8x4 gradient images (the second
-/// mirrored) and returns the configuration path.
+/// Conversion configuration used by the `convert-images` tests.
+const CONVERSION_CONFIG: &str = r#"
+width = 4
+height = 2
+sources = "sources.tsv"
+images = "raw"
+
+[[outputs]]
+method = "median"
+file = "out/median.npy"
+
+[[outputs]]
+method = "floyd-steinberg"
+file = "out/dither.npy"
+"#;
+
+/// Writes the conversion configuration, two 8x4 gradient images (the second
+/// mirrored) and their source list, and returns the configuration path.
 fn conversion_setup(dir: &Path) -> PathBuf {
     let config = dir.join("config.toml");
-    std::fs::write(
-        &config,
-        "width = 4
-height = 2
-sources = \"sources.tsv\"
-images = \"raw\"
-
-         [[outputs]]
-method = \"median\"
-file = \"out/median.npy\"
-
-         [[outputs]]
-method = \"floyd-steinberg\"
-file = \"out/dither.npy\"
-",
-    )
-    .unwrap();
-    let mut sources = String::from(
-        "file	sha1	url	page	author	license
-",
-    );
+    std::fs::write(&config, CONVERSION_CONFIG).unwrap();
     std::fs::create_dir(dir.join("raw")).unwrap();
+    let mut sources = String::from("file\tsha1\turl\tpage\tauthor\tlicense\tlicense_url\n");
     for (name, mirror) in [("a.png", false), ("b.png", true)] {
-        sources.push_str(&format!(
-            "{name}	00	https://example.org	https://example.org	A	CC0
-"
-        ));
+        let path = dir.join("raw").join(name);
         GrayImage::from_fn(8, 4, |x, _| {
             let x = if mirror { 7 - x } else { x };
             Luma([(x * 32) as u8])
         })
-        .save(dir.join("raw").join(name))
+        .save(&path)
         .unwrap();
+        let sha1 = Source::checksum(&path).unwrap();
+        sources.push_str(&format!("{name}\t{sha1}\turl\tpage\tA\tCC0\tlicense\n"));
     }
     std::fs::write(dir.join("sources.tsv"), sources).unwrap();
     config

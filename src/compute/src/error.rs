@@ -59,6 +59,21 @@ pub enum Error {
         path: PathBuf,
     },
 
+    /// A source image differs from the listed one.
+    #[error("image `{path}` has SHA-1 {actual}, expected {expected}")]
+    #[diagnostic(
+        code(compute::checksum_mismatch),
+        help("delete the file and download it again, e.g. with `data/images/download.ps1`")
+    )]
+    ChecksumMismatch {
+        /// Image file.
+        path: PathBuf,
+        /// Checksum from the source list.
+        expected: String,
+        /// Checksum of the file.
+        actual: String,
+    },
+
     /// A configuration file could not be parsed.
     #[error("invalid configuration `{path}`")]
     #[diagnostic(code(compute::config))]
