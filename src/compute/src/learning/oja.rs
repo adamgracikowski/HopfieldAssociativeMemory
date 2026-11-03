@@ -11,7 +11,7 @@ use serde::Deserialize;
 pub use fit::OjaFit;
 pub use variant::OjaVariant;
 
-use super::LearningRule;
+use super::{LearningRule, Trained};
 use crate::weights::{Backend, DenseWeights, FactoredWeights, WeightMatrix, Weights};
 use crate::{Error, PatternSet, Result};
 
@@ -35,26 +35,34 @@ use crate::{Error, PatternSet, Result};
 pub struct Oja {
     /// Form of the rule.
     pub variant: OjaVariant,
-    /// Learning rate `eta` for the normalized patterns.
+    /// Learning rate `eta` for the normalized patterns. With the scaled
+    /// start, every direction of the subspace rule evolves as
+    /// `f <- f + k f (1 - f^2)` with `k = eta lambda / p <= eta`, which
+    /// converges to 1 monotonically for `eta <= 0.5`.
     pub eta: f64,
     /// Largest number of epochs.
     pub max_epochs: usize,
-    /// Learning stops when an upper bound on `max |dw_ij|` of an epoch falls
-    /// below this value.
+    /// Learning stops when the relative change of the weights in an epoch,
+    /// divided by the learning rate, `||dW||_F / (eta ||W||_F)`, falls below
+    /// this value. The measure does not depend on `N` or `eta`. A direction
+    /// with a small eigenvalue `lambda` of the pattern overlap matrix still
+    /// converges only at a rate of about `eta lambda / p` per epoch, so its
+    /// remaining error can be larger.
     pub tolerance: f64,
 }
 
 impl Default for Oja {
-    /// Subspace rule, `eta = 0.1`, at most 100000 epochs, tolerance `1e-8`.
-    /// The subspace rule learns small eigenvalues of the pattern overlap
-    /// matrix slowly (`letters-14x20` needs tens of thousands of epochs), and
-    /// its epochs cost only `O(p^3)`.
+    /// Subspace rule, `eta = 0.5` (the largest rate with monotone
+    /// convergence), at most 100000 epochs, tolerance `1e-6`. The subspace
+    /// rule learns small eigenvalues of the pattern overlap matrix slowly
+    /// (about `p / (eta lambda_min)` epochs per e-fold, hundreds of thousands
+    /// for `letters-14x20`), and its epochs cost only `O(p^3)`.
     fn default() -> Self {
         Self {
             variant: OjaVariant::Subspace,
-            eta: 0.1,
+            eta: 0.5,
             max_epochs: 100_000,
-            tolerance: 1e-8,
+            tolerance: 1e-6,
         }
     }
 }
@@ -76,8 +84,10 @@ impl Oja {
                 let mut matrix = Array2::eye(set.len()) / scale;
                 let (epochs, converged) = self.iterate(&mut matrix, |matrix| {
                     let delta = subspace::step(matrix, &gram, rate);
-                    let bound = delta.iter().map(|d| d.abs()).sum::<f64>() / n;
-                    (delta, bound)
+                    let squared = |m: &Array2<f64>| m.dot(&gram).dot(m);
+                    let change = frobenius_norm(&squared(&delta), &gram)
+                        / frobenius_norm(&squared(matrix), &gram);
+                    (delta, change)
                 })?;
                 Ok(OjaFit {
                     coefficients: patterns.t().dot(&matrix) / n,
@@ -90,12 +100,10 @@ impl Oja {
                 let mut coefficients = patterns.t().mapv(|xi| xi / (n * scale));
                 let (epochs, converged) = self.iterate(&mut coefficients, |coefficients| {
                     let delta = single_neuron::step(coefficients, &gram, rate);
-                    let bound = delta
-                        .rows()
-                        .into_iter()
-                        .map(|row| row.iter().map(|d| d.abs()).sum::<f64>())
-                        .fold(0.0, f64::max);
-                    (delta, bound)
+                    let squared = |a: &Array2<f64>| a.t().dot(a);
+                    let change = frobenius_norm(&squared(&delta), &gram)
+                        / frobenius_norm(&squared(coefficients), &gram);
+                    (delta, change)
                 })?;
                 Ok(OjaFit {
                     coefficients,
@@ -107,24 +115,24 @@ impl Oja {
     }
 
     /// Adds the update returned by `step` to `state` once per epoch until
-    /// the returned bound on `max |dw_ij|` falls below the tolerance or the
-    /// epoch limit is reached. Returns the number of epochs and whether the
-    /// tolerance was reached.
+    /// the returned relative change `||dW||_F / ||W||_F`, divided by `eta`,
+    /// falls below the tolerance or the epoch limit is reached. Returns the
+    /// number of epochs and whether the tolerance was reached.
     fn iterate(
         &self,
         state: &mut Array2<f64>,
         mut step: impl FnMut(&Array2<f64>) -> (Array2<f64>, f64),
     ) -> Result<(usize, bool)> {
         for epoch in 1..=self.max_epochs {
-            let (delta, bound) = step(state);
+            let (delta, change) = step(state);
             *state += &delta;
-            if !(bound.is_finite() && state.iter().all(|v| v.is_finite())) {
+            if !(change.is_finite() && state.iter().all(|v| v.is_finite())) {
                 return Err(Error::LearningDiverged {
                     rule: format!("Oja's {} rule", self.variant),
                     epochs: epoch,
                 });
             }
-            if bound < self.tolerance {
+            if change / self.eta < self.tolerance {
                 return Ok((epoch, true));
             }
         }
@@ -154,14 +162,30 @@ impl Oja {
 
 impl LearningRule for Oja {
     /// Runs [`fit`](Oja::fit) and stores `W = A Xi` with zero diagonal in
-    /// the factored backend, or expands it into the dense one.
-    fn train(&self, set: &PatternSet, backend: Backend) -> Result<Weights> {
-        let factored = FactoredWeights::new(set, self.fit(set)?.coefficients)?;
-        match backend.resolve(set.neurons()) {
-            Backend::Factored => Ok(factored.into()),
-            _ => Ok(DenseWeights::new(factored.to_dense())?.into()),
-        }
+    /// the factored backend, or expands it into the dense one, keeping the
+    /// number of epochs and the convergence flag.
+    fn train(&self, set: &PatternSet, backend: Backend) -> Result<Trained> {
+        let fit = self.fit(set)?;
+        let factored = FactoredWeights::new(set, fit.coefficients)?;
+        let weights: Weights = match backend.resolve(set.neurons()) {
+            Backend::Factored => factored.into(),
+            _ => DenseWeights::new(factored.to_dense())?.into(),
+        };
+        Ok(Trained {
+            weights,
+            epochs: fit.epochs,
+            converged: fit.converged,
+        })
     }
+}
+
+/// Frobenius norm of weights `W = A Xi` computed from two `p x p`
+/// matrices: `||W||_F^2 = tr(A^T A Xi Xi^T) = sum (S * G)` with
+/// `S = A^T A` (`coefficient_gram`) and `G = Xi Xi^T` (`pattern_gram`).
+/// The subspace rule, with `A = Xi^T M / N`, passes `S = M G M` and
+/// `G = Xi Xi^T / N`, which give the same product.
+fn frobenius_norm(coefficient_gram: &Array2<f64>, pattern_gram: &Array2<f64>) -> f64 {
+    (coefficient_gram * pattern_gram).sum().max(0.0).sqrt()
 }
 
 /// `max(1, max_mu sum_nu |G[mu][nu]|)`, an upper bound on the largest
@@ -243,10 +267,35 @@ mod tests {
     fn oja(variant: OjaVariant, max_epochs: usize) -> Oja {
         Oja {
             variant,
+            eta: 0.1,
             max_epochs,
             tolerance: 0.0,
-            ..Oja::default()
         }
+    }
+
+    #[test]
+    fn frobenius_norm_matches_the_full_matrix() {
+        let set = three_patterns();
+        let xi = set.patterns().mapv(f64::from);
+        let a = Array2::from_shape_fn((25, 3), |(i, mu)| (i as f64 - 3.0 * mu as f64) / 10.0);
+        let w = a.dot(&xi);
+        let expected = w.iter().map(|v| v * v).sum::<f64>().sqrt();
+        let norm = frobenius_norm(&a.t().dot(&a), &xi.dot(&xi.t()));
+        assert!(
+            (norm - expected).abs() < 1e-12 * expected,
+            "{norm} {expected}"
+        );
+
+        let n = 25.0;
+        let gram = xi.dot(&xi.t()) / n;
+        let m = Array2::from_shape_fn((3, 3), |(i, j)| if i == j { 0.8 } else { 0.1 });
+        let w = xi.t().dot(&m).dot(&xi) / n;
+        let expected = w.iter().map(|v| v * v).sum::<f64>().sqrt();
+        let norm = frobenius_norm(&m.dot(&gram).dot(&m), &gram);
+        assert!(
+            (norm - expected).abs() < 1e-12 * expected,
+            "{norm} {expected}"
+        );
     }
 
     #[test]
@@ -284,6 +333,7 @@ mod tests {
         let w = oja(OjaVariant::Subspace, 1)
             .train(&two_patterns(), Backend::Dense)
             .unwrap()
+            .weights
             .to_dense();
         assert!((w[[0, 1]] - 1.0 / 15.0).abs() < 1e-15, "{}", w[[0, 1]]);
         assert!(
@@ -312,7 +362,9 @@ mod tests {
         assert!((w[[15, 16]] - 0.1).abs() < 1e-6, "{}", w[[15, 16]]);
         assert!(w[[0, 15]].abs() < 1e-12);
 
-        let weights = Oja::default().train(&set, Backend::Factored).unwrap();
+        let trained = Oja::default().train(&set, Backend::Factored).unwrap();
+        assert!(trained.converged);
+        let weights = trained.weights;
         for xi in set.iter() {
             let h = weights.local_fields(xi.values());
             assert!(
@@ -358,6 +410,7 @@ mod tests {
         let w = oja(OjaVariant::Subspace, 50)
             .train(&three_patterns(), Backend::Dense)
             .unwrap()
+            .weights
             .to_dense();
         assert!(w.iter().zip(w.t()).all(|(a, b)| (a - b).abs() < 1e-15));
         assert!(w.diag().iter().all(|&d| d == 0.0));
@@ -370,6 +423,7 @@ mod tests {
         let set = three_patterns();
         let rule = Oja {
             variant: OjaVariant::SingleNeuron,
+            eta: 0.1,
             max_epochs: 5000,
             ..Oja::default()
         };
@@ -388,8 +442,8 @@ mod tests {
         let set = three_patterns();
         for variant in OjaVariant::iter() {
             let rule = oja(variant, 20);
-            let dense = rule.train(&set, Backend::Dense).unwrap();
-            let factored = rule.train(&set, Backend::Factored).unwrap();
+            let dense = rule.train(&set, Backend::Dense).unwrap().weights;
+            let factored = rule.train(&set, Backend::Factored).unwrap().weights;
             assert_eq!(factored.backend(), Backend::Factored);
             let (a, b) = (dense.to_dense(), factored.to_dense());
             assert!(a.iter().zip(&b).all(|(x, y)| (x - y).abs() < 1e-15));
@@ -401,6 +455,7 @@ mod tests {
         let rule: Oja = toml::from_str("variant = \"single-neuron\"\neta = 0.05").unwrap();
         assert_eq!(rule.variant, OjaVariant::SingleNeuron);
         assert_eq!(rule.eta, 0.05);
+        assert_eq!(Oja::default().eta, 0.5);
         assert_eq!(rule.max_epochs, 100_000);
         assert!(toml::from_str::<Oja>("epochs = 3").is_err());
     }

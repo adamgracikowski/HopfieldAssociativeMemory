@@ -3,7 +3,7 @@
 use ndarray::Array2;
 use ndarray::linalg::general_mat_mul;
 
-use super::LearningRule;
+use super::{LearningRule, Trained};
 use crate::weights::{Backend, DenseWeights, FactoredWeights, Weights};
 use crate::{PatternSet, Result};
 
@@ -20,23 +20,29 @@ pub struct Hebb;
 impl LearningRule for Hebb {
     /// Dense backend: `W = (1/N) Xi^T Xi` computed in place into the
     /// `N x N` matrix, then the diagonal is zeroed. Factored backend:
-    /// coefficients `A = Xi^T / N`, which give the same matrix.
-    fn train(&self, set: &PatternSet, backend: Backend) -> Result<Weights> {
+    /// coefficients `A = Xi^T / N`, which give the same matrix. Reports 0
+    /// epochs and convergence, as the rule is computed in closed form.
+    fn train(&self, set: &PatternSet, backend: Backend) -> Result<Trained> {
         let n = set.neurons();
         let scale = 1.0 / n as f64;
         let patterns = set.patterns().mapv(f64::from);
-        match backend.resolve(n) {
+        let weights: Weights = match backend.resolve(n) {
             Backend::Factored => {
                 let coefficients = patterns.t().mapv(|xi| xi * scale);
-                Ok(FactoredWeights::new(set, coefficients)?.into())
+                FactoredWeights::new(set, coefficients)?.into()
             }
             _ => {
                 let mut matrix = Array2::zeros((n, n));
                 general_mat_mul(scale, &patterns.t(), &patterns, 0.0, &mut matrix);
                 matrix.diag_mut().fill(0.0);
-                Ok(DenseWeights::new(matrix)?.into())
+                DenseWeights::new(matrix)?.into()
             }
-        }
+        };
+        Ok(Trained {
+            weights,
+            epochs: 0,
+            converged: true,
+        })
     }
 }
 
@@ -74,6 +80,7 @@ mod tests {
         let w = Hebb
             .train(&three_patterns(), Backend::Dense)
             .unwrap()
+            .weights
             .to_dense();
         for (i, j, expected) in [
             (0, 1, 0.04),
@@ -95,7 +102,7 @@ mod tests {
     #[test]
     fn dense_weights_match_the_definition() {
         let set = three_patterns();
-        let w = Hebb.train(&set, Backend::Dense).unwrap().to_dense();
+        let w = Hebb.train(&set, Backend::Dense).unwrap().weights.to_dense();
         let xi = set.patterns();
         for i in 0..25 {
             for j in 0..25 {
@@ -112,8 +119,8 @@ mod tests {
     #[test]
     fn backends_give_the_same_weights_and_fields() {
         let set = three_patterns();
-        let dense = Hebb.train(&set, Backend::Dense).unwrap();
-        let factored = Hebb.train(&set, Backend::Factored).unwrap();
+        let dense = Hebb.train(&set, Backend::Dense).unwrap().weights;
+        let factored = Hebb.train(&set, Backend::Factored).unwrap().weights;
         assert_eq!(factored.backend(), Backend::Factored);
         let (a, b) = (dense.to_dense(), factored.to_dense());
         assert!(a.iter().zip(&b).all(|(x, y)| (x - y).abs() < 1e-15));
@@ -136,7 +143,7 @@ mod tests {
     fn orthogonal_patterns_are_fixed_points() {
         let set = PatternSet::new(4, 1, array![[1, 1, 1, 1], [1, -1, 1, -1]]).unwrap();
         for backend in [Backend::Dense, Backend::Factored] {
-            let weights = Hebb.train(&set, backend).unwrap();
+            let weights = Hebb.train(&set, backend).unwrap().weights;
             for xi in set.iter() {
                 let h = weights.local_fields(xi.values());
                 assert_eq!(h, xi.values().mapv(|v| f64::from(v) / 2.0));
@@ -146,7 +153,8 @@ mod tests {
 
     #[test]
     fn auto_uses_the_dense_backend_for_small_networks() {
-        let weights = Hebb.train(&three_patterns(), Backend::Auto).unwrap();
-        assert_eq!(weights.backend(), Backend::Dense);
+        let trained = Hebb.train(&three_patterns(), Backend::Auto).unwrap();
+        assert_eq!(trained.weights.backend(), Backend::Dense);
+        assert_eq!((trained.epochs, trained.converged), (0, true));
     }
 }

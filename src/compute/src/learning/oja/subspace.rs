@@ -11,7 +11,10 @@ use ndarray::Array2;
 ///
 /// `dM = (eta / p) M G (I - G M G M)`.
 ///
-/// Every epoch therefore costs `O(p^3)`, independent of `N`. Returns `dM`.
+/// The exact update has `M^T` in place of the last `M`; the two agree
+/// because `M` starts as a multiple of `I` and stays a polynomial in the
+/// symmetric `G`, hence symmetric. Every epoch costs `O(p^3)`, independent
+/// of `N`. Returns `dM`; `rate` is `eta / p`.
 pub(super) fn step(matrix: &Array2<f64>, gram: &Array2<f64>, rate: f64) -> Array2<f64> {
     let p = gram.nrows();
     let mg = matrix.dot(gram);

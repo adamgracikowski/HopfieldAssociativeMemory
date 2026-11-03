@@ -36,8 +36,10 @@ pub enum OjaVariant {
     /// `dW = eta (y x^T - diag(y * y) W)`.
     ///
     /// Every row converges to the principal eigenvector of the pattern
-    /// correlation matrix (Sanger 1989, p. 465), so the weights tend to a
-    /// rank-one matrix that stores at most one pattern direction.
+    /// correlation matrix (Sanger 1989, p. 465), so for generic pattern sets
+    /// the weights tend to a rank-one matrix that stores at most one pattern
+    /// direction. A row that starts without a component along the principal
+    /// eigenvector converges to another eigenvector instead.
     SingleNeuron,
 }
 
