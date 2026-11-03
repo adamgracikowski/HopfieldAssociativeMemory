@@ -117,6 +117,16 @@ pub enum Error {
         message: String,
     },
 
+    /// An iterative learning rule produced non-finite weights.
+    #[error("{rule} diverged after {epochs} epochs")]
+    #[diagnostic(code(compute::learning_diverged), help("decrease the learning rate"))]
+    LearningDiverged {
+        /// Name of the rule.
+        rule: String,
+        /// Epoch in which the weights stopped being finite.
+        epochs: usize,
+    },
+
     /// A function received an argument outside its valid range.
     #[error("invalid argument: {message}")]
     #[diagnostic(code(compute::invalid_argument))]

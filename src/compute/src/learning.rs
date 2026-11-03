@@ -2,8 +2,10 @@
 //! pattern set.
 
 pub mod hebb;
+pub mod oja;
 
 pub use hebb::Hebb;
+pub use oja::{Oja, OjaFit, OjaVariant};
 
 use crate::weights::{Backend, Weights};
 use crate::{PatternSet, Result};
