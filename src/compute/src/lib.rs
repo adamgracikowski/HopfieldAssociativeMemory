@@ -6,5 +6,7 @@
 
 pub mod build_info;
 pub mod error;
+pub mod patterns;
 
 pub use error::{Error, Result};
+pub use patterns::PatternSet;
