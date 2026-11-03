@@ -9,8 +9,12 @@ use crate::patterns::{BipolarVector, Pattern};
 
 /// Method that turns grayscale pixels into the values `1` (dark) and `-1`
 /// (light).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+///
+/// [`Display`](std::fmt::Display) and `&'static str` conversion give the name
+/// used in configuration files (`median`, `floyd-steinberg`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, strum::Display, strum::IntoStaticStr)]
 #[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum Binarization {
     /// Threshold at the median brightness.
     ///
@@ -29,14 +33,6 @@ pub enum Binarization {
 }
 
 impl Binarization {
-    /// Name of the method as written in configuration files.
-    pub fn name(self) -> &'static str {
-        match self {
-            Self::Median => "median",
-            Self::FloydSteinberg => "floyd-steinberg",
-        }
-    }
-
     /// Binarizes `image` into a pattern of `width * height` pixels stored row
     /// by row, like the rows of a [`PatternSet`](crate::PatternSet).
     pub fn apply(self, image: &GrayImage) -> Pattern {
@@ -130,7 +126,7 @@ mod tests {
             let on: Vec<usize> = (0..pattern.len())
                 .filter(|&i| pattern.values()[i] == 1)
                 .collect();
-            assert_eq!(on, vec![0, 4, 8], "{}", method.name());
+            assert_eq!(on, vec![0, 4, 8], "{method}");
         }
     }
 
@@ -167,6 +163,8 @@ mod tests {
             Binarization::FloydSteinberg
         );
         assert!(parse("otsu").is_err());
-        assert_eq!(Binarization::FloydSteinberg.name(), "floyd-steinberg");
+        assert_eq!(Binarization::FloydSteinberg.to_string(), "floyd-steinberg");
+        let name: &str = Binarization::Median.into();
+        assert_eq!(name, "median");
     }
 }
