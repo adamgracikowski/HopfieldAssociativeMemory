@@ -7,6 +7,7 @@
 pub mod build_info;
 pub mod error;
 pub mod images;
+pub mod learning;
 pub mod patterns;
 pub mod weights;
 
