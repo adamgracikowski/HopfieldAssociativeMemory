@@ -108,7 +108,7 @@ fn convert_images(args: ConvertImagesArgs) -> compute::Result<()> {
         let description = format!(
             "{} images, {} binarization",
             conversion.names.len(),
-            conversion.output.method.name()
+            conversion.output.method
         );
         if i > 0 {
             println!();

@@ -8,6 +8,7 @@ pub mod build_info;
 pub mod error;
 pub mod images;
 pub mod patterns;
+pub mod weights;
 
 pub use error::{Error, Result};
 pub use patterns::PatternSet;

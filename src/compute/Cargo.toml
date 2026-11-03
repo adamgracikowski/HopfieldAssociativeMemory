@@ -24,6 +24,7 @@ rand = "0.10.3"
 rand_chacha = "0.10.0"
 serde = { version = "1.0.229", features = ["derive"] }
 sha1_smol = "1.0.1"
+strum = { version = "0.28.0", features = ["derive"] }
 thiserror = "2.0.21"
 toml = "1.1.8"
 
