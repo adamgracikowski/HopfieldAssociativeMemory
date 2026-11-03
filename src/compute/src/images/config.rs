@@ -20,7 +20,7 @@ pub mod conversion;
 pub mod output;
 pub mod source;
 
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 use serde::Deserialize;
 
@@ -84,13 +84,13 @@ impl ConversionConfig {
         Ok(Self {
             path: path.to_owned(),
             converter,
-            sources: base.join(raw.sources),
-            images: base.join(raw.images),
+            sources: resolve(base, &raw.sources),
+            images: resolve(base, &raw.images),
             outputs: raw
                 .outputs
                 .into_iter()
                 .map(|output| Output {
-                    file: base.join(output.file),
+                    file: resolve(base, &output.file),
                     ..output
                 })
                 .collect(),
@@ -162,6 +162,25 @@ impl ConversionConfig {
     }
 }
 
+/// Joins `relative` to `base` and removes `.` components and `..` components
+/// that follow a directory name, without touching the file system (so a `..`
+/// after a symbolic link is resolved lexically).
+fn resolve(base: &Path, relative: &Path) -> PathBuf {
+    let mut path = PathBuf::new();
+    for component in base.join(relative).components() {
+        match component {
+            Component::CurDir => {}
+            Component::ParentDir
+                if matches!(path.components().next_back(), Some(Component::Normal(_))) =>
+            {
+                path.pop();
+            }
+            other => path.push(other),
+        }
+    }
+    path
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -216,6 +235,20 @@ mod tests {
             Path::new("data/cats/out/dither.npy")
         );
         assert_eq!(config.converter().width(), 4);
+    }
+
+    #[test]
+    fn resolves_parent_directories_lexically() {
+        let base = Path::new("data/images/cats");
+        assert_eq!(
+            resolve(base, Path::new("../../datasets/./a.npy")),
+            Path::new("data/datasets/a.npy")
+        );
+        assert_eq!(
+            resolve(Path::new("a"), Path::new("../../b.npy")),
+            Path::new("../b.npy")
+        );
+        assert_eq!(resolve(Path::new(""), Path::new("raw")), Path::new("raw"));
     }
 
     #[test]
