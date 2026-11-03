@@ -59,6 +59,14 @@ pub enum Error {
         message: String,
     },
 
+    /// A function received an argument outside its valid range.
+    #[error("invalid argument: {message}")]
+    #[diagnostic(code(compute::invalid_argument))]
+    InvalidArgument {
+        /// What is wrong.
+        message: String,
+    },
+
     /// The dataset registry could not be parsed.
     #[error("invalid dataset registry `{path}`")]
     #[diagnostic(code(compute::registry))]

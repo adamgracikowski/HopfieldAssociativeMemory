@@ -1,11 +1,14 @@
 //! Sets of bipolar patterns (pixel values `1` and `-1`) shown as rectangular
 //! bitmaps.
 
+pub mod bipolar;
 pub mod csv;
 pub mod npy;
 pub mod registry;
 
-use ndarray::{Array2, ArrayView1, ArrayView2};
+use ndarray::{Array2, ArrayView2};
+
+pub use bipolar::{BipolarVector, Pattern, PatternView};
 
 use crate::{Error, Result};
 
@@ -80,13 +83,36 @@ impl PatternSet {
         self.data.view()
     }
 
-    /// Pattern `mu` as a vector of `N` pixels.
+    /// Pattern `mu`, borrowed from the set without copying.
     ///
     /// # Panics
     ///
     /// Panics if `mu >= self.len()`.
-    pub fn pattern(&self, mu: usize) -> ArrayView1<'_, i8> {
-        self.data.row(mu)
+    pub fn pattern(&self, mu: usize) -> PatternView<'_> {
+        BipolarVector::new_unchecked(self.data.row(mu))
+    }
+
+    /// All patterns in order, borrowed from the set.
+    pub fn iter(&self) -> impl Iterator<Item = PatternView<'_>> {
+        self.data
+            .rows()
+            .into_iter()
+            .map(BipolarVector::new_unchecked)
+    }
+
+    /// Symmetric `p x p` matrix of overlaps $m^{\mu\nu}$ between all
+    /// patterns (see [`BipolarVector::overlap`]), with ones on the diagonal.
+    pub fn overlap_matrix(&self) -> Array2<f64> {
+        let p = self.len();
+        let mut matrix = Array2::eye(p);
+        for mu in 0..p {
+            for nu in mu + 1..p {
+                let m = self.pattern(mu).overlap(&self.pattern(nu));
+                matrix[[mu, nu]] = m;
+                matrix[[nu, mu]] = m;
+            }
+        }
+        matrix
     }
 
     /// Consumes the set and returns the `p x N` matrix.
@@ -110,7 +136,30 @@ mod tests {
         assert_eq!((set.width(), set.height()), (2, 1));
         assert_eq!((set.len(), set.neurons()), (3, 2));
         assert!(!set.is_empty());
-        assert_eq!(set.pattern(1), array![-1, -1]);
+        assert_eq!(set.pattern(1).values(), array![-1, -1]);
+        assert_eq!(set.iter().count(), 3);
+    }
+
+    /// Rows of a 5x5 set: `a` is all ones, `b` has -1 at pixels 0-9, `c` has
+    /// 1 at pixels 0, 5, 10, 15, 20.
+    /// `a . b = 15 - 10 = 5`, overlap 0.2.
+    /// `a . c = 5 - 20 = -15`, overlap -0.6.
+    /// `b . c`: pixels 0-9 give `8 - 2 = 6`, pixels 10-24 give `3 - 12 = -9`,
+    /// together -3, overlap -0.12.
+    #[test]
+    fn overlap_matrix_of_known_patterns() {
+        let data = Array2::from_shape_fn((3, 25), |(mu, i)| match mu {
+            0 => 1,
+            1 if i < 10 => -1,
+            1 => 1,
+            _ if i % 5 == 0 => 1,
+            _ => -1,
+        });
+        let m = PatternSet::new(5, 5, data).unwrap().overlap_matrix();
+        let expected = array![[1.0, 0.2, -0.6], [0.2, 1.0, -0.12], [-0.6, -0.12, 1.0]];
+        for (x, y) in m.iter().zip(&expected) {
+            assert!((x - y).abs() < 1e-12, "{m}");
+        }
     }
 
     #[test]

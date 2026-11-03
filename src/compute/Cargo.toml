@@ -19,6 +19,8 @@ csv = "1.4.0"
 miette = { version = "7.6.0", features = ["fancy"] }
 ndarray = "0.17.2"
 npyz = "0.9.1"
+rand = "0.10.3"
+rand_chacha = "0.10.0"
 serde = { version = "1.0.229", features = ["derive"] }
 thiserror = "2.0.21"
 toml = "1.1.8"
