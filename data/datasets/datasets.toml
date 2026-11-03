@@ -1,0 +1,55 @@
+# Registry of pattern sets.
+#
+# Each entry `[datasets.<name>]` describes one file in this directory:
+# - `file`: path relative to this registry (`.csv` with one pattern per row,
+#   or `.npy` with shape (p, height, width)),
+# - `width`, `height`: bitmap size, pixels stored row by row (row-major),
+# - `description`: what the patterns show.
+
+[datasets.small-7x7]
+file = "small-7x7.csv"
+width = 7
+height = 7
+description = "Five simple geometric shapes: a diagonal cross, a frame, a small filled square, a diamond and four squares."
+
+[datasets.letters-abc-8x12]
+file = "letters-abc-8x12.csv"
+width = 8
+height = 12
+description = "Lowercase letters a, b and c."
+
+[datasets.animals-14x9]
+file = "animals-14x9.csv"
+width = 14
+height = 9
+description = "Six small animal silhouettes."
+
+[datasets.letters-14x20]
+file = "letters-14x20.csv"
+width = 14
+height = 20
+description = "Lowercase letters a to z."
+
+[datasets.OCRA-12x30-cut]
+file = "OCRA-12x30-cut.csv"
+width = 12
+height = 30
+description = "Seven uppercase OCR-A letters (A, B, C, K, Q, R, Z), cut to 12x30."
+
+[datasets.large-25x25]
+file = "large-25x25.csv"
+width = 25
+height = 25
+description = "Six larger pictures."
+
+[datasets."large-25x25.plus"]
+file = "large-25x25.plus.csv"
+width = 25
+height = 25
+description = "The six pictures of large-25x25 followed by nine more."
+
+[datasets.large-25x50]
+file = "large-25x50.csv"
+width = 25
+height = 50
+description = "The six pictures of large-25x25 in the top half, the bottom half filled with 1."
