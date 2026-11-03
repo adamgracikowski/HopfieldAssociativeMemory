@@ -37,6 +37,17 @@ pub enum Error {
         message: String,
     },
 
+    /// An image file could not be decoded.
+    #[error("cannot decode image `{path}`")]
+    #[diagnostic(code(compute::image))]
+    Image {
+        /// Image file.
+        path: PathBuf,
+        /// Underlying image library error.
+        #[source]
+        source: image::ImageError,
+    },
+
     /// A pattern file has invalid content at a known position.
     #[error("{path}:{line}:{column}: {message}")]
     #[diagnostic(code(compute::parse))]
