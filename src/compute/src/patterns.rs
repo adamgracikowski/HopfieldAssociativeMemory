@@ -2,13 +2,16 @@
 //! bitmaps.
 
 pub mod bipolar;
+pub mod bitmap;
 pub mod csv;
 pub mod npy;
 pub mod registry;
+pub mod summary;
 
 use ndarray::{Array2, ArrayView2};
 
 pub use bipolar::{BipolarVector, Pattern, PatternView};
+pub use bitmap::Bitmap;
 
 use crate::{Error, Result};
 
@@ -90,6 +93,16 @@ impl PatternSet {
     /// Panics if `mu >= self.len()`.
     pub fn pattern(&self, mu: usize) -> PatternView<'_> {
         BipolarVector::new_unchecked(self.data.row(mu))
+    }
+
+    /// Pattern `mu` shown as a `width x height` bitmap.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `mu >= self.len()`.
+    pub fn bitmap(&self, mu: usize) -> Bitmap<'_> {
+        Bitmap::new(self.pattern(mu), self.width, self.height)
+            .expect("patterns of a set have `width * height` pixels")
     }
 
     /// All patterns in order, borrowed from the set.
