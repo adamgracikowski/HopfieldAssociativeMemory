@@ -252,4 +252,11 @@ description = "First."
             .unwrap_err();
         assert!(matches!(error, Error::UnsupportedFormat { .. }));
     }
+
+    #[test]
+    fn discover_fails_without_a_registry() {
+        let dir = tempfile::tempdir().unwrap();
+        let error = Registry::discover(dir.path()).unwrap_err();
+        assert!(matches!(error, Error::RegistryNotFound { .. }), "{error}");
+    }
 }

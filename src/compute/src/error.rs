@@ -45,7 +45,7 @@ pub enum Error {
         path: PathBuf,
         /// Line number, starting at 1.
         line: u64,
-        /// Column (comma-separated field) number, starting at 1.
+        /// Field number in the record, starting at 1.
         column: usize,
         /// What is wrong.
         message: String,

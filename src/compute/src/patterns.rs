@@ -37,7 +37,7 @@ impl PatternSet {
         if data.nrows() == 0 {
             return Err(shape("the set has no patterns".to_owned()));
         }
-        let neurons = width * height;
+        let neurons = bitmap_size(width, height)?;
         if data.ncols() != neurons {
             return Err(shape(format!(
                 "patterns have {} pixels, expected {width}x{height} = {neurons}",
@@ -134,6 +134,14 @@ impl PatternSet {
     }
 }
 
+/// Number of pixels `width * height` of a bitmap, or an error if the product
+/// does not fit in `usize`.
+pub(crate) fn bitmap_size(width: usize, height: usize) -> Result<usize> {
+    width
+        .checked_mul(height)
+        .ok_or_else(|| shape(format!("bitmap size {width}x{height} is too large")))
+}
+
 fn shape(message: String) -> Error {
     Error::Shape { message }
 }
@@ -188,6 +196,12 @@ mod tests {
             error.to_string().contains("pattern 1, pixel 1 has value 0"),
             "{error}"
         );
+    }
+
+    #[test]
+    fn rejects_a_bitmap_size_that_overflows() {
+        let error = PatternSet::new(usize::MAX, 2, Array2::zeros((1, 0))).unwrap_err();
+        assert!(error.to_string().contains("is too large"), "{error}");
     }
 
     #[test]

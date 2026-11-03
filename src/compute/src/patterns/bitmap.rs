@@ -20,7 +20,7 @@ impl<'a> Bitmap<'a> {
     /// Shows `pixels` as a `width x height` bitmap after checking that the
     /// sizes agree.
     pub fn new(pixels: PatternView<'a>, width: usize, height: usize) -> Result<Self> {
-        if pixels.len() != width * height {
+        if width.checked_mul(height) != Some(pixels.len()) {
             return Err(Error::InvalidArgument {
                 message: format!(
                     "a vector of {} pixels is not a {width}x{height} bitmap",
@@ -77,5 +77,6 @@ mod tests {
     fn rejects_a_size_mismatch() {
         let pattern = Pattern::new(array![1, -1, 1]).unwrap();
         assert!(Bitmap::new(pattern.view(), 2, 2).is_err());
+        assert!(Bitmap::new(pattern.view(), usize::MAX, 2).is_err());
     }
 }

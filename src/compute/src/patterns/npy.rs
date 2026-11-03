@@ -7,7 +7,7 @@ use std::path::Path;
 use ndarray::Array2;
 use npyz::{NpyFile, Order, WriteOptions, WriterBuilder};
 
-use super::PatternSet;
+use super::{PatternSet, bitmap_size};
 use crate::{Error, Result};
 
 /// Writes a pattern set to `path` as an `int8` array of shape
@@ -76,7 +76,7 @@ pub fn parse_npy(reader: impl Read, path: &Path) -> Result<PatternSet> {
         .collect::<std::io::Result<Vec<i8>>>()
         .map_err(|e| npy_error(e.to_string()))?;
 
-    let data = Array2::from_shape_vec((p, width * height), values)
+    let data = Array2::from_shape_vec((p, bitmap_size(width, height)?), values)
         .map_err(|e| npy_error(e.to_string()))?;
     PatternSet::new(width, height, data)
 }
@@ -154,5 +154,21 @@ mod tests {
         let last = bytes.len() - 1;
         bytes[last] = 0;
         assert!(matches!(parse(&bytes).unwrap_err(), Error::Shape { .. }));
+    }
+
+    #[test]
+    fn rejects_fortran_order() {
+        let mut bytes = Vec::new();
+        let mut npy = WriteOptions::new()
+            .default_dtype()
+            .order(Order::Fortran)
+            .shape(&[1, 1, 2])
+            .writer(&mut bytes)
+            .begin_nd()
+            .unwrap();
+        npy.extend([1i8, -1]).unwrap();
+        npy.finish().unwrap();
+        let error = parse(&bytes).unwrap_err();
+        assert!(error.to_string().contains("Fortran order"), "{error}");
     }
 }
