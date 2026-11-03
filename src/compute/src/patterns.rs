@@ -2,6 +2,7 @@
 //! bitmaps.
 
 pub mod csv;
+pub mod npy;
 pub mod registry;
 
 use ndarray::{Array2, ArrayView1, ArrayView2};

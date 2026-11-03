@@ -27,6 +27,16 @@ pub enum Error {
         source: csv::Error,
     },
 
+    /// An `.npy` file has an invalid header, dtype, shape or data.
+    #[error("invalid .npy file `{path}`: {message}")]
+    #[diagnostic(code(compute::npy))]
+    Npy {
+        /// File being read.
+        path: PathBuf,
+        /// What is wrong.
+        message: String,
+    },
+
     /// A pattern file has invalid content at a known position.
     #[error("{path}:{line}:{column}: {message}")]
     #[diagnostic(code(compute::parse))]
@@ -99,7 +109,10 @@ pub enum Error {
 
     /// A pattern file has an extension the library cannot read.
     #[error("unsupported pattern file format `{path}`")]
-    #[diagnostic(code(compute::unsupported_format), help("supported formats: .csv"))]
+    #[diagnostic(
+        code(compute::unsupported_format),
+        help("supported formats: .csv, .npy")
+    )]
     UnsupportedFormat {
         /// Pattern file.
         path: PathBuf,

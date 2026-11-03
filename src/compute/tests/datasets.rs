@@ -1,7 +1,9 @@
-//! Every dataset of the repository registry loads with the expected size.
+//! Every dataset of the repository registry loads with the expected size
+//! and survives a round trip through the `.npy` format.
 
 use std::path::Path;
 
+use compute::patterns::npy::write_npy;
 use compute::patterns::registry::Registry;
 
 /// Name, number of patterns `p`, width and height.
@@ -40,4 +42,37 @@ fn every_dataset_loads_with_the_expected_size() {
             "{name}"
         );
     }
+}
+
+#[test]
+fn every_dataset_survives_an_npy_round_trip_through_a_registry() {
+    let registry = registry();
+    let dir = tempfile::tempdir().unwrap();
+    let mut text = String::new();
+    for (name, _, width, height) in EXPECTED {
+        let set = registry.load(name).unwrap();
+        write_npy(&set, &dir.path().join(format!("{name}.npy"))).unwrap();
+        text.push_str(&format!(
+            "[datasets.\"{name}\"]\nfile = \"{name}.npy\"\nwidth = {width}\nheight = {height}\ndescription = \"\"\n\n"
+        ));
+    }
+    let npy_registry = Registry::parse(&text, &dir.path().join("datasets.toml")).unwrap();
+    for (name, ..) in EXPECTED {
+        assert_eq!(
+            npy_registry.load(name).unwrap(),
+            registry.load(name).unwrap(),
+            "{name}"
+        );
+    }
+}
+
+#[test]
+fn npy_file_must_match_the_declared_size() {
+    let set = registry().load("small-7x7").unwrap();
+    let dir = tempfile::tempdir().unwrap();
+    write_npy(&set, &dir.path().join("a.npy")).unwrap();
+    let text = "[datasets.a]\nfile = \"a.npy\"\nwidth = 49\nheight = 1\ndescription = \"\"\n";
+    let npy_registry = Registry::parse(text, &dir.path().join("datasets.toml")).unwrap();
+    let error = npy_registry.load("a").unwrap_err();
+    assert!(error.to_string().contains("holds 7x7 bitmaps"), "{error}");
 }

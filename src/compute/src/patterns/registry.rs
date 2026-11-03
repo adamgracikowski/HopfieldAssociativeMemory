@@ -8,6 +8,7 @@ use serde::Deserialize;
 
 use super::PatternSet;
 use super::csv::read_csv;
+use super::npy::read_npy;
 use crate::{Error, Result};
 
 /// Registry location relative to the repository root.
@@ -146,6 +147,22 @@ impl Registry {
                     .separator_byte()
                     .expect("separators are checked when the registry is parsed");
                 read_csv(&path, entry.width, entry.height, separator)
+            }
+            Some("npy") => {
+                let set = read_npy(&path)?;
+                if (set.width(), set.height()) != (entry.width, entry.height) {
+                    return Err(Error::Shape {
+                        message: format!(
+                            "`{}` holds {}x{} bitmaps, the registry declares {}x{}",
+                            path.display(),
+                            set.width(),
+                            set.height(),
+                            entry.width,
+                            entry.height
+                        ),
+                    });
+                }
+                Ok(set)
             }
             _ => Err(Error::UnsupportedFormat { path }),
         }
