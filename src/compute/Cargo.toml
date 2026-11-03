@@ -14,3 +14,18 @@ name = "compute"
 path = "src/main.rs"
 
 [dependencies]
+clap = { version = "4.6.7", features = ["derive"] }
+miette = { version = "7.6.0", features = ["fancy"] }
+thiserror = "2.0.21"
+
+[dev-dependencies]
+assert_cmd = "2.2.2"
+predicates = "3.1.4"
+
+[lints.rust]
+missing_docs = "warn"
+unsafe_code = "forbid"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
