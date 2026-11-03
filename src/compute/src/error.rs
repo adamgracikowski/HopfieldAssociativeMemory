@@ -37,6 +37,64 @@ pub enum Error {
         message: String,
     },
 
+    /// An image file could not be decoded.
+    #[error("cannot decode image `{path}`")]
+    #[diagnostic(code(compute::image))]
+    Image {
+        /// Image file.
+        path: PathBuf,
+        /// Underlying image library error, boxed because it is large.
+        #[source]
+        source: Box<image::ImageError>,
+    },
+
+    /// A source image listed for conversion does not exist.
+    #[error("image `{path}` not found")]
+    #[diagnostic(
+        code(compute::missing_image),
+        help("download the images first, e.g. with `data/images/download.ps1`")
+    )]
+    MissingImage {
+        /// Expected image file.
+        path: PathBuf,
+    },
+
+    /// A source image differs from the listed one.
+    #[error("image `{path}` has SHA-1 {actual}, expected {expected}")]
+    #[diagnostic(
+        code(compute::checksum_mismatch),
+        help("delete the file and download it again, e.g. with `data/images/download.ps1`")
+    )]
+    ChecksumMismatch {
+        /// Image file.
+        path: PathBuf,
+        /// Checksum from the source list.
+        expected: String,
+        /// Checksum of the file.
+        actual: String,
+    },
+
+    /// A configuration file could not be parsed.
+    #[error("invalid configuration `{path}`")]
+    #[diagnostic(code(compute::config))]
+    Config {
+        /// Configuration file.
+        path: PathBuf,
+        /// Underlying TOML error, boxed because it is large.
+        #[source]
+        source: Box<toml::de::Error>,
+    },
+
+    /// A configuration file has an invalid value.
+    #[error("invalid configuration `{path}`: {message}")]
+    #[diagnostic(code(compute::invalid_config))]
+    InvalidConfig {
+        /// Configuration file.
+        path: PathBuf,
+        /// What is wrong.
+        message: String,
+    },
+
     /// A pattern file has invalid content at a known position.
     #[error("{path}:{line}:{column}: {message}")]
     #[diagnostic(code(compute::parse))]
@@ -73,9 +131,9 @@ pub enum Error {
     Registry {
         /// Registry file.
         path: PathBuf,
-        /// Underlying TOML error.
+        /// Underlying TOML error, boxed because it is large.
         #[source]
-        source: toml::de::Error,
+        source: Box<toml::de::Error>,
     },
 
     /// A registry entry has an invalid value.

@@ -54,3 +54,15 @@ file = "large-25x50.csv"
 width = 25
 height = 50
 description = "The six pictures of large-25x25 in the top half, the bottom half filled with 1."
+
+[datasets.cats-300x200-median]
+file = "cats-300x200-median.npy"
+width = 300
+height = 200
+description = "Twelve cat photos, thresholded at the median brightness (sources and licenses: data/images/README.md)."
+
+[datasets.cats-300x200-dither]
+file = "cats-300x200-dither.npy"
+width = 300
+height = 200
+description = "Twelve cat photos, Floyd-Steinberg dithering (sources and licenses: data/images/README.md)."

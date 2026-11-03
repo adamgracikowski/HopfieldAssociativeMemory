@@ -62,6 +62,16 @@ impl Summary {
     }
 }
 
+/// Formats the load `p/N` with three decimals, or in scientific notation with
+/// three significant digits when it is below 0.001 (large bitmaps).
+fn format_load(load: f64) -> String {
+    if load >= 1e-3 {
+        format!("{load:.3}")
+    } else {
+        format!("{load:.2e}")
+    }
+}
+
 impl fmt::Display for Summary {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "dataset      {}", self.name)?;
@@ -73,9 +83,9 @@ impl fmt::Display for Summary {
         )?;
         writeln!(
             f,
-            "patterns     p = {}, p/N = {:.3}",
+            "patterns     p = {}, p/N = {}",
             self.patterns,
-            self.load()
+            format_load(self.load())
         )?;
         match self.max_abs_overlap() {
             Some((m, mu, nu)) => writeln!(f, "max |m|      {m:.3} (patterns {mu} and {nu})")?,
@@ -133,6 +143,13 @@ mod tests {
             "{text}"
         );
         assert!(text.contains("    1  0.000  1.000 -0.500"), "{text}");
+    }
+
+    #[test]
+    fn small_loads_use_scientific_notation() {
+        assert_eq!(format_load(0.75), "0.750");
+        assert_eq!(format_load(0.001), "0.001");
+        assert_eq!(format_load(12.0 / 60000.0), "2.00e-4");
     }
 
     #[test]

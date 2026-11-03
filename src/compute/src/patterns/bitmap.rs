@@ -2,6 +2,8 @@
 
 use std::fmt;
 
+use image::GrayImage;
+
 use super::PatternView;
 use crate::{Error, Result};
 
@@ -44,6 +46,23 @@ impl<'a> Bitmap<'a> {
     pub fn height(&self) -> usize {
         self.height
     }
+
+    /// The bitmap as a grayscale image: black for `1`, white for `-1`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a side does not fit in `u32`.
+    pub fn to_image(&self) -> GrayImage {
+        let side = |n: usize| u32::try_from(n).expect("bitmap side fits in u32");
+        let pixels = self
+            .pixels
+            .values()
+            .iter()
+            .map(|&v| if v == 1 { 0 } else { 255 })
+            .collect();
+        GrayImage::from_raw(side(self.width), side(self.height), pixels)
+            .expect("a bitmap has `width * height` pixels")
+    }
 }
 
 impl fmt::Display for Bitmap<'_> {
@@ -71,6 +90,14 @@ mod tests {
         let bitmap = Bitmap::new(pattern.view(), 3, 2).unwrap();
         assert_eq!(bitmap.to_string(), "#..\n.##\n");
         assert_eq!((bitmap.width(), bitmap.height()), (3, 2));
+    }
+
+    #[test]
+    fn converts_to_a_black_and_white_image() {
+        let pattern = Pattern::new(array![1, -1, -1, -1, 1, 1]).unwrap();
+        let image = Bitmap::new(pattern.view(), 3, 2).unwrap().to_image();
+        assert_eq!(image.dimensions(), (3, 2));
+        assert_eq!(image.as_raw(), &[0, 255, 255, 255, 0, 0]);
     }
 
     #[test]

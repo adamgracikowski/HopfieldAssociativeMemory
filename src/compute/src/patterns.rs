@@ -8,7 +8,7 @@ pub mod npy;
 pub mod registry;
 pub mod summary;
 
-use ndarray::{Array2, ArrayView2};
+use ndarray::{Array2, ArrayView2, Axis};
 
 pub use bipolar::{BipolarVector, Pattern, PatternView};
 pub use bitmap::Bitmap;
@@ -54,6 +54,21 @@ impl PatternSet {
             height,
             data,
         })
+    }
+
+    /// Creates a pattern set from separate patterns, in order, with the same
+    /// checks as [`PatternSet::new`].
+    pub fn from_patterns(width: usize, height: usize, patterns: &[Pattern]) -> Result<Self> {
+        if patterns.is_empty() {
+            return Err(shape("the set has no patterns".to_owned()));
+        }
+        let rows: Vec<_> = patterns.iter().map(|pattern| pattern.values()).collect();
+        let data = ndarray::stack(Axis(0), &rows).map_err(|_| {
+            shape(format!(
+                "patterns have different lengths, expected {width}x{height} pixels each"
+            ))
+        })?;
+        Self::new(width, height, data)
     }
 
     /// Bitmap width in pixels.
@@ -202,6 +217,20 @@ mod tests {
     fn rejects_a_bitmap_size_that_overflows() {
         let error = PatternSet::new(usize::MAX, 2, Array2::zeros((1, 0))).unwrap_err();
         assert!(error.to_string().contains("is too large"), "{error}");
+    }
+
+    #[test]
+    fn builds_a_set_from_separate_patterns() {
+        let a = Pattern::new(array![1, -1, 1, 1]).unwrap();
+        let b = Pattern::new(array![-1, -1, 1, -1]).unwrap();
+        let set = PatternSet::from_patterns(2, 2, &[a.clone(), b]).unwrap();
+        assert_eq!(set.len(), 2);
+        assert_eq!(set.pattern(0), a);
+
+        let short = Pattern::new(array![1, 1]).unwrap();
+        assert!(PatternSet::from_patterns(2, 2, &[a.clone(), short]).is_err());
+        assert!(PatternSet::from_patterns(3, 1, &[a]).is_err());
+        assert!(PatternSet::from_patterns(2, 2, &[]).is_err());
     }
 
     #[test]
