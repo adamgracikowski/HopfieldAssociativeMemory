@@ -1,9 +1,8 @@
 //! Weights stored as a full `N x N` matrix.
 
-use ndarray::linalg::general_mat_vec_mul;
-use ndarray::{Array1, Array2, ArrayView1, ArrayView2, ArrayViewMut1};
+use ndarray::{Array1, Array2, ArrayView1, ArrayView2, ArrayViewMut1, Zip};
 
-use super::WeightMatrix;
+use super::{PARALLEL_MIN_NEURONS, WeightMatrix};
 use crate::{Error, Result};
 
 /// Full `N x N` weight matrix with zero diagonal. Symmetry is not required:
@@ -15,12 +14,17 @@ pub struct DenseWeights {
 
 impl DenseWeights {
     /// Wraps `matrix` after checking that it is a non-empty square matrix
-    /// with zero diagonal.
+    /// of finite values with zero diagonal.
     pub fn new(matrix: Array2<f64>) -> Result<Self> {
         let (rows, cols) = matrix.dim();
         if rows == 0 || rows != cols {
             return Err(invalid(format!(
                 "weight matrix must be square and non-empty, found {rows}x{cols}"
+            )));
+        }
+        if let Some(((i, j), w)) = matrix.indexed_iter().find(|(_, w)| !w.is_finite()) {
+            return Err(invalid(format!(
+                "weight matrix must be finite, found w[{i}][{j}] = {w}"
             )));
         }
         if let Some((i, w)) = matrix.diag().indexed_iter().find(|(_, w)| **w != 0.0) {
@@ -59,21 +63,23 @@ impl WeightMatrix for DenseWeights {
         self.matrix.nrows()
     }
 
-    /// Computes `h = W x` with a matrix-vector product, converting the state
-    /// to `f64` once.
-    fn local_fields_into(&self, state: ArrayView1<'_, i8>, mut out: ArrayViewMut1<'_, f64>) {
+    /// Computes every `h_i` as the dot product of row `i` with the state
+    /// converted to `f64` once.
+    fn local_fields_into(&self, state: ArrayView1<'_, i8>, out: ArrayViewMut1<'_, f64>) {
+        assert_eq!(state.len(), self.neurons(), "state length");
         let x: Array1<f64> = state.mapv(f64::from);
-        general_mat_vec_mul(1.0, &self.matrix, &x, 0.0, &mut out);
+        let fields = Zip::from(out).and(self.matrix.rows());
+        let field = |h: &mut f64, row: ArrayView1<'_, f64>| *h = row.dot(&x);
+        if self.neurons() >= PARALLEL_MIN_NEURONS {
+            fields.par_for_each(field);
+        } else {
+            fields.for_each(field);
+        }
     }
 
     fn local_field(&self, i: usize, state: ArrayView1<'_, i8>) -> f64 {
         assert_eq!(state.len(), self.neurons(), "state length");
-        self.matrix
-            .row(i)
-            .iter()
-            .zip(state)
-            .map(|(&w, &x)| w * f64::from(x))
-            .sum()
+        self.matrix.row(i).dot(&state.mapv(f64::from))
     }
 
     fn to_dense(&self) -> Array2<f64> {
@@ -111,6 +117,8 @@ mod tests {
         assert!(DenseWeights::new(Array2::zeros((0, 0))).is_err());
         let error = DenseWeights::new(array![[0.0, 1.0], [1.0, 0.1]]).unwrap_err();
         assert!(error.to_string().contains("zero diagonal"), "{error}");
+        let error = DenseWeights::new(array![[0.0, f64::NAN], [1.0, 0.0]]).unwrap_err();
+        assert!(error.to_string().contains("w[0][1] = NaN"), "{error}");
     }
 
     #[test]

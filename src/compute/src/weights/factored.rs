@@ -1,9 +1,8 @@
 //! Weights stored as a product of the patterns and a coefficient matrix.
 
-use ndarray::linalg::general_mat_vec_mul;
-use ndarray::{Array1, Array2, ArrayView1, ArrayView2, ArrayViewMut1, Axis};
+use ndarray::{Array1, Array2, ArrayView1, ArrayView2, ArrayViewMut1, Zip};
 
-use super::WeightMatrix;
+use super::{PARALLEL_MIN_NEURONS, WeightMatrix};
 use crate::{Error, PatternSet, Result};
 
 /// Weight matrix `W = A Xi - diag(d)` of `N` neurons built from `p` bipolar
@@ -23,7 +22,7 @@ pub struct FactoredWeights {
 
 impl FactoredWeights {
     /// Builds the weights from the patterns of `basis` (the rows of `Xi`) and
-    /// the `N x p` coefficient matrix `A`.
+    /// the `N x p` coefficient matrix `A` of finite values.
     pub fn new(basis: &PatternSet, coefficients: Array2<f64>) -> Result<Self> {
         let expected = (basis.neurons(), basis.len());
         if coefficients.dim() != expected {
@@ -35,6 +34,11 @@ impl FactoredWeights {
                     coefficients.nrows(),
                     coefficients.ncols()
                 ),
+            });
+        }
+        if let Some(((i, mu), a)) = coefficients.indexed_iter().find(|(_, a)| !a.is_finite()) {
+            return Err(Error::InvalidArgument {
+                message: format!("coefficients must be finite, found A[{i}][{mu}] = {a}"),
             });
         }
         let mut weights = Self {
@@ -56,6 +60,11 @@ impl FactoredWeights {
         self.coefficients.view()
     }
 
+    /// Diagonal `d` of `A Xi`, subtracted to give `w_ii = 0`.
+    pub fn diagonal(&self) -> ArrayView1<'_, f64> {
+        self.diagonal.view()
+    }
+
     /// Recomputes `d_i = sum_mu A[i][mu] Xi[mu][i]` from the coefficients.
     fn update_diagonal(&mut self) {
         for (i, (d, a)) in self
@@ -73,20 +82,32 @@ impl FactoredWeights {
     }
 
     /// Overlaps `m = Xi x` of `state` with the basis vectors, computed
-    /// exactly in integers.
+    /// exactly in integers. The values are integers of magnitude at most
+    /// `N`, so `f64` holds them exactly.
     pub fn overlaps(&self, state: ArrayView1<'_, i8>) -> Array1<f64> {
         assert_eq!(state.len(), self.neurons(), "state length");
-        self.basis
-            .axis_iter(Axis(0))
-            .map(|row| {
-                let sum: i64 = row
-                    .iter()
-                    .zip(state)
-                    .map(|(&xi, &x)| i64::from(xi) * i64::from(x))
-                    .sum();
-                sum as f64
-            })
-            .collect()
+        let mut overlaps = Array1::zeros(self.basis.nrows());
+        let rows = Zip::from(&mut overlaps).and(self.basis.rows());
+        let overlap = |m: &mut f64, row: ArrayView1<'_, i8>| {
+            let sum: i64 = row
+                .iter()
+                .zip(state)
+                .map(|(&xi, &x)| i64::from(xi) * i64::from(x))
+                .sum();
+            *m = sum as f64;
+        };
+        if self.neurons() >= PARALLEL_MIN_NEURONS {
+            rows.par_for_each(overlap);
+        } else {
+            rows.for_each(overlap);
+        }
+        overlaps
+    }
+
+    /// Local field `h_i = A[i] m - d_i x_i` of neuron `i` in state `x_i`,
+    /// given the overlaps `m = Xi x` of the whole state.
+    pub(super) fn field_from_overlaps(&self, i: usize, overlaps: &Array1<f64>, x_i: i8) -> f64 {
+        self.coefficients.row(i).dot(overlaps) - self.diagonal[i] * f64::from(x_i)
     }
 }
 
@@ -95,22 +116,29 @@ impl WeightMatrix for FactoredWeights {
         self.coefficients.nrows()
     }
 
-    /// Computes `h = A (Xi x) - d * x` in `O(N p)` operations.
-    fn local_fields_into(&self, state: ArrayView1<'_, i8>, mut out: ArrayViewMut1<'_, f64>) {
+    /// Computes `h = A (Xi x) - d * x` in `O(N p)` operations: the overlaps
+    /// `m = Xi x` once, then `h_i = A[i] m - d_i x_i` for every neuron.
+    fn local_fields_into(&self, state: ArrayView1<'_, i8>, out: ArrayViewMut1<'_, f64>) {
         let overlaps = self.overlaps(state);
-        general_mat_vec_mul(1.0, &self.coefficients, &overlaps, 0.0, &mut out);
-        for ((h, &d), &x) in out.iter_mut().zip(&self.diagonal).zip(state) {
-            *h -= d * f64::from(x);
+        let fields = Zip::indexed(out).and(state);
+        let field = |i: usize, h: &mut f64, &x: &i8| {
+            *h = self.field_from_overlaps(i, &overlaps, x);
+        };
+        if self.neurons() >= PARALLEL_MIN_NEURONS {
+            fields.par_for_each(field);
+        } else {
+            fields.for_each(field);
         }
     }
 
     /// Computes `h_i = A[i] (Xi x) - d_i x_i`. The overlaps cost `O(N p)`,
     /// so computing every field this way costs `O(N^2 p)`; use
     /// [`local_fields_into`](WeightMatrix::local_fields_into) for all
-    /// fields at once.
+    /// fields at once or a [`FieldTracker`](super::FieldTracker) for
+    /// updates of one neuron at a time.
     fn local_field(&self, i: usize, state: ArrayView1<'_, i8>) -> f64 {
         let overlaps = self.overlaps(state);
-        self.coefficients.row(i).dot(&overlaps) - self.diagonal[i] * f64::from(state[i])
+        self.field_from_overlaps(i, &overlaps, state[i])
     }
 
     fn to_dense(&self) -> Array2<f64> {
@@ -178,5 +206,8 @@ mod tests {
         let basis = PatternSet::new(3, 1, array![[1, -1, 1]]).unwrap();
         let error = FactoredWeights::new(&basis, Array2::zeros((1, 3))).unwrap_err();
         assert!(error.to_string().contains("must be 3x1"), "{error}");
+        let error =
+            FactoredWeights::new(&basis, array![[0.0], [f64::INFINITY], [0.0]]).unwrap_err();
+        assert!(error.to_string().contains("A[1][0] = inf"), "{error}");
     }
 }

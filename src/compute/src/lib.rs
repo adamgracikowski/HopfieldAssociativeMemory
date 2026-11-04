@@ -5,6 +5,7 @@
 //! the results to files that the presentation layer visualizes.
 
 pub mod build_info;
+pub mod dynamics;
 pub mod error;
 pub mod images;
 pub mod learning;
