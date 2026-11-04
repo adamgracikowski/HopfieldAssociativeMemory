@@ -105,7 +105,7 @@ The seed starts separate random streams for the initial state and for the dynami
 `train` learns the weights and checks which stored patterns are fixed points (with the `zero_field` convention). It writes:
 
 - `metadata.json`: command, time, build (version, commit, dirty flag as `true`, `false` or `null`), the configuration with all defaults and its paths as written, the dataset (with the registry relative to the configuration directory), the training result (backend, epochs, convergence) and the number of unstable neurons of every pattern,
-- `weights.npy` (`float64`, `N x N`) for dense weights, or `coefficients.npy` (`float64`, `N x p`) for factored weights `W = A Xi - diag(d)`, where `Xi` holds the dataset patterns as rows and `d_i = sum_mu A[i][mu] Xi[mu][i]`.
+- `weights.npy` (`float64`, `N x N`) for dense weights, or `coefficients.npy` (`float64`, `N x p`) for factored weights `W = A Xi - diag(d)`, where `Xi` holds the dataset patterns as rows and `d_i = sum_mu A[i][mu] Xi[mu][i]`. The other of the two files is removed, so a directory never holds weights of two runs.
 
 `recall` trains the network the same way, runs it from the initial state and writes:
 

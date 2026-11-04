@@ -72,6 +72,19 @@ impl OutputDir {
         })
     }
 
+    /// Removes the file `name` if it exists, e.g. a file of an earlier run
+    /// that this run replaces with another one.
+    pub fn remove(&self, name: &str) -> Result<()> {
+        let path = self.path.join(name);
+        match std::fs::remove_file(&path) {
+            Err(error) if error.kind() != std::io::ErrorKind::NotFound => Err(Error::Io {
+                path,
+                source: error,
+            }),
+            _ => Ok(()),
+        }
+    }
+
     fn write(
         &self,
         name: &str,
@@ -112,6 +125,16 @@ mod tests {
         assert!(OutputDir::new(&out, true).is_ok());
         std::fs::remove_file(out.join("x.json")).unwrap();
         assert!(OutputDir::new(&out, false).is_ok());
+    }
+
+    #[test]
+    fn removes_a_file_if_it_exists() {
+        let dir = tempfile::tempdir().unwrap();
+        let out = OutputDir::new(dir.path(), true).unwrap();
+        out.write_json("x.json", &1).unwrap();
+        out.remove("x.json").unwrap();
+        assert!(!dir.path().join("x.json").exists());
+        out.remove("x.json").unwrap();
     }
 
     #[test]

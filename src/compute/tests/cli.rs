@@ -481,3 +481,33 @@ fn failed_recall_leaves_no_output_directory() {
         .stderr(contains("cannot flip 50 pixels"));
     assert!(!out.exists());
 }
+
+/// Training again with another backend into the same directory replaces
+/// the weight file instead of leaving the old one next to the new one.
+#[test]
+fn train_with_another_backend_removes_the_old_weights() {
+    let dir = tempfile::tempdir().unwrap();
+    let out = dir.path().join("run");
+    let train = |backend: &str| {
+        let config = run_config(
+            dir.path(),
+            &format!("backend = \"{backend}\"\n[learning]\nrule = \"hebb\""),
+        );
+        compute()
+            .arg("train")
+            .arg("--config")
+            .arg(&config)
+            .arg("--out")
+            .arg(&out)
+            .arg("--force")
+            .assert()
+            .success();
+    };
+    train("dense");
+    assert!(out.join("weights.npy").is_file());
+    train("factored");
+    assert!(out.join("coefficients.npy").is_file());
+    assert!(!out.join("weights.npy").exists());
+    train("dense");
+    assert!(!out.join("coefficients.npy").exists());
+}
