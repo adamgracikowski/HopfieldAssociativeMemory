@@ -1,5 +1,7 @@
 //! Choice of the learning rule in a run configuration.
 
+use std::fmt;
+
 use serde::{Deserialize, Serialize};
 
 use crate::learning::{Hebb, LearningRule, Oja, Trained};
@@ -22,6 +24,16 @@ pub enum Learning {
     Hebb {},
     /// Oja's rule ([`Oja`]).
     Oja(Oja),
+}
+
+impl fmt::Display for Learning {
+    /// `hebb`, or `oja` with the variant, e.g. `oja (subspace)`.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Hebb {} => f.write_str("hebb"),
+            Self::Oja(oja) => write!(f, "oja ({})", oja.variant),
+        }
+    }
 }
 
 impl LearningRule for Learning {
@@ -87,6 +99,12 @@ mod tests {
         assert_eq!(json["eta"], 0.5);
         let hebb = serde_json::to_value(Learning::Hebb {}).unwrap();
         assert_eq!(hebb, serde_json::json!({ "rule": "hebb" }));
+    }
+
+    #[test]
+    fn displays_the_rule_and_variant() {
+        assert_eq!(Learning::Hebb {}.to_string(), "hebb");
+        assert_eq!(Learning::Oja(Oja::default()).to_string(), "oja (subspace)");
     }
 
     #[test]

@@ -2,6 +2,7 @@
 
 mod convert_images;
 mod inspect;
+mod recall;
 mod train;
 
 use clap::{Parser, Subcommand};
@@ -9,6 +10,7 @@ use compute::build_info;
 
 use convert_images::ConvertImagesArgs;
 use inspect::InspectArgs;
+use recall::RecallArgs;
 use train::TrainArgs;
 
 /// Hopfield associative memory: training, recall and experiments.
@@ -26,6 +28,7 @@ impl Cli {
             Command::Inspect(args) => args.run(),
             Command::ConvertImages(args) => args.run(),
             Command::Train(args) => args.run(),
+            Command::Recall(args) => args.run(),
         }
     }
 }
@@ -41,4 +44,8 @@ enum Command {
     /// Train a network on a dataset and save its weights and the stability
     /// of the patterns.
     Train(TrainArgs),
+
+    /// Train a network, run it from an initial state and save every visited
+    /// state.
+    Recall(RecallArgs),
 }

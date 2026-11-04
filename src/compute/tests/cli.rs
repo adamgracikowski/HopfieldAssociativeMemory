@@ -235,7 +235,7 @@ fn train_writes_weights_and_metadata() {
         .arg(&out)
         .assert()
         .success()
-        .stdout(contains("learning     hebb (dense backend)"))
+        .stdout(contains("learning     hebb, dense backend"))
         .stdout(contains("of 5 patterns"));
 
     assert_eq!(npy_shape(&out.join("weights.npy")), [49, 49]);
@@ -271,7 +271,7 @@ fn train_saves_coefficients_of_factored_weights() {
         .arg(&out)
         .assert()
         .success()
-        .stdout(contains("oja, subspace (factored backend)"))
+        .stdout(contains("learning     oja (subspace), factored backend"))
         .stdout(contains("stable       5 of 5 patterns"));
     assert_eq!(npy_shape(&out.join("coefficients.npy")), [49, 5]);
     assert!(!out.join("weights.npy").exists());
@@ -304,4 +304,98 @@ fn train_refuses_a_non_empty_output_without_force() {
     run(true).success();
     assert!(dir.path().join("weights.npy").is_file());
     assert!(dir.path().join("config.toml").is_file());
+}
+
+const RECALL: &str = "seed = 3\n[learning]\nrule = \"hebb\"\n[dynamics]\nmode = \"synchronous\"\n\
+                      [input]\nsource = \"pattern\"\nindex = 1\nflips = 6";
+
+fn recall(config: &Path, out: &Path) -> assert_cmd::assert::Assert {
+    compute()
+        .arg("recall")
+        .arg("--config")
+        .arg(config)
+        .arg("--out")
+        .arg(out)
+        .assert()
+}
+
+#[test]
+fn recall_writes_history_frames_and_metadata() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = run_config(dir.path(), RECALL);
+    let out = dir.path().join("run");
+    recall(&config, &out)
+        .success()
+        .stdout(contains("input        pattern 1 with 6 flipped pixels"))
+        .stdout(contains("target       pattern 1, distance 6 -> "));
+
+    let metadata = read_json(&out.join("metadata.json"));
+    assert_eq!(metadata["command"], "recall");
+    assert_eq!(metadata["config"]["seed"], 3);
+    assert_eq!(metadata["outcome"]["target"], 1);
+    assert_eq!(metadata["outcome"]["initial_distance"], 6);
+    let frames = metadata["outcome"]["frames"].as_u64().unwrap();
+    assert!(frames >= 1);
+    assert_eq!(npy_shape(&out.join("history.npy")), [frames, 7, 7]);
+    let stats = read_json(&out.join("frames.json"));
+    assert_eq!(stats["energy"].as_array().unwrap().len() as u64, frames);
+    assert_eq!(stats["overlaps"][0].as_array().unwrap().len(), 5);
+    assert_eq!(stats["changes"][0], 0);
+}
+
+/// Running again with the same seed reproduces every file; the metadata
+/// differs only in `created`.
+#[test]
+fn recall_is_reproducible() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = run_config(
+        dir.path(),
+        &RECALL.replace(
+            "\"synchronous\"",
+            "\"asynchronous\"\norder = \"random\"\nrecord_every = 7",
+        ),
+    );
+    let (first, second) = (dir.path().join("a"), dir.path().join("b"));
+    recall(&config, &first).success();
+    recall(&config, &second).success();
+    for name in ["history.npy", "frames.json"] {
+        assert_eq!(
+            std::fs::read(first.join(name)).unwrap(),
+            std::fs::read(second.join(name)).unwrap(),
+            "{name}"
+        );
+    }
+    let without_time = |dir: &Path| {
+        let mut metadata = read_json(&dir.join("metadata.json"));
+        metadata.as_object_mut().unwrap().remove("created");
+        metadata
+    };
+    assert_eq!(without_time(&first), without_time(&second));
+}
+
+#[test]
+fn recall_renders_the_initial_and_final_state() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = run_config(dir.path(), RECALL);
+    compute()
+        .arg("recall")
+        .arg("--config")
+        .arg(&config)
+        .arg("--out")
+        .arg(dir.path().join("run"))
+        .arg("--render")
+        .assert()
+        .success()
+        .stdout(contains("\ninitial state\n"))
+        .stdout(contains("\nfinal state\n"));
+}
+
+#[test]
+fn recall_requires_a_seed() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = run_config(dir.path(), &RECALL.replace("seed = 3", ""));
+    recall(&config, &dir.path().join("run"))
+        .failure()
+        .stderr(contains("compute::invalid_config"))
+        .stderr(contains("`seed`"));
 }

@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 
 use clap::Args;
-use compute::run::{Learning, OutputDir, RunConfig, TrainRun};
+use compute::run::{OutputDir, RunConfig, TrainRun};
 
 #[derive(Debug, Args)]
 pub struct TrainArgs {
@@ -38,8 +38,8 @@ impl TrainArgs {
             dataset.name, dataset.width, dataset.height, dataset.patterns, dataset.neurons
         );
         println!(
-            "learning     {} ({} backend)",
-            rule_name(&config.learning),
+            "learning     {}, {} backend",
+            config.learning,
             training.weights.backend()
         );
         let convergence = if training.converged {
@@ -54,13 +54,5 @@ impl TrainArgs {
         );
         println!("written to   {}", out.path().display());
         Ok(())
-    }
-}
-
-/// Name of the learning rule, with the variant of Oja's rule.
-fn rule_name(learning: &Learning) -> String {
-    match learning {
-        Learning::Hebb {} => "hebb".to_owned(),
-        Learning::Oja(oja) => format!("oja, {}", oja.variant),
     }
 }
