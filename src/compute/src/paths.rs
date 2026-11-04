@@ -21,9 +21,57 @@ pub fn resolve(base: &Path, relative: &Path) -> PathBuf {
     path
 }
 
+/// Path of `target` relative to the directory `base`, with `/` separators,
+/// e.g. `../images/cats/config.toml`. Both are made absolute against the
+/// current directory and normalized lexically first. Returns `None` when
+/// they have no common root (e.g. different drives).
+pub fn relative_to(target: &Path, base: &Path) -> Option<String> {
+    let normalize = |path: &Path| {
+        std::path::absolute(path)
+            .ok()
+            .map(|path| resolve(Path::new(""), &path))
+    };
+    let (target, base) = (normalize(target)?, normalize(base)?);
+    let target: Vec<Component<'_>> = target.components().collect();
+    let base: Vec<Component<'_>> = base.components().collect();
+    if target.first() != base.first() {
+        return None;
+    }
+    let common = target.iter().zip(&base).take_while(|(a, b)| a == b).count();
+    let parts: Vec<String> = std::iter::repeat_n("..".to_owned(), base.len() - common)
+        .chain(
+            target[common..]
+                .iter()
+                .map(|part| part.as_os_str().to_string_lossy().into_owned()),
+        )
+        .collect();
+    Some(if parts.is_empty() {
+        ".".to_owned()
+    } else {
+        parts.join("/")
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn relative_paths_use_parent_steps_and_slashes() {
+        let relative = |target: &str, base: &str| relative_to(Path::new(target), Path::new(base));
+        assert_eq!(
+            relative("data/images/cats/config.toml", "data/datasets").as_deref(),
+            Some("../images/cats/config.toml")
+        );
+        assert_eq!(
+            relative("data/datasets/a.npy", "data/datasets").as_deref(),
+            Some("a.npy")
+        );
+        assert_eq!(
+            relative("data/./x/../datasets", "data/datasets").as_deref(),
+            Some(".")
+        );
+    }
 
     #[test]
     fn resolves_parent_directories_lexically() {

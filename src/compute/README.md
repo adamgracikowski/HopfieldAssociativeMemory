@@ -58,7 +58,7 @@ method = "floyd-steinberg" # error diffusion dithering
 file = "../../datasets/cats-300x200-dither.npy"
 ```
 
-Patterns follow the order of the source list. Every image must be a plain file name in `images` and match its SHA-1 checksum. Outputs must have distinct file names. `--preview <dir>` also writes every bitmap as a black-and-white PNG to `<dir>/<output file stem>/`.
+Patterns follow the order of the source list. Every image must be a plain file name in `images` and match its SHA-1 checksum. Outputs must have distinct file names. Next to every `.npy` file a `.json` file of the same name records its provenance: the build (version, commit, dirty flag), the configuration file relative to the dataset, the bitmap size, the binarization and the source images with their checksums, authors and licenses. It has no timestamp, so converting again with the same code and images gives the same file. `--preview <dir>` also writes every bitmap as a black-and-white PNG to `<dir>/<output file stem>/`.
 
 ### `train` and `recall`
 

@@ -13,6 +13,8 @@ Twelve cat photos from [Wikimedia Commons](https://commons.wikimedia.org/) (cate
 - `data/datasets/cats-300x200-median.npy`: threshold at the median brightness,
 - `data/datasets/cats-300x200-dither.npy`: Floyd-Steinberg dithering.
 
+Each dataset has a provenance file of the same name with the extension `.json`, written by `convert-images`: the build of `compute` that produced it, the configuration, the binarization and the source images in pattern order.
+
 To reproduce the datasets:
 
 ```powershell

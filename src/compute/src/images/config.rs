@@ -18,6 +18,7 @@
 
 pub mod conversion;
 pub mod output;
+pub mod provenance;
 pub mod source;
 
 use std::collections::HashSet;
@@ -27,6 +28,7 @@ use serde::Deserialize;
 
 pub use conversion::Conversion;
 pub use output::Output;
+pub use provenance::Provenance;
 pub use source::Source;
 
 use super::ImageConverter;
@@ -159,7 +161,6 @@ impl ConversionConfig {
                 self.converter.open(&path)
             })
             .collect::<Result<Vec<_>>>()?;
-        let names: Vec<String> = sources.into_iter().map(|source| source.file).collect();
 
         self.outputs
             .iter()
@@ -167,7 +168,8 @@ impl ConversionConfig {
                 let patterns: Vec<_> = grays.iter().map(|gray| output.method.apply(gray)).collect();
                 Ok(Conversion {
                     output: output.clone(),
-                    names: names.clone(),
+                    sources: sources.clone(),
+                    config: self.path.clone(),
                     set: PatternSet::from_patterns(
                         self.converter.width(),
                         self.converter.height(),
@@ -269,7 +271,8 @@ mod tests {
         for conversion in &conversions {
             assert_eq!(conversion.set.len(), 2);
             assert_eq!(conversion.set.neurons(), 8);
-            assert_eq!(conversion.names, ["a.png", "b.png"]);
+            let files: Vec<_> = conversion.sources.iter().map(|s| s.file.as_str()).collect();
+            assert_eq!(files, ["a.png", "b.png"]);
         }
         let median = &conversions[0].set;
         assert_eq!(median.pattern(0).values()[0], 1);

@@ -32,7 +32,7 @@ impl ConvertImagesArgs {
             let name = file.file_stem().unwrap_or_default().to_string_lossy();
             let description = format!(
                 "{} images, {} binarization",
-                conversion.names.len(),
+                conversion.sources.len(),
                 conversion.output.method
             );
             if i > 0 {

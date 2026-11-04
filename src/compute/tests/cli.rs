@@ -168,6 +168,13 @@ fn convert_images_writes_datasets_and_previews() {
     );
     assert!(dir.path().join("out").join("dither.npy").is_file());
     assert!(preview.join("dither").join("01-b.png").is_file());
+
+    let provenance = read_json(&dir.path().join("out").join("dither.json"));
+    assert_eq!(provenance["command"], "convert-images");
+    assert_eq!(provenance["build"]["commit"], build_info::GIT_COMMIT);
+    assert_eq!(provenance["config"], "../config.toml");
+    assert_eq!(provenance["method"], "floyd-steinberg");
+    assert_eq!(provenance["sources"][0]["file"], "a.png");
 }
 
 #[test]
