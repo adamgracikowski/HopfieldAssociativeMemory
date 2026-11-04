@@ -73,13 +73,23 @@ pub trait WeightMatrix {
     ///
     /// Panics if `state` does not have `N` elements.
     fn energy(&self, state: ArrayView1<'_, i8>) -> f64 {
-        let fields = self.local_fields(state);
-        -0.5 * fields
-            .iter()
-            .zip(state)
-            .map(|(&h, &x)| h * f64::from(x))
-            .sum::<f64>()
+        energy_from_fields(state, self.local_fields(state).view())
     }
+}
+
+/// Energy `E = -1/2 sum_i x_i h_i` of `state` from its local fields
+/// `fields`.
+///
+/// # Panics
+///
+/// Panics if `state` and `fields` have different lengths.
+pub fn energy_from_fields(state: ArrayView1<'_, i8>, fields: ArrayView1<'_, f64>) -> f64 {
+    assert_eq!(state.len(), fields.len(), "state and fields length");
+    -0.5 * fields
+        .iter()
+        .zip(state)
+        .map(|(&h, &x)| h * f64::from(x))
+        .sum::<f64>()
 }
 
 /// Weights stored in one of the backends.
