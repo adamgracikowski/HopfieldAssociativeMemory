@@ -5,8 +5,10 @@
 //! step limit, and returns the [`Outcome`]. A [`Recorder`] receives every
 //! frame on the way: [`History`] keeps them, [`NoHistory`] drops them.
 
+mod asynchronous;
 pub mod history;
 pub mod mode;
+pub mod order;
 pub mod outcome;
 pub mod recorder;
 mod synchronous;
@@ -18,6 +20,7 @@ use serde::Deserialize;
 
 pub use history::History;
 pub use mode::Mode;
+pub use order::UpdateOrder;
 pub use outcome::Outcome;
 pub use recorder::{NoHistory, Recorder};
 pub use termination::Termination;
@@ -26,6 +29,7 @@ pub use zero_field::{ZERO_FIELD_TOLERANCE, ZeroField};
 use crate::patterns::PatternView;
 use crate::weights::{WeightMatrix, Weights};
 use crate::{Error, Result};
+use asynchronous::Asynchronous;
 use synchronous::Synchronous;
 
 /// Settings of a recall simulation.
@@ -36,33 +40,43 @@ pub struct Dynamics {
     pub mode: Mode,
     /// Convention for `sgn(0)`.
     pub zero_field: ZeroField,
+    /// Order of updates within a sweep (asynchronous mode only).
+    pub order: UpdateOrder,
     /// Largest number of steps (synchronous updates or asynchronous
     /// sweeps).
     pub max_steps: usize,
+    /// Asynchronous mode only: a frame is recorded every `record_every`
+    /// neuron updates (if the state changed since the previous frame).
+    /// `None` means once per sweep, i.e. every `N` updates. The synchronous
+    /// mode records every step.
+    pub record_every: Option<usize>,
 }
 
 impl Default for Dynamics {
-    /// Asynchronous mode, `sgn(0)` keeps the previous state, at most 1000
-    /// steps.
+    /// Asynchronous mode with a new random permutation in every sweep,
+    /// `sgn(0)` keeps the previous state, at most 1000 steps, a frame per
+    /// sweep.
     fn default() -> Self {
         Self {
             mode: Mode::Asynchronous,
             zero_field: ZeroField::Keep,
+            order: UpdateOrder::Permutation,
             max_steps: 1000,
+            record_every: None,
         }
     }
 }
 
 impl Dynamics {
-    /// Runs the network with `weights` from `initial` and passes every
-    /// frame to `recorder`: the initial state, the state after every step
-    /// and the final state (each state once). `rng` drives the random
-    /// choices of the asynchronous mode.
+    /// Runs the network with `weights` from `initial` and passes the
+    /// frames to `recorder`: the initial state, the states between steps
+    /// and the final state, consecutive frames always different. `rng`
+    /// drives the random update orders of the asynchronous mode.
     pub fn run<R, H>(
         &self,
         weights: &Weights,
         initial: PatternView<'_>,
-        _rng: &mut R,
+        rng: &mut R,
         recorder: &mut H,
     ) -> Result<Outcome>
     where
@@ -86,17 +100,28 @@ impl Dynamics {
                 max_steps: self.max_steps,
             }
             .run(initial, recorder)),
-            Mode::Asynchronous => Err(Error::InvalidArgument {
-                message: "asynchronous mode is not implemented yet".to_owned(),
-            }),
+            Mode::Asynchronous => Ok(Asynchronous {
+                weights,
+                zero_field: self.zero_field,
+                order: self.order,
+                max_steps: self.max_steps,
+                record_every: self.record_every.unwrap_or(weights.neurons()),
+            }
+            .run(initial, rng, recorder)),
         }
     }
 
     fn validate(&self) -> Result<()> {
+        let invalid = |message: &str| {
+            Err(Error::InvalidArgument {
+                message: message.to_owned(),
+            })
+        };
         if self.max_steps == 0 {
-            return Err(Error::InvalidArgument {
-                message: "at least one step is needed".to_owned(),
-            });
+            return invalid("at least one step is needed");
+        }
+        if self.record_every == Some(0) {
+            return invalid("frames must be recorded at least every update, not every 0");
         }
         Ok(())
     }
@@ -282,6 +307,14 @@ mod tests {
             .run(&weights, initial.view(), &mut rng, &mut NoHistory)
             .unwrap_err();
         assert!(error.to_string().contains("at least one step"), "{error}");
+        let never = Dynamics {
+            record_every: Some(0),
+            ..Dynamics::default()
+        };
+        let error = never
+            .run(&weights, initial.view(), &mut rng, &mut NoHistory)
+            .unwrap_err();
+        assert!(error.to_string().contains("every 0"), "{error}");
     }
 
     #[test]
@@ -295,8 +328,13 @@ mod tests {
                 mode: Mode::Synchronous,
                 zero_field: ZeroField::PlusOne,
                 max_steps: 20,
+                ..Dynamics::default()
             }
         );
+        let dynamics: Dynamics =
+            toml::from_str("order = \"sequential\"\nrecord_every = 5").unwrap();
+        assert_eq!(dynamics.order, UpdateOrder::Sequential);
+        assert_eq!(dynamics.record_every, Some(5));
         assert_eq!(toml::from_str::<Dynamics>("").unwrap(), Dynamics::default());
         assert!(toml::from_str::<Dynamics>("steps = 3").is_err());
     }
