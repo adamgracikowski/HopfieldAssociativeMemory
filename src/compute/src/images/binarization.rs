@@ -3,7 +3,7 @@
 use image::GrayImage;
 use image::imageops::{BiLevel, ColorMap, dither};
 use ndarray::Array1;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::patterns::{BipolarVector, Pattern};
 
@@ -12,7 +12,9 @@ use crate::patterns::{BipolarVector, Pattern};
 ///
 /// [`Display`](std::fmt::Display) and `&'static str` conversion give the name
 /// used in configuration files (`median`, `floyd-steinberg`).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, strum::Display, strum::IntoStaticStr)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize, strum::Display, strum::IntoStaticStr,
+)]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum Binarization {

@@ -1,0 +1,122 @@
+{
+  "command": "convert-images",
+  "build": {
+    "version": "0.1.0",
+    "commit": "f8a3ac605c8a0a134d23b33a0108449f3792be0e",
+    "dirty": false
+  },
+  "config": "../images/cats/config.toml",
+  "width": 300,
+  "height": 200,
+  "method": "median",
+  "sources": [
+    {
+      "file": "stray-cat-mandalay.jpg",
+      "sha1": "139b0b51dbee5d3624b70053425ee0b0a26e6902",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/16/20160729_-_Stray_cat_-_Mandalay_Hill_-_Mandalay%2C_Myanmar_-_5862.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "page": "https://commons.wikimedia.org/wiki/File:20160729_-_Stray_cat_-_Mandalay_Hill_-_Mandalay,_Myanmar_-_5862.jpg",
+      "author": "Jakub Hałun",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+    },
+    {
+      "file": "bengal-kitten.jpg",
+      "sha1": "19b551dbb61535913347fee1cdae58a47dacbccf",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/40/BEN_Bengalian_kitten_%284492540155%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "page": "https://commons.wikimedia.org/wiki/File:BEN_Bengalian_kitten_(4492540155).jpg",
+      "author": "Nickolas Titkov from Moscow, Russian Federation",
+      "license": "CC BY-SA 2.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.0"
+    },
+    {
+      "file": "calico-cat-assisi.jpg",
+      "sha1": "db52fa5de531f9ff9660f69f69dbef19fae8d8ae",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/01/Calico_cat%2C_-_Assisi%2C_Italy.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "page": "https://commons.wikimedia.org/wiki/File:Calico_cat,_-_Assisi,_Italy.jpg",
+      "author": "Terragio67",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+    },
+    {
+      "file": "sphynx-kitten.jpg",
+      "sha1": "243d915c8c12376dcd56dfac3716cd4f505ab08a",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/29/Cat_Sphynx._Kittens._img_11.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "page": "https://commons.wikimedia.org/wiki/File:Cat_Sphynx._Kittens._img_11.jpg",
+      "author": "Dmitry Makeev",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+    },
+    {
+      "file": "cat-playing-with-lizard.jpg",
+      "sha1": "d106bf9af0348847f8ddf2d1c295241f20978138",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/72/Cat_playing_with_a_lizard.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "page": "https://commons.wikimedia.org/wiki/File:Cat_playing_with_a_lizard.jpg",
+      "author": "Basile Morin",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+    },
+    {
+      "file": "cat-sleeping-hanoi.jpg",
+      "sha1": "0df0c8420704ece454489fef41735304554acd79",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Cat_sleeping_in_the_Ng%E1%BB%8Dc_S%C6%A1n_Temple_in_Hanoi%2C_20240204_1309_5747.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "page": "https://commons.wikimedia.org/wiki/File:Cat_sleeping_in_the_Ng%E1%BB%8Dc_S%C6%A1n_Temple_in_Hanoi,_20240204_1309_5747.jpg",
+      "author": "Jakub Hałun",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0"
+    },
+    {
+      "file": "cat-with-ocular-prosthetic.jpg",
+      "sha1": "15e20ee0cf25c5077c109e4e6b4383f3234a476e",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/15/CatWithOcularProsthetic.jpeg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "page": "https://commons.wikimedia.org/wiki/File:CatWithOcularProsthetic.jpeg",
+      "author": "Aqwis",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0"
+    },
+    {
+      "file": "tabby-cat-on-snow.jpg",
+      "sha1": "9faac1cfb129a7cd1e9718d424c5397dd4cd8f44",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Felis_catus-black_tabby_cat_on_snow_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "page": "https://commons.wikimedia.org/wiki/File:Felis_catus-black_tabby_cat_on_snow_(cropped).jpg",
+      "author": "Von.grzanka",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0"
+    },
+    {
+      "file": "ginger-cat-face.jpg",
+      "sha1": "95660cacafa2accdd270990fd2ca965570e7ab50",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/94/Gato_%282%29_REFON.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "page": "https://commons.wikimedia.org/wiki/File:Gato_(2)_REFON.jpg",
+      "author": "José Reynaldo da Fonseca",
+      "license": "CC BY 2.5",
+      "license_url": "https://creativecommons.org/licenses/by/2.5"
+    },
+    {
+      "file": "stray-cat-livorno.jpg",
+      "sha1": "1c8728d670215cf72dcabaa86eae61622f4a9f41",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Gatta_randagia_Livorno.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "page": "https://commons.wikimedia.org/wiki/File:Gatta_randagia_Livorno.JPG",
+      "author": "Lucarelli",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0"
+    },
+    {
+      "file": "golden-tabby-kitten.jpg",
+      "sha1": "63489e731ed5ff90df148d9d1b93267acbd1159c",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Golden_tabby_and_white_kitten_n01.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "page": "https://commons.wikimedia.org/wiki/File:Golden_tabby_and_white_kitten_n01.jpg",
+      "author": "© Marie-Lan Nguyen / Wikimedia Commons",
+      "license": "CC BY 2.5",
+      "license_url": "https://creativecommons.org/licenses/by/2.5"
+    },
+    {
+      "file": "six-weeks-old-cat.jpg",
+      "sha1": "0bed3e649d400423bdd5d7db192bafea9897df4a",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Six_weeks_old_cat_%28aka%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "page": "https://commons.wikimedia.org/wiki/File:Six_weeks_old_cat_(aka).jpg",
+      "author": "André Karwath aka Aka",
+      "license": "CC BY-SA 2.5",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.5"
+    }
+  ]
+}

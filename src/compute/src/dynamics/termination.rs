@@ -1,12 +1,23 @@
 //! Reasons for which a simulation stops.
 
+use serde::Serialize;
+
 /// Why a simulation stopped.
 ///
 /// [`Display`](std::fmt::Display) and `&'static str` conversion give the
 /// name used in output files (`fixed-point`, `two-cycle`, `step-limit`).
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, strum::Display, strum::IntoStaticStr, strum::EnumIter,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Serialize,
+    strum::Display,
+    strum::IntoStaticStr,
+    strum::EnumIter,
 )]
+#[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum Termination {
     /// The state is a fixed point: updating any neuron leaves it unchanged.

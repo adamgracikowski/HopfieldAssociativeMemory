@@ -11,18 +11,20 @@ pub mod mode;
 pub mod order;
 pub mod outcome;
 pub mod recorder;
+pub mod stability;
 mod synchronous;
 pub mod termination;
 pub mod zero_field;
 
 use rand::Rng;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 pub use history::History;
 pub use mode::Mode;
 pub use order::UpdateOrder;
 pub use outcome::Outcome;
 pub use recorder::{NoHistory, Recorder};
+pub use stability::Stability;
 pub use termination::Termination;
 pub use zero_field::{ZERO_FIELD_TOLERANCE, ZeroField};
 
@@ -33,7 +35,7 @@ use asynchronous::Asynchronous;
 use synchronous::Synchronous;
 
 /// Settings of a recall simulation.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Dynamics {
     /// Update mode.

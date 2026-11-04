@@ -1,6 +1,6 @@
 //! Activation of a neuron and the convention for a zero local field.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Local fields with `|h| <= ZERO_FIELD_TOLERANCE` count as zero.
 ///
@@ -29,6 +29,7 @@ pub const ZERO_FIELD_TOLERANCE: f64 = 1e-10;
     PartialEq,
     Eq,
     Deserialize,
+    Serialize,
     strum::Display,
     strum::IntoStaticStr,
     strum::EnumIter,

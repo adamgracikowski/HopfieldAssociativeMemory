@@ -18,18 +18,21 @@
 
 pub mod conversion;
 pub mod output;
+pub mod provenance;
 pub mod source;
 
 use std::collections::HashSet;
-use std::path::{Component, Path, PathBuf};
+use std::path::{Path, PathBuf};
 
 use serde::Deserialize;
 
 pub use conversion::Conversion;
 pub use output::Output;
+pub use provenance::Provenance;
 pub use source::Source;
 
 use super::ImageConverter;
+use crate::paths::resolve;
 use crate::patterns::PatternSet;
 use crate::{Error, Result};
 
@@ -158,7 +161,6 @@ impl ConversionConfig {
                 self.converter.open(&path)
             })
             .collect::<Result<Vec<_>>>()?;
-        let names: Vec<String> = sources.into_iter().map(|source| source.file).collect();
 
         self.outputs
             .iter()
@@ -166,7 +168,8 @@ impl ConversionConfig {
                 let patterns: Vec<_> = grays.iter().map(|gray| output.method.apply(gray)).collect();
                 Ok(Conversion {
                     output: output.clone(),
-                    names: names.clone(),
+                    sources: sources.clone(),
+                    config: self.path.clone(),
                     set: PatternSet::from_patterns(
                         self.converter.width(),
                         self.converter.height(),
@@ -176,25 +179,6 @@ impl ConversionConfig {
             })
             .collect()
     }
-}
-
-/// Joins `relative` to `base` and removes `.` components and `..` components
-/// that follow a directory name, without touching the file system (so a `..`
-/// after a symbolic link is resolved lexically).
-fn resolve(base: &Path, relative: &Path) -> PathBuf {
-    let mut path = PathBuf::new();
-    for component in base.join(relative).components() {
-        match component {
-            Component::CurDir => {}
-            Component::ParentDir
-                if matches!(path.components().next_back(), Some(Component::Normal(_))) =>
-            {
-                path.pop();
-            }
-            other => path.push(other),
-        }
-    }
-    path
 }
 
 #[cfg(test)]
@@ -254,20 +238,6 @@ mod tests {
     }
 
     #[test]
-    fn resolves_parent_directories_lexically() {
-        let base = Path::new("data/images/cats");
-        assert_eq!(
-            resolve(base, Path::new("../../datasets/./a.npy")),
-            Path::new("data/datasets/a.npy")
-        );
-        assert_eq!(
-            resolve(Path::new("a"), Path::new("../../b.npy")),
-            Path::new("../b.npy")
-        );
-        assert_eq!(resolve(Path::new(""), Path::new("raw")), Path::new("raw"));
-    }
-
-    #[test]
     fn rejects_invalid_configurations() {
         let parse = |text: &str| ConversionConfig::parse(text, Path::new("c.toml"));
         let error = parse(&format!("{CONFIG}\nseed = 1")).unwrap_err();
@@ -301,7 +271,8 @@ mod tests {
         for conversion in &conversions {
             assert_eq!(conversion.set.len(), 2);
             assert_eq!(conversion.set.neurons(), 8);
-            assert_eq!(conversion.names, ["a.png", "b.png"]);
+            let files: Vec<_> = conversion.sources.iter().map(|s| s.file.as_str()).collect();
+            assert_eq!(files, ["a.png", "b.png"]);
         }
         let median = &conversions[0].set;
         assert_eq!(median.pattern(0).values()[0], 1);

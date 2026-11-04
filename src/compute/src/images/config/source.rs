@@ -4,12 +4,12 @@ use std::collections::HashSet;
 use std::io::Read;
 use std::path::{Component, Path};
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{Error, Result};
 
 /// A source image with its origin and license: one row of a source list.
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Source {
     /// Plain file name in the image directory.
     pub file: String,
