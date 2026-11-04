@@ -1,6 +1,6 @@
 //! Choice of the weight storage backend.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Largest dense matrix the `auto` backend allows: 256 MiB of `f64`, that is
 /// `N <= 5792` neurons.
@@ -18,6 +18,7 @@ pub const DENSE_LIMIT_BYTES: usize = 256 * 1024 * 1024;
     PartialEq,
     Eq,
     Deserialize,
+    Serialize,
     strum::Display,
     strum::IntoStaticStr,
     strum::EnumIter,

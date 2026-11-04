@@ -127,7 +127,7 @@ mod tests {
         assert_eq!(weights.neurons(), 4);
         assert_eq!(
             weights.local_fields(array![1, 1, -1, 1].view()),
-            Array1::zeros(4)
+            Array1::<f64>::zeros(4)
         );
         assert_eq!(sample().into_inner(), sample().to_dense());
     }

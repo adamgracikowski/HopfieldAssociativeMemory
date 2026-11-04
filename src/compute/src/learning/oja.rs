@@ -6,7 +6,7 @@ mod subspace;
 pub mod variant;
 
 use ndarray::Array2;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 pub use fit::OjaFit;
 pub use variant::OjaVariant;
@@ -30,7 +30,7 @@ use crate::{Error, PatternSet, Result};
 /// [`OjaVariant`]): the subspace rule on `M` with `A = Xi^T M / N` at
 /// `O(p^3)` per epoch, the single-neuron rule on `A` at `O(N p^2)`.
 /// The diagonal is zeroed only after learning, which keeps this form.
-#[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Oja {
     /// Form of the rule.

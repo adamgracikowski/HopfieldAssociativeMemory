@@ -1,6 +1,6 @@
 //! Update modes of the network.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// How neurons are updated in one step.
 ///
@@ -14,6 +14,7 @@ use serde::Deserialize;
     PartialEq,
     Eq,
     Deserialize,
+    Serialize,
     strum::Display,
     strum::IntoStaticStr,
     strum::EnumIter,

@@ -1,6 +1,6 @@
 //! Forms of Oja's rule for the whole weight matrix.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Form of Oja's rule used to update the whole weight matrix.
 ///
@@ -16,6 +16,7 @@ use serde::Deserialize;
     PartialEq,
     Eq,
     Deserialize,
+    Serialize,
     strum::Display,
     strum::IntoStaticStr,
     strum::EnumIter,

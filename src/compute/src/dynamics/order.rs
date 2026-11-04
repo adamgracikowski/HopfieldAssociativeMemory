@@ -2,7 +2,7 @@
 
 use rand::seq::SliceRandom;
 use rand::{Rng, RngExt};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Order in which the asynchronous mode updates the neurons within one
 /// sweep of `N` updates. Random orders draw from the generator passed to the
@@ -19,6 +19,7 @@ use serde::Deserialize;
     PartialEq,
     Eq,
     Deserialize,
+    Serialize,
     strum::Display,
     strum::IntoStaticStr,
     strum::EnumIter,

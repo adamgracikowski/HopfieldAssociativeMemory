@@ -9,7 +9,9 @@ pub mod dynamics;
 pub mod error;
 pub mod images;
 pub mod learning;
+pub mod paths;
 pub mod patterns;
+pub mod run;
 pub mod weights;
 
 pub use error::{Error, Result};

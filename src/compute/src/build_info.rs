@@ -1,6 +1,8 @@
 //! Version and source revision of the build, recorded with every result so
 //! that a run can be traced back to its code.
 
+use serde::Serialize;
+
 /// Version of the crate from `Cargo.toml`.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -22,6 +24,27 @@ pub const LONG_VERSION: &str = concat!(
     ")"
 );
 
+/// Version, commit and dirty flag of this build, as recorded in result
+/// metadata.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+pub struct BuildInfo {
+    /// Crate version ([`VERSION`]).
+    pub version: &'static str,
+    /// Git commit ([`GIT_COMMIT`]).
+    pub commit: &'static str,
+    /// Dirty flag ([`GIT_DIRTY`]).
+    pub dirty: &'static str,
+}
+
+impl BuildInfo {
+    /// The build of this binary.
+    pub const CURRENT: Self = Self {
+        version: VERSION,
+        commit: GIT_COMMIT,
+        dirty: GIT_DIRTY,
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -42,5 +65,13 @@ mod tests {
         assert!(LONG_VERSION.starts_with(VERSION));
         assert!(LONG_VERSION.contains(GIT_COMMIT));
         assert!(LONG_VERSION.ends_with(&format!("dirty: {GIT_DIRTY})")));
+    }
+
+    #[test]
+    fn current_build_serializes_all_parts() {
+        let json = serde_json::to_value(BuildInfo::CURRENT).unwrap();
+        assert_eq!(json["version"], VERSION);
+        assert_eq!(json["commit"], GIT_COMMIT);
+        assert_eq!(json["dirty"], GIT_DIRTY);
     }
 }
