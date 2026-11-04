@@ -183,6 +183,17 @@ pub enum Error {
         known: String,
     },
 
+    /// The output directory of a run already holds files.
+    #[error("output directory `{path}` is not empty")]
+    #[diagnostic(
+        code(compute::output_exists),
+        help("choose another directory or pass `--force` to overwrite the files of this run")
+    )]
+    OutputExists {
+        /// Output directory.
+        path: PathBuf,
+    },
+
     /// A pattern file has an extension the library cannot read.
     #[error("unsupported pattern file format `{path}`")]
     #[diagnostic(

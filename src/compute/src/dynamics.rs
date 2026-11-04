@@ -11,6 +11,7 @@ pub mod mode;
 pub mod order;
 pub mod outcome;
 pub mod recorder;
+pub mod stability;
 mod synchronous;
 pub mod termination;
 pub mod zero_field;
@@ -23,6 +24,7 @@ pub use mode::Mode;
 pub use order::UpdateOrder;
 pub use outcome::Outcome;
 pub use recorder::{NoHistory, Recorder};
+pub use stability::Stability;
 pub use termination::Termination;
 pub use zero_field::{ZERO_FIELD_TOLERANCE, ZeroField};
 

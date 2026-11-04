@@ -7,6 +7,7 @@ use compute::build_info;
 use compute::images::config::Source;
 use compute::patterns::npy::read_npy;
 use image::{GrayImage, Luma};
+use npyz::NpyFile;
 use predicates::prelude::*;
 use predicates::str::contains;
 
@@ -197,4 +198,110 @@ fn convert_images_rejects_an_unknown_method() {
         .assert()
         .failure()
         .stderr(contains("invalid configuration"));
+}
+
+/// Writes a run configuration for `small-7x7` into `dir`, with the
+/// repository registry and `extra` lines appended.
+fn run_config(dir: &Path, extra: &str) -> PathBuf {
+    let registry = std::path::absolute("../../data/datasets/datasets.toml").unwrap();
+    let text = format!(
+        "dataset = \"small-7x7\"\nregistry = '{}'\n{extra}\n",
+        registry.display()
+    );
+    let path = dir.join("config.toml");
+    std::fs::write(&path, text).unwrap();
+    path
+}
+
+fn read_json(path: &Path) -> serde_json::Value {
+    serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap()
+}
+
+fn npy_shape(path: &Path) -> Vec<u64> {
+    let bytes = std::fs::read(path).unwrap();
+    NpyFile::new(&bytes[..]).unwrap().shape().to_vec()
+}
+
+#[test]
+fn train_writes_weights_and_metadata() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = run_config(dir.path(), "[learning]\nrule = \"hebb\"");
+    let out = dir.path().join("run");
+    compute()
+        .arg("train")
+        .arg("--config")
+        .arg(&config)
+        .arg("--out")
+        .arg(&out)
+        .assert()
+        .success()
+        .stdout(contains("learning     hebb (dense backend)"))
+        .stdout(contains("of 5 patterns"));
+
+    assert_eq!(npy_shape(&out.join("weights.npy")), [49, 49]);
+    let metadata = read_json(&out.join("metadata.json"));
+    assert_eq!(metadata["command"], "train");
+    assert_eq!(metadata["build"]["commit"], build_info::GIT_COMMIT);
+    assert_eq!(metadata["config"]["learning"]["rule"], "hebb");
+    assert_eq!(metadata["config"]["dynamics"]["mode"], "asynchronous");
+    assert_eq!(metadata["dataset"]["neurons"], 49);
+    assert_eq!(metadata["training"]["backend"], "dense");
+    assert_eq!(
+        metadata["stability"]["unstable_neurons"]
+            .as_array()
+            .unwrap()
+            .len(),
+        5
+    );
+}
+
+#[test]
+fn train_saves_coefficients_of_factored_weights() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = run_config(
+        dir.path(),
+        "backend = \"factored\"\n[learning]\nrule = \"oja\"",
+    );
+    let out = dir.path().join("run");
+    compute()
+        .arg("train")
+        .arg("--config")
+        .arg(&config)
+        .arg("--out")
+        .arg(&out)
+        .assert()
+        .success()
+        .stdout(contains("oja, subspace (factored backend)"))
+        .stdout(contains("stable       5 of 5 patterns"));
+    assert_eq!(npy_shape(&out.join("coefficients.npy")), [49, 5]);
+    assert!(!out.join("weights.npy").exists());
+    let metadata = read_json(&out.join("metadata.json"));
+    assert_eq!(metadata["training"]["converged"], true);
+    assert_eq!(metadata["config"]["learning"]["eta"], 0.5);
+}
+
+#[test]
+fn train_refuses_a_non_empty_output_without_force() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = run_config(dir.path(), "[learning]\nrule = \"hebb\"");
+    let run = |force: bool| {
+        let mut command = compute();
+        command
+            .arg("train")
+            .arg("--config")
+            .arg(&config)
+            .arg("--out")
+            .arg(dir.path());
+        if force {
+            command.arg("--force");
+        }
+        command.assert()
+    };
+    run(false)
+        .failure()
+        .stderr(contains("is not empty"))
+        .stderr(contains("--force"));
+    run(true).success();
+    assert!(dir.path().join("weights.npy").is_file());
+    assert!(dir.path().join("config.toml").is_file());
 }
