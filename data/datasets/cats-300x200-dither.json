@@ -2,8 +2,8 @@
   "command": "convert-images",
   "build": {
     "version": "0.1.0",
-    "commit": "131a89b2e90645c5c7a3c11b038c06a993052676",
-    "dirty": "false"
+    "commit": "f8a3ac605c8a0a134d23b33a0108449f3792be0e",
+    "dirty": false
   },
   "config": "../images/cats/config.toml",
   "width": 300,
