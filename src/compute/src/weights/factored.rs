@@ -22,7 +22,7 @@ pub struct FactoredWeights {
 
 impl FactoredWeights {
     /// Builds the weights from the patterns of `basis` (the rows of `Xi`) and
-    /// the `N x p` coefficient matrix `A`.
+    /// the `N x p` coefficient matrix `A` of finite values.
     pub fn new(basis: &PatternSet, coefficients: Array2<f64>) -> Result<Self> {
         let expected = (basis.neurons(), basis.len());
         if coefficients.dim() != expected {
@@ -34,6 +34,11 @@ impl FactoredWeights {
                     coefficients.nrows(),
                     coefficients.ncols()
                 ),
+            });
+        }
+        if let Some(((i, mu), a)) = coefficients.indexed_iter().find(|(_, a)| !a.is_finite()) {
+            return Err(Error::InvalidArgument {
+                message: format!("coefficients must be finite, found A[{i}][{mu}] = {a}"),
             });
         }
         let mut weights = Self {
@@ -201,5 +206,8 @@ mod tests {
         let basis = PatternSet::new(3, 1, array![[1, -1, 1]]).unwrap();
         let error = FactoredWeights::new(&basis, Array2::zeros((1, 3))).unwrap_err();
         assert!(error.to_string().contains("must be 3x1"), "{error}");
+        let error =
+            FactoredWeights::new(&basis, array![[0.0], [f64::INFINITY], [0.0]]).unwrap_err();
+        assert!(error.to_string().contains("A[1][0] = inf"), "{error}");
     }
 }

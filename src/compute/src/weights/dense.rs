@@ -14,12 +14,17 @@ pub struct DenseWeights {
 
 impl DenseWeights {
     /// Wraps `matrix` after checking that it is a non-empty square matrix
-    /// with zero diagonal.
+    /// of finite values with zero diagonal.
     pub fn new(matrix: Array2<f64>) -> Result<Self> {
         let (rows, cols) = matrix.dim();
         if rows == 0 || rows != cols {
             return Err(invalid(format!(
                 "weight matrix must be square and non-empty, found {rows}x{cols}"
+            )));
+        }
+        if let Some(((i, j), w)) = matrix.indexed_iter().find(|(_, w)| !w.is_finite()) {
+            return Err(invalid(format!(
+                "weight matrix must be finite, found w[{i}][{j}] = {w}"
             )));
         }
         if let Some((i, w)) = matrix.diag().indexed_iter().find(|(_, w)| **w != 0.0) {
@@ -112,6 +117,8 @@ mod tests {
         assert!(DenseWeights::new(Array2::zeros((0, 0))).is_err());
         let error = DenseWeights::new(array![[0.0, 1.0], [1.0, 0.1]]).unwrap_err();
         assert!(error.to_string().contains("zero diagonal"), "{error}");
+        let error = DenseWeights::new(array![[0.0, f64::NAN], [1.0, 0.0]]).unwrap_err();
+        assert!(error.to_string().contains("w[0][1] = NaN"), "{error}");
     }
 
     #[test]

@@ -182,6 +182,15 @@ mod tests {
         assert_eq!(history.changes(), [0, 2]);
     }
 
+    /// The cycle of the previous test appears after one step, so a limit
+    /// of one step still reports it rather than the step limit.
+    #[test]
+    fn a_two_cycle_at_the_step_limit_is_recognized() {
+        let (outcome, _) = run(synchronous(1), &two_neurons(), &pattern(array![1, -1]));
+        assert_eq!(outcome.termination, Termination::TwoCycle);
+        assert_eq!(outcome.steps, 1);
+    }
+
     /// `h = (0.5, 0.5)` keeps `(1, 1)`, with energy `-0.5`.
     #[test]
     fn stored_pattern_is_a_fixed_point() {
@@ -234,10 +243,15 @@ mod tests {
     }
 
     /// Direct synchronous simulation on the full matrix: the states until
-    /// the first repeated state of distance 1 or 2, or `max_steps` steps.
-    fn reference(w: &Array2<f64>, initial: &Array1<i8>, max_steps: usize) -> Vec<Array1<i8>> {
+    /// the first repeated state of distance 1 or 2, or `max_steps` steps,
+    /// and the reason for stopping.
+    fn reference(
+        w: &Array2<f64>,
+        initial: &Array1<i8>,
+        max_steps: usize,
+    ) -> (Vec<Array1<i8>>, Termination) {
         let mut states = vec![initial.clone()];
-        for _ in 0..max_steps {
+        loop {
             let x = states.last().unwrap();
             let next: Array1<i8> = (0..x.len())
                 .map(|i| {
@@ -246,12 +260,17 @@ mod tests {
                 })
                 .collect();
             let len = states.len();
-            if next == states[len - 1] || (len >= 2 && next == states[len - 2]) {
-                break;
+            if next == states[len - 1] {
+                return (states, Termination::FixedPoint);
+            }
+            if len >= 2 && next == states[len - 2] {
+                return (states, Termination::TwoCycle);
+            }
+            if len - 1 == max_steps {
+                return (states, Termination::StepLimit);
             }
             states.push(next);
         }
-        states
     }
 
     #[test]
@@ -266,8 +285,9 @@ mod tests {
         let w = dense.to_dense();
         for _ in 0..20 {
             let initial = Pattern::random(30, &mut rng).unwrap();
-            let expected = reference(&w, &initial.clone().into_inner(), 50);
+            let (expected, termination) = reference(&w, &initial.clone().into_inner(), 50);
             let (outcome, history) = run(synchronous(50), &dense, &initial);
+            assert_eq!(outcome.termination, termination);
             assert_eq!(history.len(), expected.len());
             for (k, state) in expected.iter().enumerate() {
                 assert_eq!(history.state(k).values(), state.view(), "frame {k}");

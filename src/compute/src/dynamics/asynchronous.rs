@@ -3,7 +3,7 @@
 use rand::Rng;
 
 use super::{Outcome, Recorder, Termination, UpdateOrder, ZeroField};
-use crate::patterns::PatternView;
+use crate::patterns::{Pattern, PatternView};
 use crate::weights::{FieldTracker, WeightMatrix, Weights};
 
 /// Asynchronous simulation `x_i <- sgn(h_i)`, one neuron at a time, in
@@ -28,8 +28,11 @@ impl Asynchronous<'_> {
     /// the step limit the state is checked for a fixed point as well.
     ///
     /// A frame is recorded every `record_every` updates if the state
-    /// changed since the previous frame, and once more at the end if the
-    /// final state has not been recorded yet.
+    /// differs from the previous frame, and once more at the end if the
+    /// final state has not been recorded yet. Its change count is the
+    /// Hamming distance to the previous frame, which can be smaller than
+    /// the number of flips in between when a neuron flips back (random
+    /// order, asymmetric weights or frames longer than a sweep).
     pub(super) fn run<R: Rng + ?Sized>(
         &self,
         initial: PatternView<'_>,
@@ -45,7 +48,10 @@ impl Asynchronous<'_> {
         let mut steps = 0;
         let mut total = 0;
         let mut updates = 0;
-        let mut unrecorded = 0;
+        let mut frame = Frame {
+            state: initial.to_pattern(),
+            flips: 0,
+        };
         let termination = loop {
             if steps == self.max_steps {
                 break if self.is_fixed_point(&tracker) {
@@ -61,13 +67,11 @@ impl Asynchronous<'_> {
                 if self.zero_field.activate(tracker.field(i), x) != x {
                     tracker.flip(i);
                     changes += 1;
-                    unrecorded += 1;
+                    frame.flips += 1;
                 }
                 updates += 1;
-                if updates % self.record_every == 0 && unrecorded > 0 {
-                    let state = tracker.state();
-                    recorder.record(state, self.weights.energy(state.values()), unrecorded);
-                    unrecorded = 0;
+                if updates % self.record_every == 0 {
+                    frame.record_if_changed(tracker.state(), self.weights, recorder);
                 }
             }
             total += changes;
@@ -77,11 +81,9 @@ impl Asynchronous<'_> {
             steps += 1;
         };
 
+        frame.record_if_changed(tracker.state(), self.weights, recorder);
         let state = tracker.into_state();
         let energy = self.weights.energy(state.values());
-        if unrecorded > 0 {
-            recorder.record(state.view(), energy, unrecorded);
-        }
         Outcome {
             state,
             steps,
@@ -98,6 +100,34 @@ impl Asynchronous<'_> {
             let x = state.values()[i];
             self.zero_field.activate(tracker.field(i), x) == x
         })
+    }
+}
+
+/// The last recorded frame and the number of flips since then.
+struct Frame {
+    state: Pattern,
+    flips: usize,
+}
+
+impl Frame {
+    /// Records `state` if it differs from the last frame, with its energy
+    /// and the Hamming distance to the last frame. The distance is computed
+    /// only after a flip, so frames without flips cost nothing.
+    fn record_if_changed(
+        &mut self,
+        state: PatternView<'_>,
+        weights: &Weights,
+        recorder: &mut impl Recorder,
+    ) {
+        if self.flips == 0 {
+            return;
+        }
+        self.flips = 0;
+        let changes = state.hamming(&self.state);
+        if changes > 0 {
+            recorder.record(state, weights.energy(state.values()), changes);
+            self.state = state.to_pattern();
+        }
     }
 }
 
@@ -199,6 +229,64 @@ mod tests {
         );
         assert_eq!(history.states(), array![[1, 1], [-1, -1], [1, 1]]);
         assert_eq!(history.changes(), [0, 2, 2]);
+    }
+
+    /// The same cycle with a frame every 4 updates: after two sweeps the
+    /// state is back at `(1, 1)` after 4 flips, so no new frame is recorded.
+    /// With a frame every 3 updates the frame after 3 flips is `(1, -1)`,
+    /// at distance 1 from the start, and the final `(1, 1)` follows at
+    /// distance 1.
+    #[test]
+    fn frames_record_the_distance_to_the_previous_frame() {
+        let weights = Weights::from(DenseWeights::new(array![[0.0, -1.0], [1.0, 0.0]]).unwrap());
+        let start = pattern(array![1, 1]);
+        let every = |k| Dynamics {
+            record_every: Some(k),
+            ..asynchronous(UpdateOrder::Sequential, 2)
+        };
+        let (outcome, history) = run(every(4), &weights, &start, 0);
+        assert_eq!(outcome.changes, 4);
+        assert_eq!(history.states(), array![[1, 1]]);
+
+        let (_, history) = run(every(3), &weights, &start, 0);
+        assert_eq!(history.states(), array![[1, 1], [1, -1], [1, 1]]);
+        assert_eq!(history.changes(), [0, 1, 1]);
+    }
+
+    /// With the random order a neuron can flip back within a frame, so the
+    /// recorded changes are compared with the actual distances.
+    #[test]
+    fn random_order_frames_are_distinct_and_counted_exactly() {
+        let mut rng = ChaCha8Rng::seed_from_u64(6);
+        let set = random_set(40, 8, &mut rng);
+        let weights = Hebb.train(&set, Backend::Dense).unwrap().weights;
+        let dynamics = asynchronous(UpdateOrder::Random, 1000);
+        for seed in 0..50 {
+            let start = Pattern::random(40, &mut rng).unwrap();
+            let (_, history) = run(dynamics, &weights, &start, seed);
+            for k in 1..history.len() {
+                let distance = history.state(k).hamming(&history.state(k - 1));
+                assert!(distance > 0);
+                assert_eq!(history.changes()[k], distance, "{seed} {k}");
+            }
+        }
+    }
+
+    /// The two-neuron Hebbian network from `(1, -1)` reaches `(-1, -1)` in
+    /// the first sweep; with a limit of one step the check at the limit
+    /// finds a fixed point.
+    #[test]
+    fn a_fixed_point_at_the_step_limit_is_recognized() {
+        let set = PatternSet::new(2, 1, array![[1, 1]]).unwrap();
+        let weights = Hebb.train(&set, Backend::Dense).unwrap().weights;
+        let (outcome, _) = run(
+            asynchronous(UpdateOrder::Sequential, 1),
+            &weights,
+            &pattern(array![1, -1]),
+            0,
+        );
+        assert_eq!(outcome.termination, Termination::FixedPoint);
+        assert_eq!(outcome.steps, 1);
     }
 
     /// Symmetric weights with zero diagonal: the energy never increases
