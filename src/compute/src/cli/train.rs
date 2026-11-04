@@ -27,7 +27,7 @@ impl TrainArgs {
     /// prints a summary.
     pub fn run(self) -> compute::Result<()> {
         let config = RunConfig::from_file(&self.config)?;
-        let out = OutputDir::create(&self.out, self.force)?;
+        let out = OutputDir::new(&self.out, self.force)?;
         let run = TrainRun::execute(&config)?;
         run.write(&config, &out)?;
 

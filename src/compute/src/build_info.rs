@@ -32,8 +32,9 @@ pub struct BuildInfo {
     pub version: &'static str,
     /// Git commit ([`GIT_COMMIT`]).
     pub commit: &'static str,
-    /// Dirty flag ([`GIT_DIRTY`]).
-    pub dirty: &'static str,
+    /// Whether the crate files differed from the commit ([`GIT_DIRTY`]);
+    /// `None` (`null` in JSON) when it is unknown.
+    pub dirty: Option<bool>,
 }
 
 impl BuildInfo {
@@ -41,8 +42,17 @@ impl BuildInfo {
     pub const CURRENT: Self = Self {
         version: VERSION,
         commit: GIT_COMMIT,
-        dirty: GIT_DIRTY,
+        dirty: parse_dirty(GIT_DIRTY),
     };
+}
+
+/// `Some(true)` for `true`, `Some(false)` for `false`, `None` otherwise.
+const fn parse_dirty(flag: &str) -> Option<bool> {
+    match flag.as_bytes() {
+        b"true" => Some(true),
+        b"false" => Some(false),
+        _ => None,
+    }
 }
 
 #[cfg(test)]
@@ -72,6 +82,16 @@ mod tests {
         let json = serde_json::to_value(BuildInfo::CURRENT).unwrap();
         assert_eq!(json["version"], VERSION);
         assert_eq!(json["commit"], GIT_COMMIT);
-        assert_eq!(json["dirty"], GIT_DIRTY);
+        assert_eq!(
+            json["dirty"].to_string(),
+            GIT_DIRTY.replace("unknown", "null")
+        );
+    }
+
+    #[test]
+    fn dirty_flag_is_parsed_to_a_boolean() {
+        assert_eq!(parse_dirty("true"), Some(true));
+        assert_eq!(parse_dirty("false"), Some(false));
+        assert_eq!(parse_dirty("unknown"), None);
     }
 }

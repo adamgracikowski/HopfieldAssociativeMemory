@@ -291,6 +291,31 @@ mod tests {
         assert_eq!(first.history, second.history);
     }
 
+    /// The initial state comes from its own random stream: changing the
+    /// dynamics keeps it, changing the seed changes it.
+    #[test]
+    fn damaged_input_does_not_depend_on_the_dynamics() {
+        let dir = tempfile::tempdir().unwrap();
+        let input = "[input]\nsource = \"pattern\"\nindex = 0\nflips = 2";
+        let initial = |extra: &str| {
+            let config = orthogonal_config(dir.path(), &format!("{extra}\n{input}"));
+            RecallRun::execute(&config).unwrap().initial
+        };
+        let asynchronous = initial("[dynamics]\norder = \"random\"");
+        assert_eq!(initial("[dynamics]\nmode = \"synchronous\""), asynchronous);
+        assert_eq!(initial("[dynamics]\norder = \"sequential\""), asynchronous);
+
+        let config = orthogonal_config(dir.path(), input);
+        let reseeded = (1..20)
+            .map(|seed| {
+                let mut config = config.clone();
+                config.seed = Some(seed + 1);
+                RecallRun::execute(&config).unwrap().initial
+            })
+            .any(|other| other != asynchronous);
+        assert!(reseeded);
+    }
+
     #[test]
     fn requires_a_seed_and_an_input() {
         let dir = tempfile::tempdir().unwrap();

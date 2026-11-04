@@ -21,12 +21,26 @@ pub fn resolve(base: &Path, relative: &Path) -> PathBuf {
     path
 }
 
+/// Directory of the file `path`: its parent, or `.` for a bare file name
+/// (whose parent is empty).
+pub fn directory_of(path: &Path) -> &Path {
+    match path.parent() {
+        Some(parent) if !parent.as_os_str().is_empty() => parent,
+        _ => Path::new("."),
+    }
+}
+
 /// Path of `target` relative to the directory `base`, with `/` separators,
 /// e.g. `../images/cats/config.toml`. Both are made absolute against the
 /// current directory and normalized lexically first. Returns `None` when
 /// they have no common root (e.g. different drives).
 pub fn relative_to(target: &Path, base: &Path) -> Option<String> {
     let normalize = |path: &Path| {
+        let path = if path.as_os_str().is_empty() {
+            Path::new(".")
+        } else {
+            path
+        };
         std::path::absolute(path)
             .ok()
             .map(|path| resolve(Path::new(""), &path))
@@ -71,6 +85,13 @@ mod tests {
             relative("data/./x/../datasets", "data/datasets").as_deref(),
             Some(".")
         );
+        assert_eq!(relative("a/b.toml", "").as_deref(), Some("a/b.toml"));
+    }
+
+    #[test]
+    fn directory_of_a_bare_file_name_is_the_current_one() {
+        assert_eq!(directory_of(Path::new("c.toml")), Path::new("."));
+        assert_eq!(directory_of(Path::new("a/c.toml")), Path::new("a"));
     }
 
     #[test]

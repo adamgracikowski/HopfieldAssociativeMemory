@@ -406,3 +406,78 @@ fn recall_requires_a_seed() {
         .stderr(contains("compute::invalid_config"))
         .stderr(contains("`seed`"));
 }
+
+/// A repository-like tree in `root`: `data/datasets/` with `small-7x7` and
+/// its registry, and `exp/config.toml` without a `registry` key, so the
+/// registry is found from the configuration directory upwards.
+fn discovery_setup(root: &Path) -> PathBuf {
+    let datasets = root.join("data").join("datasets");
+    std::fs::create_dir_all(&datasets).unwrap();
+    std::fs::copy(
+        "../../data/datasets/small-7x7.csv",
+        datasets.join("small-7x7.csv"),
+    )
+    .unwrap();
+    std::fs::write(
+        datasets.join("datasets.toml"),
+        "[datasets.small-7x7]\nfile = \"small-7x7.csv\"\nwidth = 7\nheight = 7\n\
+         description = \"Shapes.\"\n",
+    )
+    .unwrap();
+    let exp = root.join("exp");
+    std::fs::create_dir(&exp).unwrap();
+    std::fs::write(
+        exp.join("config.toml"),
+        format!("dataset = \"small-7x7\"\n{RECALL}\n"),
+    )
+    .unwrap();
+    exp
+}
+
+/// The configuration given by its bare file name finds the registry, and
+/// runs from two working directories give the same metadata, whose paths
+/// are relative to the configuration.
+#[test]
+fn recall_does_not_depend_on_the_working_directory() {
+    let dir = tempfile::tempdir().unwrap();
+    let exp = discovery_setup(dir.path());
+    compute()
+        .current_dir(&exp)
+        .args(["recall", "--config", "config.toml", "--out", "a"])
+        .assert()
+        .success();
+    compute()
+        .current_dir(dir.path())
+        .args(["recall", "--config", "exp/config.toml", "--out", "exp/b"])
+        .assert()
+        .success();
+
+    let without_time = |run: &str| {
+        let mut metadata = read_json(&exp.join(run).join("metadata.json"));
+        metadata.as_object_mut().unwrap().remove("created");
+        metadata
+    };
+    let metadata = without_time("a");
+    assert_eq!(metadata, without_time("b"));
+    assert_eq!(
+        metadata["dataset"]["registry"],
+        "../data/datasets/datasets.toml"
+    );
+    assert_eq!(metadata["dataset"]["file"], "small-7x7.csv");
+    assert!(metadata["config"].get("registry").is_none());
+    assert_eq!(
+        std::fs::read(exp.join("a").join("history.npy")).unwrap(),
+        std::fs::read(exp.join("b").join("history.npy")).unwrap()
+    );
+}
+
+#[test]
+fn failed_recall_leaves_no_output_directory() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = run_config(dir.path(), &RECALL.replace("flips = 6", "flips = 50"));
+    let out = dir.path().join("run");
+    recall(&config, &out)
+        .failure()
+        .stderr(contains("cannot flip 50 pixels"));
+    assert!(!out.exists());
+}

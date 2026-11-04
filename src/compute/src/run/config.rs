@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{Input, Learning};
 use crate::dynamics::Dynamics;
-use crate::paths::resolve;
+use crate::paths::{directory_of, resolve};
 use crate::patterns::registry::Registry;
 use crate::weights::Backend;
 use crate::{Error, Result};
@@ -33,7 +33,9 @@ use crate::{Error, Result};
 /// The registry is `registry` if given, otherwise
 /// `data/datasets/datasets.toml` found from the directory of the
 /// configuration file upwards. Relative paths (`registry`, the input file)
-/// are resolved against the directory of the configuration file.
+/// are resolved against the directory of the configuration file when they
+/// are used and kept as written in the fields, so the serialized
+/// configuration does not depend on the working directory.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct RunConfig {
@@ -71,18 +73,12 @@ impl RunConfig {
         Self::parse(&text, path)
     }
 
-    /// Parses configuration `text` of the file `path` and resolves its
-    /// relative paths against the directory of `path`.
+    /// Parses configuration `text` of the file `path`.
     pub fn parse(text: &str, path: &Path) -> Result<Self> {
         let mut config: Self = toml::from_str(text).map_err(|source| Error::Config {
             path: path.to_owned(),
             source: Box::new(source),
         })?;
-        let base = path.parent().unwrap_or(Path::new(""));
-        config.registry = config.registry.map(|registry| resolve(base, &registry));
-        if let Some(Input::File { path: file, .. }) = &mut config.input {
-            *file = resolve(base, file);
-        }
         config.path = path.to_owned();
         Ok(config)
     }
@@ -92,13 +88,19 @@ impl RunConfig {
         &self.path
     }
 
-    /// Opens the dataset registry: `registry` if given, otherwise the one
-    /// found from the directory of the configuration file upwards.
+    /// Directory of the configuration file, the base of its relative paths.
+    pub fn directory(&self) -> &Path {
+        directory_of(&self.path)
+    }
+
+    /// Opens the dataset registry: `registry` resolved against
+    /// [`directory`](Self::directory) if given, otherwise the one found from
+    /// that directory upwards.
     pub fn open_registry(&self) -> Result<Registry> {
         match &self.registry {
-            Some(path) => Registry::from_file(path),
+            Some(path) => Registry::from_file(&resolve(self.directory(), path)),
             None => {
-                let dir = self.path.parent().unwrap_or(Path::new(""));
+                let dir = self.directory();
                 let start = std::path::absolute(dir).map_err(|source| Error::Io {
                     path: dir.to_owned(),
                     source,
@@ -113,12 +115,21 @@ impl RunConfig {
         self.seed.ok_or_else(|| self.missing("`seed`"))
     }
 
-    /// The initial state settings, or an error if the configuration has no
-    /// `[input]` table.
-    pub fn require_input(&self) -> Result<&Input> {
-        self.input
-            .as_ref()
-            .ok_or_else(|| self.missing("an `[input]` table"))
+    /// The initial state settings with an input file resolved against
+    /// [`directory`](Self::directory), or an error if the configuration has
+    /// no `[input]` table.
+    pub fn require_input(&self) -> Result<Input> {
+        let input = self
+            .input
+            .clone()
+            .ok_or_else(|| self.missing("an `[input]` table"))?;
+        Ok(match input {
+            Input::File { path, index } => Input::File {
+                path: resolve(self.directory(), &path),
+                index,
+            },
+            other => other,
+        })
     }
 
     fn missing(&self, what: &str) -> Error {
@@ -157,13 +168,14 @@ mod tests {
     }
 
     #[test]
-    fn parses_and_resolves_paths() {
+    fn keeps_paths_as_written_and_resolves_them_on_use() {
         let config = parse(CONFIG).unwrap();
         assert_eq!(config.dataset, "small-7x7");
         assert_eq!(
             config.registry.as_deref(),
-            Some(Path::new("data/datasets/datasets.toml"))
+            Some(Path::new("../datasets/datasets.toml"))
         );
+        assert_eq!(config.directory(), Path::new("data/experiments"));
         assert_eq!(config.require_seed().unwrap(), 42);
         assert_eq!(config.backend, Backend::Dense);
         assert_eq!(config.learning, Learning::Hebb {});
@@ -171,11 +183,14 @@ mod tests {
         assert_eq!(config.dynamics.zero_field, ZeroField::PlusOne);
         assert_eq!(
             config.require_input().unwrap(),
-            &Input::File {
+            Input::File {
                 path: PathBuf::from("data/experiments/inputs/a.npy"),
                 index: 0
             }
         );
+        let json = serde_json::to_value(&config).unwrap();
+        assert_eq!(json["registry"], "../datasets/datasets.toml");
+        assert_eq!(json["input"]["path"], "inputs/a.npy");
         assert_eq!(config.path(), Path::new("data/experiments/c.toml"));
     }
 

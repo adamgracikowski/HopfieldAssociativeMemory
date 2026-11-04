@@ -15,10 +15,12 @@ pub struct OutputDir {
 }
 
 impl OutputDir {
-    /// Creates `path` with its parents. An existing directory must be empty
-    /// unless `force` is set; then the files of the run replace files of the
-    /// same name and other files stay.
-    pub fn create(path: &Path, force: bool) -> Result<Self> {
+    /// Output directory `path`, checked before the run: an existing
+    /// directory must be empty unless `force` is set; then the files of the
+    /// run replace files of the same name and other files stay. The
+    /// directory (with its parents) is created by the first write, so a run
+    /// that fails before writing leaves nothing behind.
+    pub fn new(path: &Path, force: bool) -> Result<Self> {
         let io_error = |source| Error::Io {
             path: path.to_owned(),
             source,
@@ -28,7 +30,6 @@ impl OutputDir {
                 path: path.to_owned(),
             });
         }
-        std::fs::create_dir_all(path).map_err(io_error)?;
         Ok(Self {
             path: path.to_owned(),
         })
@@ -76,6 +77,10 @@ impl OutputDir {
         name: &str,
         content: impl FnOnce(&mut BufWriter<std::fs::File>) -> std::io::Result<()>,
     ) -> Result<()> {
+        std::fs::create_dir_all(&self.path).map_err(|source| Error::Io {
+            path: self.path.clone(),
+            source,
+        })?;
         let path = self.path.join(name);
         let io_error = |source| Error::Io {
             path: path.clone(),
@@ -97,20 +102,22 @@ mod tests {
     fn refuses_a_non_empty_directory_without_force() {
         let dir = tempfile::tempdir().unwrap();
         let out = dir.path().join("a").join("run");
-        let created = OutputDir::create(&out, false).unwrap();
-        assert!(out.is_dir());
-        assert!(OutputDir::create(&out, false).is_ok());
+        let checked = OutputDir::new(&out, false).unwrap();
+        assert!(!out.exists());
+        checked.write_json("x.json", &[1, 2]).unwrap();
+        assert!(out.join("x.json").is_file());
 
-        created.write_json("x.json", &[1, 2]).unwrap();
-        let error = OutputDir::create(&out, false).unwrap_err();
+        let error = OutputDir::new(&out, false).unwrap_err();
         assert!(matches!(error, Error::OutputExists { .. }), "{error}");
-        assert!(OutputDir::create(&out, true).is_ok());
+        assert!(OutputDir::new(&out, true).is_ok());
+        std::fs::remove_file(out.join("x.json")).unwrap();
+        assert!(OutputDir::new(&out, false).is_ok());
     }
 
     #[test]
     fn writes_json_and_npy() {
         let dir = tempfile::tempdir().unwrap();
-        let out = OutputDir::create(dir.path(), true).unwrap();
+        let out = OutputDir::new(dir.path(), true).unwrap();
         out.write_json("v.json", &serde_json::json!({ "a": 1 }))
             .unwrap();
         let text = std::fs::read_to_string(dir.path().join("v.json")).unwrap();

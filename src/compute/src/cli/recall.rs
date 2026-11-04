@@ -33,7 +33,7 @@ impl RecallArgs {
     /// summary.
     pub fn run(self) -> compute::Result<()> {
         let config = RunConfig::from_file(&self.config)?;
-        let out = OutputDir::create(&self.out, self.force)?;
+        let out = OutputDir::new(&self.out, self.force)?;
         let run = RecallRun::execute(&config)?;
         run.write(&config, &out)?;
 
@@ -56,7 +56,7 @@ impl RecallArgs {
             "dynamics     {}{order}, sgn(0) {}",
             dynamics.mode, dynamics.zero_field
         );
-        println!("input        {}", describe(config.require_input()?));
+        println!("input        {}", describe(&config.require_input()?));
         println!(
             "result       {} after {} steps, {} changes, energy {:.6}",
             summary.termination, summary.steps, summary.changes, summary.energy
