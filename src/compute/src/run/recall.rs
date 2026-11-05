@@ -1,8 +1,6 @@
 //! The `recall` command: run the network from an initial state and save
 //! every visited state.
 
-use rand::SeedableRng;
-use rand_chacha::ChaCha8Rng;
 use serde::Serialize;
 
 use super::train::METADATA_FILE;
@@ -10,17 +8,13 @@ use super::{DatasetInfo, Initial, Metadata, OutputDir, RunConfig, TrainingInfo};
 use crate::dynamics::{History, Outcome, Termination};
 use crate::learning::LearningRule;
 use crate::patterns::PatternView;
+use crate::seed::Seed;
 use crate::{PatternSet, Result};
 
 /// Name of the state history file (`int8`, `frames x height x width`).
 pub const HISTORY_FILE: &str = "history.npy";
 /// Name of the per-frame statistics file.
 pub const FRAMES_FILE: &str = "frames.json";
-
-/// Random stream of the initial state.
-const INPUT_STREAM: u64 = 0;
-/// Random stream of the dynamics (update order).
-const DYNAMICS_STREAM: u64 = 1;
 
 /// The stored pattern closest to a state.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize)]
@@ -110,23 +104,20 @@ struct RecallResult<'a> {
 
 impl RecallRun {
     /// Loads the dataset, trains the network, builds the initial state and
-    /// runs the dynamics, all as configured.
-    ///
-    /// The seed starts two independent streams of `ChaCha8Rng`, one for the
-    /// initial state and one for the dynamics, so changing the update order
-    /// does not change the damaged input.
+    /// runs the dynamics, all as configured. The initial state and the
+    /// dynamics draw from the two streams of the [`Seed`].
     pub fn execute(config: &RunConfig) -> Result<Self> {
-        let seed = config.require_seed()?;
+        let seed = Seed(config.require_seed()?);
         let input = config.require_input()?;
-        let (dataset, set) = DatasetInfo::load(config)?;
+        let (dataset, set) = config.load_dataset()?;
         let trained = config.learning.train(&set, config.backend)?;
 
-        let initial = input.initial(&set, &mut stream(seed, INPUT_STREAM))?;
+        let initial = input.initial(&set, &mut seed.input_rng())?;
         let mut history = History::new();
         let outcome = config.dynamics.run(
             &trained.weights,
             initial.state.view(),
-            &mut stream(seed, DYNAMICS_STREAM),
+            &mut seed.dynamics_rng(),
             &mut history,
         )?;
         Ok(Self {
@@ -191,13 +182,6 @@ impl RecallRun {
         out.write_npy(HISTORY_FILE, &shape, self.history.states().iter().copied())?;
         out.write_json(FRAMES_FILE, &self.frames())
     }
-}
-
-/// Generator for `stream` of `seed`.
-fn stream(seed: u64, stream: u64) -> ChaCha8Rng {
-    let mut rng = ChaCha8Rng::seed_from_u64(seed);
-    rng.set_stream(stream);
-    rng
 }
 
 #[cfg(test)]
