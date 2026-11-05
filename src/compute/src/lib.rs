@@ -7,11 +7,13 @@
 pub mod build_info;
 pub mod dynamics;
 pub mod error;
+pub mod experiment;
 pub mod images;
 pub mod learning;
 pub mod paths;
 pub mod patterns;
 pub mod run;
+pub mod seed;
 pub mod weights;
 
 pub use error::{Error, Result};

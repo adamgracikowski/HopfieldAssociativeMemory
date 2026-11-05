@@ -37,7 +37,7 @@ impl TrainRun {
     /// Loads the dataset of `config`, trains the network and checks which
     /// patterns are stable.
     pub fn execute(config: &RunConfig) -> Result<Self> {
-        let (dataset, set) = DatasetInfo::load(config)?;
+        let (dataset, set) = config.load_dataset()?;
         let trained = config.learning.train(&set, config.backend)?;
         let stability = Stability::of(&trained.weights, &set, config.dynamics.zero_field);
         Ok(Self {

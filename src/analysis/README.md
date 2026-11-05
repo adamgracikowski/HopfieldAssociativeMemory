@@ -14,6 +14,16 @@ Run all commands in `src/analysis`.
 uv sync
 ```
 
+## Usage
+
+```bash
+uv run hopfield-analysis recovery ../../data/experiments/00-example/results --out recovery.png
+```
+
+`recovery` plots the fraction of recovered runs against the noise level of an experiment written by `compute experiment`: one panel per dataset, one line per learning rule and update mode, with the 95% Wilson intervals from `summary.json`.
+
+The module `hopfield_analysis.experiments` reads the results of an experiment: `load_trials` (`trials.parquet` as a polars DataFrame, one row per run), `load_summary` (the cells of `summary.json` as a flat DataFrame, nested fields joined with `_`, e.g. `recovered_fraction`) and `load_metadata`.
+
 ## Checks
 
 The same checks run in CI:

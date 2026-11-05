@@ -511,3 +511,197 @@ fn train_with_another_backend_removes_the_old_weights() {
     train("dense");
     assert!(!out.join("coefficients.npy").exists());
 }
+
+/// Hebbian learning on `small-7x7` (`p = 5`), both modes, two noise levels
+/// and 4 trials: 3 cells of 4 x 5 = 20 runs and one deterministic cell
+/// (synchronous, no noise) of 5 runs.
+const EXPERIMENT: &str = "seed = 5\ndatasets = [\"small-7x7\"]\ntrials = 4\n\
+    [[learning]]\nrule = \"hebb\"\n\
+    [dynamics]\nmodes = [\"synchronous\", \"asynchronous\"]\n\
+    [input]\nsource = \"pattern\"\nnoise = [0.0, 0.2]\n";
+
+/// Writes the experiment configuration `text` with an absolute registry into
+/// `dir` and returns its path.
+fn experiment_config(dir: &Path, text: &str) -> PathBuf {
+    let registry = std::path::absolute("../../data/datasets/datasets.toml").unwrap();
+    let path = dir.join("config.toml");
+    std::fs::write(
+        &path,
+        format!("registry = '{}'\n{text}", registry.display()),
+    )
+    .unwrap();
+    path
+}
+
+fn experiment(config: &Path) -> Command {
+    let mut command = compute();
+    command.arg("experiment").arg("--config").arg(config);
+    command
+}
+
+/// The whole table of a Parquet file as one record batch.
+fn read_parquet(path: &Path) -> arrow_array::RecordBatch {
+    let file = std::fs::File::open(path).unwrap();
+    let builder =
+        parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder::try_new(file).unwrap();
+    let rows = builder.metadata().file_metadata().num_rows() as usize;
+    let mut batches: Vec<_> = builder
+        .with_batch_size(rows)
+        .build()
+        .unwrap()
+        .map(Result::unwrap)
+        .collect();
+    assert_eq!(batches.len(), 1, "the table is read in one batch");
+    batches.remove(0)
+}
+
+#[test]
+fn experiment_writes_tables_and_metadata() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = experiment_config(dir.path(), EXPERIMENT);
+    let out = dir.path().join("run");
+    experiment(&config)
+        .arg("--out")
+        .arg(&out)
+        .assert()
+        .success()
+        .stderr(contains("trained      small-7x7, hebb: 0 epochs"))
+        .stdout(contains("grid         4 cells, 65 runs"));
+
+    let trials = read_parquet(&out.join("trials.parquet"));
+    assert_eq!(trials.num_rows(), 65);
+    let names: Vec<String> = trials
+        .schema()
+        .fields()
+        .iter()
+        .map(|field| field.name().clone())
+        .collect();
+    assert_eq!(names[..4], ["dataset", "learning", "mode", "noise"]);
+    assert!(names.contains(&"seed".to_owned()) && names.contains(&"class".to_owned()));
+
+    let summary = read_json(&out.join("summary.json"));
+    let cells = summary["cells"].as_array().unwrap();
+    assert_eq!(cells.len(), 4);
+    assert_eq!(cells[1]["noise"], 0.2);
+    assert_eq!(cells[1]["flips"], 10);
+    assert_eq!(cells[1]["runs"], 20);
+    assert!(cells[1]["recovered"]["lower"].is_f64());
+    assert_eq!(cells[0]["runs"], 5);
+    assert_eq!(cells[0]["deterministic"], true);
+    assert_eq!(cells[1]["deterministic"], false);
+
+    let metadata = read_json(&out.join("metadata.json"));
+    assert_eq!(metadata["command"], "experiment");
+    assert_eq!(metadata["build"]["commit"], build_info::GIT_COMMIT);
+    assert_eq!(metadata["config"]["trials"], 4);
+    assert_eq!(metadata["datasets"][0]["neurons"], 49);
+    assert_eq!(metadata["trainings"][0]["learning"], "hebb");
+    assert_eq!(metadata["trainings"][0]["backend"], "dense");
+    assert_eq!(
+        metadata["trainings"][0]["stability"]["unstable_neurons"]
+            .as_array()
+            .unwrap()
+            .len(),
+        5
+    );
+}
+
+/// The tables are byte for byte the same with one and with four threads;
+/// the metadata differs only in `created`.
+#[test]
+fn experiment_tables_do_not_depend_on_the_number_of_threads() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = experiment_config(
+        dir.path(),
+        &EXPERIMENT.replace(
+            "[[learning]]\nrule = \"hebb\"\n",
+            "[[learning]]\nrule = \"hebb\"\n[[learning]]\nrule = \"oja\"\n",
+        ),
+    );
+    let run = |threads: &str| {
+        let out = dir.path().join(format!("threads-{threads}"));
+        experiment(&config)
+            .env("RAYON_NUM_THREADS", threads)
+            .arg("--out")
+            .arg(&out)
+            .assert()
+            .success();
+        out
+    };
+    let (one, four) = (run("1"), run("4"));
+    for file in ["trials.parquet", "summary.json"] {
+        assert_eq!(
+            std::fs::read(one.join(file)).unwrap(),
+            std::fs::read(four.join(file)).unwrap(),
+            "{file}"
+        );
+    }
+    assert_eq!(read_parquet(&one.join("trials.parquet")).num_rows(), 130);
+    let without_time = |out: &Path| {
+        let mut metadata = read_json(&out.join("metadata.json"));
+        metadata.as_object_mut().unwrap().remove("created");
+        metadata
+    };
+    assert_eq!(without_time(&one), without_time(&four));
+}
+
+#[test]
+fn experiment_writes_results_next_to_the_config_by_default() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = experiment_config(dir.path(), EXPERIMENT);
+    experiment(&config)
+        .assert()
+        .success()
+        .stdout(contains("results"));
+    let results = dir.path().join("results");
+    assert!(results.join("trials.parquet").is_file());
+
+    experiment(&config)
+        .assert()
+        .failure()
+        .stderr(contains("compute::output_exists"));
+    experiment(&config).arg("--force").assert().success();
+}
+
+#[test]
+fn experiment_requires_a_seed() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = experiment_config(dir.path(), &EXPERIMENT.replace("seed = 5\n", ""));
+    experiment(&config)
+        .assert()
+        .failure()
+        .stderr(contains("compute::config"))
+        .stderr(contains("`seed`"));
+    assert!(!dir.path().join("results").exists());
+}
+
+/// The committed results of the example experiment are what the current
+/// code computes, with one thread and with four. A change of the code that
+/// changes the results fails here until the results are regenerated. The
+/// trial table is compared as decoded data, because the Parquet file also
+/// records the version of the `parquet` crate; `summary.json` byte for byte.
+#[test]
+fn example_experiment_matches_the_committed_results() {
+    let example = Path::new("../../data/experiments/00-example");
+    let committed = example.join("results");
+    let dir = tempfile::tempdir().unwrap();
+    for threads in ["1", "4"] {
+        let out = dir.path().join(threads);
+        experiment(&example.join("config.toml"))
+            .env("RAYON_NUM_THREADS", threads)
+            .arg("--out")
+            .arg(&out)
+            .assert()
+            .success();
+        assert!(
+            read_parquet(&out.join("trials.parquet"))
+                == read_parquet(&committed.join("trials.parquet")),
+            "trials.parquet with {threads} threads differs from the committed one"
+        );
+        assert!(
+            std::fs::read(out.join("summary.json")).unwrap()
+                == std::fs::read(committed.join("summary.json")).unwrap(),
+            "summary.json with {threads} threads differs from the committed one"
+        );
+    }
+}

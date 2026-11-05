@@ -1,0 +1,1892 @@
+{
+  "cells": [
+    {
+      "dataset": "small-7x7",
+      "learning": "hebb",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 5,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 3,
+          "fraction": 0.6,
+          "lower": 0.6,
+          "upper": 0.6
+        },
+        "negation": {
+          "count": 1,
+          "fraction": 0.2,
+          "lower": 0.2,
+          "upper": 0.2
+        },
+        "spurious": {
+          "count": 1,
+          "fraction": 0.2,
+          "lower": 0.2,
+          "upper": 0.2
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 3,
+        "fraction": 0.6,
+        "lower": 0.6,
+        "upper": 0.6
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 1.7320508075688772
+      },
+      "energy": {
+        "mean": -35.053061224489795,
+        "std": 4.828624906978671
+      },
+      "final_overlap": {
+        "mean": 0.8775510204081632,
+        "std": 0.2120878539880258
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "hebb",
+      "mode": "synchronous",
+      "noise": 0.1,
+      "flips": 5,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 47,
+          "fraction": 0.47,
+          "lower": 0.3751065198210374,
+          "upper": 0.5671131686275227
+        },
+        "negation": {
+          "count": 20,
+          "fraction": 0.2,
+          "lower": 0.1333659225590988,
+          "upper": 0.28883096192650237
+        },
+        "spurious": {
+          "count": 32,
+          "fraction": 0.32,
+          "lower": 0.2366901081545688,
+          "upper": 0.4166280225367919
+        },
+        "cycle": {
+          "count": 1,
+          "fraction": 0.01,
+          "lower": 0.001767386565547261,
+          "upper": 0.0544875247609346
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 42,
+        "fraction": 0.42,
+        "lower": 0.327982249185113,
+        "upper": 0.5179369200110473
+      },
+      "steps": {
+        "mean": 2.0,
+        "std": 1.3926212476455828
+      },
+      "energy": {
+        "mean": -35.794285714285714,
+        "std": 4.134564715610331
+      },
+      "final_overlap": {
+        "mean": 0.8297959183673466,
+        "std": 0.1986966310747815
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "hebb",
+      "mode": "synchronous",
+      "noise": 0.2,
+      "flips": 10,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 44,
+          "fraction": 0.44,
+          "lower": 0.34671865400968327,
+          "upper": 0.537720722887437
+        },
+        "negation": {
+          "count": 23,
+          "fraction": 0.23,
+          "lower": 0.15843154746876406,
+          "upper": 0.32154564856827694
+        },
+        "spurious": {
+          "count": 30,
+          "fraction": 0.3,
+          "lower": 0.21894753866228117,
+          "upper": 0.39585038432811953
+        },
+        "cycle": {
+          "count": 3,
+          "fraction": 0.03,
+          "lower": 0.01025433822341481,
+          "upper": 0.084520780804027
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 38,
+        "fraction": 0.38,
+        "lower": 0.2909744920013438,
+        "upper": 0.47790426179289663
+      },
+      "steps": {
+        "mean": 2.11,
+        "std": 1.2783749153681117
+      },
+      "energy": {
+        "mean": -36.257959183673464,
+        "std": 3.9937387838858998
+      },
+      "final_overlap": {
+        "mean": 0.7857142857142853,
+        "std": 0.22230529497029702
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "hebb",
+      "mode": "synchronous",
+      "noise": 0.3,
+      "flips": 15,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 44,
+          "fraction": 0.44,
+          "lower": 0.34671865400968327,
+          "upper": 0.537720722887437
+        },
+        "negation": {
+          "count": 27,
+          "fraction": 0.27,
+          "lower": 0.1926946091766482,
+          "upper": 0.3643230022623127
+        },
+        "spurious": {
+          "count": 26,
+          "fraction": 0.26,
+          "lower": 0.18404578126986462,
+          "upper": 0.35371172631861636
+        },
+        "cycle": {
+          "count": 3,
+          "fraction": 0.03,
+          "lower": 0.01025433822341481,
+          "upper": 0.084520780804027
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 26,
+        "fraction": 0.26,
+        "lower": 0.18404578126986462,
+        "upper": 0.35371172631861636
+      },
+      "steps": {
+        "mean": 2.48,
+        "std": 1.2986395367709422
+      },
+      "energy": {
+        "mean": -37.542857142857144,
+        "std": 3.5039663070980525
+      },
+      "final_overlap": {
+        "mean": 0.6983673469387752,
+        "std": 0.2825989714023899
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "hebb",
+      "mode": "asynchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 60,
+          "fraction": 0.6,
+          "lower": 0.5020007846184025,
+          "upper": 0.6906002538863971
+        },
+        "negation": {
+          "count": 20,
+          "fraction": 0.2,
+          "lower": 0.1333659225590988,
+          "upper": 0.28883096192650237
+        },
+        "spurious": {
+          "count": 20,
+          "fraction": 0.2,
+          "lower": 0.1333659225590988,
+          "upper": 0.28883096192650237
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 60,
+        "fraction": 0.6,
+        "lower": 0.5020007846184025,
+        "upper": 0.6906002538863971
+      },
+      "steps": {
+        "mean": 0.86,
+        "std": 1.3028329660296962
+      },
+      "energy": {
+        "mean": -35.0530612244898,
+        "std": 4.3406109975621385
+      },
+      "final_overlap": {
+        "mean": 0.877551020408163,
+        "std": 0.1906528026518015
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "hebb",
+      "mode": "asynchronous",
+      "noise": 0.1,
+      "flips": 5,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 51,
+          "fraction": 0.51,
+          "lower": 0.4134784047743415,
+          "upper": 0.6057816990761385
+        },
+        "negation": {
+          "count": 20,
+          "fraction": 0.2,
+          "lower": 0.1333659225590988,
+          "upper": 0.28883096192650237
+        },
+        "spurious": {
+          "count": 29,
+          "fraction": 0.29,
+          "lower": 0.21014706973984149,
+          "upper": 0.3853907494000793
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 46,
+        "fraction": 0.46,
+        "lower": 0.36560643853331865,
+        "upper": 0.5573531460647615
+      },
+      "steps": {
+        "mean": 1.62,
+        "std": 0.9721370814090494
+      },
+      "energy": {
+        "mean": -35.770612244897954,
+        "std": 4.146240995578217
+      },
+      "final_overlap": {
+        "mean": 0.8342857142857139,
+        "std": 0.20061537896104784
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "hebb",
+      "mode": "asynchronous",
+      "noise": 0.2,
+      "flips": 10,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 46,
+          "fraction": 0.46,
+          "lower": 0.36560643853331865,
+          "upper": 0.5573531460647615
+        },
+        "negation": {
+          "count": 22,
+          "fraction": 0.22,
+          "lower": 0.15001174503655804,
+          "upper": 0.3107053471500031
+        },
+        "spurious": {
+          "count": 32,
+          "fraction": 0.32,
+          "lower": 0.2366901081545688,
+          "upper": 0.4166280225367919
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 39,
+        "fraction": 0.39,
+        "lower": 0.300167219319702,
+        "upper": 0.48797163832501844
+      },
+      "steps": {
+        "mean": 1.64,
+        "std": 0.958955660912411
+      },
+      "energy": {
+        "mean": -36.242448979591835,
+        "std": 4.005582245272154
+      },
+      "final_overlap": {
+        "mean": 0.7918367346938772,
+        "std": 0.21531640493207746
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "hebb",
+      "mode": "asynchronous",
+      "noise": 0.3,
+      "flips": 15,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 47,
+          "fraction": 0.47,
+          "lower": 0.3751065198210374,
+          "upper": 0.5671131686275227
+        },
+        "negation": {
+          "count": 24,
+          "fraction": 0.24,
+          "lower": 0.16691211265459965,
+          "upper": 0.3323251872329213
+        },
+        "spurious": {
+          "count": 29,
+          "fraction": 0.29,
+          "lower": 0.21014706973984149,
+          "upper": 0.3853907494000793
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 29,
+        "fraction": 0.29,
+        "lower": 0.21014706973984149,
+        "upper": 0.3853907494000793
+      },
+      "steps": {
+        "mean": 1.94,
+        "std": 0.9408785921958933
+      },
+      "energy": {
+        "mean": -37.3608163265306,
+        "std": 3.551867247147418
+      },
+      "final_overlap": {
+        "mean": 0.6832653061224485,
+        "std": 0.31987233411428573
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (subspace)",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 5,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 5,
+          "fraction": 1.0,
+          "lower": 1.0,
+          "upper": 1.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
+      "steps": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -21.999983882688525,
+        "std": 0.000027879456736554565
+      },
+      "final_overlap": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (subspace)",
+      "mode": "synchronous",
+      "noise": 0.1,
+      "flips": 5,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 100,
+          "fraction": 1.0,
+          "lower": 0.9630051925239981,
+          "upper": 1.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "spurious": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 100,
+        "fraction": 1.0,
+        "lower": 0.9630051925239981,
+        "upper": 1.0
+      },
+      "steps": {
+        "mean": 1.03,
+        "std": 0.17144660799776507
+      },
+      "energy": {
+        "mean": -21.999983882688543,
+        "std": 0.000025061767863113323
+      },
+      "final_overlap": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (subspace)",
+      "mode": "synchronous",
+      "noise": 0.2,
+      "flips": 10,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 98,
+          "fraction": 0.98,
+          "lower": 0.9299868370580063,
+          "upper": 0.9944981477650318
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "spurious": {
+          "count": 1,
+          "fraction": 0.01,
+          "lower": 0.001767386565547261,
+          "upper": 0.0544875247609346
+        },
+        "cycle": {
+          "count": 1,
+          "fraction": 0.01,
+          "lower": 0.001767386565547261,
+          "upper": 0.0544875247609346
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 97,
+        "fraction": 0.97,
+        "lower": 0.9154792191959729,
+        "upper": 0.9897456617765852
+      },
+      "steps": {
+        "mean": 1.31,
+        "std": 0.5448565745851716
+      },
+      "energy": {
+        "mean": -21.90476537933588,
+        "std": 0.7111486371201909
+      },
+      "final_overlap": {
+        "mean": 0.9906122448979592,
+        "std": 0.058549405909933114
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (subspace)",
+      "mode": "synchronous",
+      "noise": 0.3,
+      "flips": 15,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 71,
+          "fraction": 0.71,
+          "lower": 0.6146092505999207,
+          "upper": 0.7898529302601586
+        },
+        "negation": {
+          "count": 2,
+          "fraction": 0.02,
+          "lower": 0.005501852234968185,
+          "upper": 0.07001316294199365
+        },
+        "spurious": {
+          "count": 13,
+          "fraction": 0.13,
+          "lower": 0.07757093858414264,
+          "upper": 0.20980521894809878
+        },
+        "cycle": {
+          "count": 14,
+          "fraction": 0.14,
+          "lower": 0.08526265754464904,
+          "upper": 0.2213736038380724
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 69,
+        "fraction": 0.69,
+        "lower": 0.5937376052204429,
+        "upper": 0.7722043679386762
+      },
+      "steps": {
+        "mean": 2.01,
+        "std": 0.7976607212735419
+      },
+      "energy": {
+        "mean": -20.9384648792063,
+        "std": 1.8880665612580951
+      },
+      "final_overlap": {
+        "mean": 0.8799999999999997,
+        "std": 0.20435520727557352
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (subspace)",
+      "mode": "asynchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 100,
+          "fraction": 1.0,
+          "lower": 0.9630051925239981,
+          "upper": 1.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "spurious": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 100,
+        "fraction": 1.0,
+        "lower": 0.9630051925239981,
+        "upper": 1.0
+      },
+      "steps": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -21.999983882688543,
+        "std": 0.000025061767863113323
+      },
+      "final_overlap": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (subspace)",
+      "mode": "asynchronous",
+      "noise": 0.1,
+      "flips": 5,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 100,
+          "fraction": 1.0,
+          "lower": 0.9630051925239981,
+          "upper": 1.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "spurious": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 100,
+        "fraction": 1.0,
+        "lower": 0.9630051925239981,
+        "upper": 1.0
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -21.999983882688543,
+        "std": 0.000025061767863113323
+      },
+      "final_overlap": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (subspace)",
+      "mode": "asynchronous",
+      "noise": 0.2,
+      "flips": 10,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 95,
+          "fraction": 0.95,
+          "lower": 0.8882480347279118,
+          "upper": 0.9784566385436864
+        },
+        "negation": {
+          "count": 1,
+          "fraction": 0.01,
+          "lower": 0.001767386565547261,
+          "upper": 0.0544875247609346
+        },
+        "spurious": {
+          "count": 4,
+          "fraction": 0.04,
+          "lower": 0.01566305055184801,
+          "upper": 0.09837217232607375
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 94,
+        "fraction": 0.94,
+        "lower": 0.8752303146877748,
+        "upper": 0.9722142547333433
+      },
+      "steps": {
+        "mean": 1.08,
+        "std": 0.2726599243442909
+      },
+      "energy": {
+        "mean": -21.907540681836828,
+        "std": 0.5282751608379417
+      },
+      "final_overlap": {
+        "mean": 0.980408163265306,
+        "std": 0.08769107845582498
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (subspace)",
+      "mode": "asynchronous",
+      "noise": 0.3,
+      "flips": 15,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 64,
+          "fraction": 0.64,
+          "lower": 0.542352199811621,
+          "upper": 0.7272892540950986
+        },
+        "negation": {
+          "count": 5,
+          "fraction": 0.05,
+          "lower": 0.02154336145631356,
+          "upper": 0.11175196527208817
+        },
+        "spurious": {
+          "count": 31,
+          "fraction": 0.31,
+          "lower": 0.22779563206132375,
+          "upper": 0.406262394779557
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 63,
+        "fraction": 0.63,
+        "lower": 0.5322034757513312,
+        "upper": 0.7181778743049083
+      },
+      "steps": {
+        "mean": 1.31,
+        "std": 0.48606854070452465
+      },
+      "energy": {
+        "mean": -21.045613116412607,
+        "std": 1.481367115552814
+      },
+      "final_overlap": {
+        "mean": 0.8379591836734693,
+        "std": 0.24561531711266169
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "hebb",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 6,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 2,
+          "fraction": 0.3333333333333333,
+          "lower": 0.3333333333333333,
+          "upper": 0.3333333333333333
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 4,
+          "fraction": 0.6666666666666666,
+          "lower": 0.6666666666666666,
+          "upper": 0.6666666666666666
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 2,
+        "fraction": 0.3333333333333333,
+        "lower": 0.3333333333333333,
+        "upper": 0.3333333333333333
+      },
+      "steps": {
+        "mean": 2.5,
+        "std": 1.9748417658131499
+      },
+      "energy": {
+        "mean": -88.53968253968252,
+        "std": 16.192430632112067
+      },
+      "final_overlap": {
+        "mean": 0.7301587301587301,
+        "std": 0.21787123729236177
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "hebb",
+      "mode": "synchronous",
+      "noise": 0.1,
+      "flips": 13,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 35,
+          "fraction": 0.2916666666666667,
+          "lower": 0.21781442705981952,
+          "upper": 0.37844401921348453
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 85,
+          "fraction": 0.7083333333333334,
+          "lower": 0.6215559807865156,
+          "upper": 0.7821855729401805
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 35,
+        "fraction": 0.2916666666666667,
+        "lower": 0.21781442705981952,
+        "upper": 0.37844401921348453
+      },
+      "steps": {
+        "mean": 2.9166666666666665,
+        "std": 1.3997798946625155
+      },
+      "energy": {
+        "mean": -89.85343915343921,
+        "std": 14.298766691955075
+      },
+      "final_overlap": {
+        "mean": 0.7018518518518514,
+        "std": 0.20753278249058513
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "hebb",
+      "mode": "synchronous",
+      "noise": 0.2,
+      "flips": 25,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 26,
+          "fraction": 0.21666666666666667,
+          "lower": 0.15236622842757383,
+          "upper": 0.2985452585041196
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 94,
+          "fraction": 0.7833333333333333,
+          "lower": 0.7014547414958805,
+          "upper": 0.8476337715724263
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 26,
+        "fraction": 0.21666666666666667,
+        "lower": 0.15236622842757383,
+        "upper": 0.2985452585041196
+      },
+      "steps": {
+        "mean": 3.091666666666667,
+        "std": 1.3409881803058092
+      },
+      "energy": {
+        "mean": -92.19523809523817,
+        "std": 12.970788736986169
+      },
+      "final_overlap": {
+        "mean": 0.6509259259259255,
+        "std": 0.2115973707251354
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "hebb",
+      "mode": "synchronous",
+      "noise": 0.3,
+      "flips": 38,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 22,
+          "fraction": 0.18333333333333332,
+          "lower": 0.12430210244218537,
+          "upper": 0.26201073589323665
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 98,
+          "fraction": 0.8166666666666667,
+          "lower": 0.7379892641067634,
+          "upper": 0.8756978975578147
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 22,
+        "fraction": 0.18333333333333332,
+        "lower": 0.12430210244218537,
+        "upper": 0.26201073589323665
+      },
+      "steps": {
+        "mean": 3.2,
+        "std": 1.2542365182442576
+      },
+      "energy": {
+        "mean": -93.19047619047628,
+        "std": 12.28597726492281
+      },
+      "final_overlap": {
+        "mean": 0.6275132275132269,
+        "std": 0.20984342433127698
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "hebb",
+      "mode": "asynchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 40,
+          "fraction": 0.3333333333333333,
+          "lower": 0.255316102227993,
+          "upper": 0.4216906547906502
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 80,
+          "fraction": 0.6666666666666666,
+          "lower": 0.5783093452093498,
+          "upper": 0.744683897772007
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 40,
+        "fraction": 0.3333333333333333,
+        "lower": 0.255316102227993,
+        "upper": 0.4216906547906502
+      },
+      "steps": {
+        "mean": 1.8666666666666667,
+        "std": 1.389839077398684
+      },
+      "energy": {
+        "mean": -88.53968253968259,
+        "std": 14.843576823690704
+      },
+      "final_overlap": {
+        "mean": 0.7310846560846558,
+        "std": 0.19908830775650116
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "hebb",
+      "mode": "asynchronous",
+      "noise": 0.1,
+      "flips": 13,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 37,
+          "fraction": 0.30833333333333335,
+          "lower": 0.23272612182675728,
+          "upper": 0.3958316487446824
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 83,
+          "fraction": 0.6916666666666667,
+          "lower": 0.6041683512553176,
+          "upper": 0.7672738781732428
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 37,
+        "fraction": 0.30833333333333335,
+        "lower": 0.23272612182675728,
+        "upper": 0.3958316487446824
+      },
+      "steps": {
+        "mean": 2.25,
+        "std": 0.9636241116594315
+      },
+      "energy": {
+        "mean": -89.31481481481488,
+        "std": 14.553238316813264
+      },
+      "final_overlap": {
+        "mean": 0.7141534391534388,
+        "std": 0.20445251203962844
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "hebb",
+      "mode": "asynchronous",
+      "noise": 0.2,
+      "flips": 25,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 24,
+          "fraction": 0.2,
+          "lower": 0.13824380919983048,
+          "upper": 0.2803683534337273
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 96,
+          "fraction": 0.8,
+          "lower": 0.7196316465662729,
+          "upper": 0.8617561908001696
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 24,
+        "fraction": 0.2,
+        "lower": 0.13824380919983048,
+        "upper": 0.2803683534337273
+      },
+      "steps": {
+        "mean": 2.408333333333333,
+        "std": 0.9482033726233743
+      },
+      "energy": {
+        "mean": -92.66825396825404,
+        "std": 12.691925680646577
+      },
+      "final_overlap": {
+        "mean": 0.6399470899470895,
+        "std": 0.21060934525896816
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "hebb",
+      "mode": "asynchronous",
+      "noise": 0.3,
+      "flips": 38,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 21,
+          "fraction": 0.175,
+          "lower": 0.11740448670592563,
+          "upper": 0.25275868948042857
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 99,
+          "fraction": 0.825,
+          "lower": 0.7472413105195714,
+          "upper": 0.8825955132940744
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 21,
+        "fraction": 0.175,
+        "lower": 0.11740448670592563,
+        "upper": 0.25275868948042857
+      },
+      "steps": {
+        "mean": 2.4,
+        "std": 0.9294436756568341
+      },
+      "energy": {
+        "mean": -93.42698412698422,
+        "std": 12.12224123291053
+      },
+      "final_overlap": {
+        "mean": 0.6218253968253964,
+        "std": 0.20930524956666147
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "oja (subspace)",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 6,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 6,
+          "fraction": 1.0,
+          "lower": 1.0,
+          "upper": 1.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 6,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
+      "steps": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -59.999931481513535,
+        "std": 0.00009610858986128035
+      },
+      "final_overlap": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "oja (subspace)",
+      "mode": "synchronous",
+      "noise": 0.1,
+      "flips": 13,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 120,
+          "fraction": 1.0,
+          "lower": 0.9689797289440706,
+          "upper": 1.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 120,
+        "fraction": 1.0,
+        "lower": 0.9689797289440706,
+        "upper": 1.0
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -59.99993148151355,
+        "std": 0.00008810259987733649
+      },
+      "final_overlap": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "oja (subspace)",
+      "mode": "synchronous",
+      "noise": 0.2,
+      "flips": 25,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 120,
+          "fraction": 1.0,
+          "lower": 0.9689797289440706,
+          "upper": 1.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 120,
+        "fraction": 1.0,
+        "lower": 0.9689797289440706,
+        "upper": 1.0
+      },
+      "steps": {
+        "mean": 1.0166666666666666,
+        "std": 0.12855586584927867
+      },
+      "energy": {
+        "mean": -59.99993148151355,
+        "std": 0.00008810259987733649
+      },
+      "final_overlap": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "oja (subspace)",
+      "mode": "synchronous",
+      "noise": 0.3,
+      "flips": 38,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 119,
+          "fraction": 0.9916666666666667,
+          "lower": 0.9543025846256777,
+          "upper": 0.9985274821693252
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 1,
+          "fraction": 0.008333333333333333,
+          "lower": 0.001472517830674952,
+          "upper": 0.045697415374322405
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 119,
+        "fraction": 0.9916666666666667,
+        "lower": 0.9543025846256777,
+        "upper": 0.9985274821693252
+      },
+      "steps": {
+        "mean": 1.475,
+        "std": 0.5494458629405825
+      },
+      "energy": {
+        "mean": -59.8822631645041,
+        "std": 1.2889863573984253
+      },
+      "final_overlap": {
+        "mean": 0.9972222222222221,
+        "std": 0.03042903097250919
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "oja (subspace)",
+      "mode": "asynchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 120,
+          "fraction": 1.0,
+          "lower": 0.9689797289440706,
+          "upper": 1.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 120,
+        "fraction": 1.0,
+        "lower": 0.9689797289440706,
+        "upper": 1.0
+      },
+      "steps": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -59.99993148151355,
+        "std": 0.00008810259987733649
+      },
+      "final_overlap": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "oja (subspace)",
+      "mode": "asynchronous",
+      "noise": 0.1,
+      "flips": 13,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 120,
+          "fraction": 1.0,
+          "lower": 0.9689797289440706,
+          "upper": 1.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 120,
+        "fraction": 1.0,
+        "lower": 0.9689797289440706,
+        "upper": 1.0
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -59.99993148151355,
+        "std": 0.00008810259987733649
+      },
+      "final_overlap": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "oja (subspace)",
+      "mode": "asynchronous",
+      "noise": 0.2,
+      "flips": 25,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 120,
+          "fraction": 1.0,
+          "lower": 0.9689797289440706,
+          "upper": 1.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 120,
+        "fraction": 1.0,
+        "lower": 0.9689797289440706,
+        "upper": 1.0
+      },
+      "steps": {
+        "mean": 1.0083333333333333,
+        "std": 0.0912870929175277
+      },
+      "energy": {
+        "mean": -59.99993148151355,
+        "std": 0.00008810259987733649
+      },
+      "final_overlap": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "oja (subspace)",
+      "mode": "asynchronous",
+      "noise": 0.3,
+      "flips": 38,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 119,
+          "fraction": 0.9916666666666667,
+          "lower": 0.9543025846256777,
+          "upper": 0.9985274821693252
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 1,
+          "fraction": 0.008333333333333333,
+          "lower": 0.001472517830674952,
+          "upper": 0.045697415374322405
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 119,
+        "fraction": 0.9916666666666667,
+        "lower": 0.9543025846256777,
+        "upper": 0.9985274821693252
+      },
+      "steps": {
+        "mean": 1.1916666666666667,
+        "std": 0.4159798260568346
+      },
+      "energy": {
+        "mean": -59.88145994864911,
+        "std": 1.297785146224538
+      },
+      "final_overlap": {
+        "mean": 0.997089947089947,
+        "std": 0.03187803244739062
+      }
+    }
+  ]
+}

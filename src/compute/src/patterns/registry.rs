@@ -9,6 +9,7 @@ use serde::Deserialize;
 use super::PatternSet;
 use super::csv::read_csv;
 use super::npy::read_npy;
+use crate::paths::resolve;
 use crate::{Error, Result};
 
 /// Registry location relative to the repository root.
@@ -107,6 +108,22 @@ impl Registry {
                 relative: relative.to_owned(),
             })
             .and_then(|path| Self::from_file(&path))
+    }
+
+    /// Opens the registry of a configuration file in directory `base`: `path`
+    /// resolved against `base` if given, otherwise the one found from `base`
+    /// upwards with [`discover`](Self::discover).
+    pub fn open(path: Option<&Path>, base: &Path) -> Result<Self> {
+        match path {
+            Some(path) => Self::from_file(&resolve(base, path)),
+            None => {
+                let start = std::path::absolute(base).map_err(|source| Error::Io {
+                    path: base.to_owned(),
+                    source,
+                })?;
+                Self::discover(&start)
+            }
+        }
     }
 
     /// Location of the registry file.

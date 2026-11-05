@@ -1,9 +1,11 @@
 //! Dataset of a run.
 
+use std::path::Path;
+
 use serde::Serialize;
 
-use super::RunConfig;
 use crate::paths::relative_to;
+use crate::patterns::registry::Registry;
 use crate::{PatternSet, Result};
 
 /// The dataset of a run as recorded in its metadata.
@@ -29,14 +31,14 @@ pub struct DatasetInfo {
 }
 
 impl DatasetInfo {
-    /// Loads the dataset of `config` from its registry.
-    pub fn load(config: &RunConfig) -> Result<(Self, PatternSet)> {
-        let registry = config.open_registry()?;
-        let entry = registry.entry(&config.dataset)?;
-        let set = registry.load(&config.dataset)?;
+    /// Loads dataset `name` from `registry` for a configuration file in the
+    /// directory `config_dir`, against which the registry path is recorded.
+    pub fn load(registry: &Registry, name: &str, config_dir: &Path) -> Result<(Self, PatternSet)> {
+        let entry = registry.entry(name)?;
+        let set = registry.load(name)?;
         let info = Self {
-            name: config.dataset.clone(),
-            registry: relative_to(registry.path(), config.directory())
+            name: name.to_owned(),
+            registry: relative_to(registry.path(), config_dir)
                 .unwrap_or_else(|| registry.path().display().to_string()),
             file: entry.file.to_string_lossy().replace('\\', "/"),
             description: entry.description.clone(),

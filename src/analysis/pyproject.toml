@@ -4,7 +4,13 @@ version = "0.1.0"
 description = "Presentation layer of the Hopfield associative memory project: visualization of the results written by the compute layer."
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "matplotlib>=3.11.2",
+    "polars>=2.1.0",
+]
+
+[project.scripts]
+hopfield-analysis = "hopfield_analysis.cli:main"
 
 [dependency-groups]
 dev = [

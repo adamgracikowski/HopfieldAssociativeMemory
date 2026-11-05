@@ -1,0 +1,146 @@
+{
+  "command": "experiment",
+  "created": "2026-11-05T21:35:06Z",
+  "build": {
+    "version": "0.1.0",
+    "commit": "04a0a1bc325a20277e925df4f6bb1338b3012560",
+    "dirty": false
+  },
+  "config": {
+    "seed": 20261105,
+    "datasets": [
+      "small-7x7",
+      "animals-14x9"
+    ],
+    "backend": "auto",
+    "trials": 20,
+    "learning": [
+      {
+        "rule": "hebb"
+      },
+      {
+        "rule": "oja",
+        "variant": "subspace",
+        "eta": 0.5,
+        "max_epochs": 100000,
+        "tolerance": 1e-6
+      }
+    ],
+    "dynamics": {
+      "modes": [
+        "synchronous",
+        "asynchronous"
+      ],
+      "zero_field": "keep",
+      "order": "permutation",
+      "max_steps": 1000
+    },
+    "input": {
+      "source": "pattern",
+      "noise": [
+        0.0,
+        0.1,
+        0.2,
+        0.3
+      ]
+    }
+  },
+  "datasets": [
+    {
+      "name": "small-7x7",
+      "registry": "../../datasets/datasets.toml",
+      "file": "small-7x7.csv",
+      "description": "Five simple geometric shapes: a diagonal cross, a frame, a small filled square, a diamond and four squares.",
+      "width": 7,
+      "height": 7,
+      "patterns": 5,
+      "neurons": 49
+    },
+    {
+      "name": "animals-14x9",
+      "registry": "../../datasets/datasets.toml",
+      "file": "animals-14x9.csv",
+      "description": "Six small animal silhouettes.",
+      "width": 14,
+      "height": 9,
+      "patterns": 6,
+      "neurons": 126
+    }
+  ],
+  "trainings": [
+    {
+      "dataset": "small-7x7",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 49,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 3,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 49,
+      "epochs": 261,
+      "converged": true,
+      "stability": {
+        "stable": 5,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 126,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 2,
+        "unstable_neurons": [
+          6,
+          6,
+          6,
+          0,
+          0,
+          6
+        ]
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 126,
+      "epochs": 128,
+      "converged": true,
+      "stability": {
+        "stable": 6,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  ]
+}

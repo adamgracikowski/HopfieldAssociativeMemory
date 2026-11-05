@@ -4,12 +4,12 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use super::{Input, Learning};
+use super::{DatasetInfo, Input, Learning};
 use crate::dynamics::Dynamics;
 use crate::paths::{directory_of, resolve};
 use crate::patterns::registry::Registry;
 use crate::weights::Backend;
-use crate::{Error, Result};
+use crate::{Error, PatternSet, Result};
 
 /// Settings of a run, read from a TOML file:
 ///
@@ -97,17 +97,12 @@ impl RunConfig {
     /// [`directory`](Self::directory) if given, otherwise the one found from
     /// that directory upwards.
     pub fn open_registry(&self) -> Result<Registry> {
-        match &self.registry {
-            Some(path) => Registry::from_file(&resolve(self.directory(), path)),
-            None => {
-                let dir = self.directory();
-                let start = std::path::absolute(dir).map_err(|source| Error::Io {
-                    path: dir.to_owned(),
-                    source,
-                })?;
-                Registry::discover(&start)
-            }
-        }
+        Registry::open(self.registry.as_deref(), self.directory())
+    }
+
+    /// Loads the dataset from the [registry](Self::open_registry).
+    pub fn load_dataset(&self) -> Result<(DatasetInfo, PatternSet)> {
+        DatasetInfo::load(&self.open_registry()?, &self.dataset, self.directory())
     }
 
     /// The seed, or an error if the configuration has none.

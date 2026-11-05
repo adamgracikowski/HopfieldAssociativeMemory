@@ -3,7 +3,11 @@
 use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
 
+use arrow_array::RecordBatch;
 use npyz::{AutoSerialize, WriteOptions, WriterBuilder};
+use parquet::arrow::ArrowWriter;
+use parquet::basic::{Compression, ZstdLevel};
+use parquet::file::properties::WriterProperties;
 use serde::Serialize;
 
 use crate::{Error, Result};
@@ -69,6 +73,21 @@ impl OutputDir {
                 .begin_nd()?;
             npy.extend(values)?;
             npy.finish()
+        })
+    }
+
+    /// Writes `batch` as a Parquet file `name`, compressed with zstd. The
+    /// file depends only on the batch and the `parquet` version.
+    pub fn write_parquet(&self, name: &str, batch: &RecordBatch) -> Result<()> {
+        let properties = WriterProperties::builder()
+            .set_compression(Compression::ZSTD(ZstdLevel::default()))
+            .build();
+        self.write(name, |writer| {
+            let mut parquet = ArrowWriter::try_new(writer, batch.schema(), Some(properties))
+                .map_err(std::io::Error::other)?;
+            parquet.write(batch).map_err(std::io::Error::other)?;
+            parquet.close().map_err(std::io::Error::other)?;
+            Ok(())
         })
     }
 
