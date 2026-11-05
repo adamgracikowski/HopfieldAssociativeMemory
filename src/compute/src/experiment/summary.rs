@@ -27,8 +27,10 @@ impl Proportion {
     /// `(p + z^2 / 2n) / (1 + z^2 / n)` and the half-width
     /// `z / (1 + z^2 / n) * sqrt(p (1 - p) / n + z^2 / 4n^2)`. Unlike the
     /// normal approximation it stays within `[0, 1]` and is not empty for
-    /// `k = 0` or `k = n`; the ends are clamped to `[0, 1]` against
-    /// rounding.
+    /// `k = 0` or `k = n`. The interval always contains `p`, with ends 0 for
+    /// `k = 0` and 1 for `k = n`; the computed ends are clamped to `[0, p]`
+    /// and `[p, 1]`, because rounding can move them slightly past `p` (e.g.
+    /// an upper end of `1 - 1e-16` for `k = n = 100`).
     ///
     /// # Panics
     ///
@@ -44,8 +46,8 @@ impl Proportion {
         Self {
             count,
             fraction: p,
-            lower: (centre - half).clamp(0.0, 1.0),
-            upper: (centre + half).clamp(0.0, 1.0),
+            lower: (centre - half).clamp(0.0, p),
+            upper: (centre + half).clamp(p, 1.0),
         }
     }
 }
@@ -196,6 +198,22 @@ mod tests {
         let all = Proportion::wilson(5, 5);
         assert_eq!(all.upper, 1.0);
         assert!((all.lower - (1.0 - 0.434491)).abs() < 1e-6, "{all:?}");
+    }
+
+    /// For `k = 0` and `k = n` the interval ends at exactly 0 and 1 for any
+    /// `n`, even where rounding of the formula misses them, e.g. an upper
+    /// end of `1 - 1e-16` for `k = n = 100`.
+    #[test]
+    fn wilson_interval_contains_the_fraction() {
+        for n in 1..=500 {
+            assert_eq!(Proportion::wilson(0, n).lower, 0.0, "n = {n}");
+            assert_eq!(Proportion::wilson(n, n).upper, 1.0, "n = {n}");
+            for k in [n / 3, n / 2] {
+                let proportion = Proportion::wilson(k, n);
+                assert!(proportion.lower <= proportion.fraction, "{k} of {n}");
+                assert!(proportion.fraction <= proportion.upper, "{k} of {n}");
+            }
+        }
     }
 
     /// `1, 2, 3, 4`: mean 2.5, squared deviations `2.25 + 0.25 + 0.25 +
