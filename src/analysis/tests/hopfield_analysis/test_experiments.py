@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import polars as pl
 import pytest
@@ -10,6 +11,8 @@ from hopfield_analysis.experiments import (
     load_trials,
     plot_recovery,
 )
+
+EXAMPLE = Path(__file__).parents[4] / "data" / "experiments" / "00-example" / "results"
 
 
 def proportion(count, runs):
@@ -113,3 +116,27 @@ def test_cli_writes_a_png(results, tmp_path, capsys):
     assert main(["recovery", str(results), "--out", str(out)]) == 0
     assert out.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
     assert "written to" in capsys.readouterr().out
+
+
+def test_reads_the_results_of_the_example_experiment():
+    trials = load_trials(EXAMPLE)
+    summary = load_summary(EXAMPLE)
+    metadata = load_metadata(EXAMPLE)
+    config = metadata["config"]
+    expected_cells = (
+        len(config["datasets"])
+        * len(config["learning"])
+        * len(config["dynamics"]["modes"])
+        * len(config["input"]["noise"])
+    )
+    assert summary.height == expected_cells
+    assert summary["runs"].sum() == trials.height
+    assert set(trials["class"].unique()) <= {
+        "pattern",
+        "negation",
+        "spurious",
+        "cycle",
+        "unconverged",
+    }
+    figure = plot_recovery(summary)
+    assert len(figure.get_axes()) == len(config["datasets"])

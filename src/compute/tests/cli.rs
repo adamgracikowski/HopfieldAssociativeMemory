@@ -665,3 +665,28 @@ fn experiment_requires_a_seed() {
         .stderr(contains("`seed`"));
     assert!(!dir.path().join("results").exists());
 }
+
+/// The committed results of the example experiment are what the current
+/// code computes, with one thread and with four. A change of the code that
+/// changes the results fails here until the results are regenerated.
+#[test]
+fn example_experiment_matches_the_committed_results() {
+    let example = Path::new("../../data/experiments/00-example");
+    let dir = tempfile::tempdir().unwrap();
+    for threads in ["1", "4"] {
+        let out = dir.path().join(threads);
+        experiment(&example.join("config.toml"))
+            .env("RAYON_NUM_THREADS", threads)
+            .arg("--out")
+            .arg(&out)
+            .assert()
+            .success();
+        for file in ["trials.parquet", "summary.json"] {
+            assert!(
+                std::fs::read(out.join(file)).unwrap()
+                    == std::fs::read(example.join("results").join(file)).unwrap(),
+                "{file} with {threads} threads differs from the committed one"
+            );
+        }
+    }
+}
