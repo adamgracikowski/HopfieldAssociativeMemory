@@ -23,6 +23,7 @@ ndarray = { version = "0.17.2", features = ["rayon"] }
 npyz = "0.9.1"
 rand = "0.10.3"
 rand_chacha = "0.10.0"
+rayon = "1.12.0"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
 sha1_smol = "1.0.1"
@@ -33,7 +34,6 @@ toml = "1.1.8"
 [dev-dependencies]
 assert_cmd = "2.2.2"
 predicates = "3.1.4"
-rayon = "1.12.0"
 tempfile = "3.27.0"
 
 [lints.rust]

@@ -29,7 +29,7 @@ pub struct Nearest {
 impl Nearest {
     /// The pattern with the largest absolute overlap among `overlaps`, the
     /// first one on ties.
-    fn of(overlaps: &[f64]) -> Self {
+    pub fn of(overlaps: &[f64]) -> Self {
         let (pattern, &overlap) = overlaps
             .iter()
             .enumerate()
