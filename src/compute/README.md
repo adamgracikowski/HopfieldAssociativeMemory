@@ -115,6 +115,52 @@ The seed starts separate random streams for the initial state and for the dynami
 
 Running `recall` again with the same configuration and code gives identical files, apart from `created` in `metadata.json`.
 
+### `experiment`
+
+Runs a grid of datasets, learning rules, update modes and noise levels with many trials in every cell, in parallel over the trials.
+
+```bash
+cargo run --release -- experiment --config ../../data/experiments/00-example/config.toml
+```
+
+The results go to `results/` next to the configuration, or to `--out <dir>`; the directory must be empty or not exist yet (`--force` as above). The configuration:
+
+```toml
+seed = 7                  # master seed, required
+datasets = ["small-7x7", "animals-14x9"]  # grid axis
+# registry = "../../datasets/datasets.toml"  # by default found from this file's directory upwards
+backend = "auto"          # as in a run configuration
+trials = 100              # trials per cell
+
+[[learning]]              # grid axis, one table per rule, parameters as above
+rule = "hebb"
+[[learning]]
+rule = "oja"
+
+[dynamics]                # optional, defaults shown
+modes = ["asynchronous"]  # grid axis
+zero_field = "keep"
+order = "permutation"
+max_steps = 1000
+
+[input]
+source = "pattern"        # in every trial each stored pattern with flipped pixels
+noise = [0.0, 0.1, 0.2]   # grid axis: fractions of flipped pixels, round(noise * N) pixels
+# source = "random"       # in every trial one random state
+```
+
+Axes must not be empty or repeat a value, and the rule names (`hebb`, `oja (subspace)`, `oja (single-neuron)`) must differ. Every (dataset, rule) pair is trained once; its stability check uses `zero_field`.
+
+Every run draws from its own seed: the first 8 bytes of the SHA-1 of `seed/dataset/source/flips/target/trial` (`-` for the flips and target of a random input). It does not depend on the rule or the mode, so all of them start from the same initial states, and the results do not depend on the number of threads. A `recall` run with this seed, the same dataset, rule and mode, and `[input]` `source = "pattern"`, `index = target`, `flips = flips` repeats the run with its history.
+
+The final state is classified by exact equality: `pattern` (a fixed point equal to a stored pattern), `negation` (equal to a negated pattern), `spurious` (another fixed point), `cycle` (two-cycle) or `unconverged` (step limit). The command writes:
+
+- `trials.parquet`: one row per run, ordered by cell, trial and target, with the columns `dataset`, `learning`, `mode`, `noise`, `flips`, `target`, `trial`, `seed`, `steps`, `changes`, `termination`, `class`, `energy`, `recovered` (final state equals the target), `initial_distance`, `final_distance` (Hamming distances to the target), `final_overlap` (with the target), `nearest` and `nearest_overlap` (the pattern with the largest `|m|`); target columns are null for random inputs,
+- `summary.json`: `{"cells": [...]}` with, for every cell, the number of runs, the fraction of every class and of recovered runs with a 95% Wilson interval (`count`, `fraction`, `lower`, `upper`), and the mean and sample standard deviation of steps, final energy and final overlap,
+- `metadata.json`: command, time, build, the configuration with all defaults, the datasets and every training (backend, epochs, convergence, unstable neurons of every pattern).
+
+Running the experiment again gives identical `trials.parquet` and `summary.json`; `metadata.json` differs only in `created`.
+
 ## Checks
 
 The same checks run in CI:

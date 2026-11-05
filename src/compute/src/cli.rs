@@ -1,6 +1,7 @@
 //! Parsing of the command line and dispatch to the subcommands.
 
 mod convert_images;
+mod experiment;
 mod inspect;
 mod recall;
 mod train;
@@ -9,6 +10,7 @@ use clap::{Parser, Subcommand};
 use compute::build_info;
 
 use convert_images::ConvertImagesArgs;
+use experiment::ExperimentArgs;
 use inspect::InspectArgs;
 use recall::RecallArgs;
 use train::TrainArgs;
@@ -29,6 +31,7 @@ impl Cli {
             Command::ConvertImages(args) => args.run(),
             Command::Train(args) => args.run(),
             Command::Recall(args) => args.run(),
+            Command::Experiment(args) => args.run(),
         }
     }
 }
@@ -48,4 +51,8 @@ enum Command {
     /// Train a network, run it from an initial state and save every visited
     /// state.
     Recall(RecallArgs),
+
+    /// Run a grid of datasets, learning rules, update modes and noise levels
+    /// with many trials and save the trial table and the cell summaries.
+    Experiment(ExperimentArgs),
 }

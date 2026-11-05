@@ -3,12 +3,27 @@
 use rayon::prelude::*;
 use serde::Serialize;
 
-use super::{Cell, CellSummary, ExperimentConfig, ExperimentInput, Trial, TrialResult};
+use super::{
+    Cell, CellSummary, ExperimentConfig, ExperimentInput, ExperimentMetadata, Trial, TrialResult,
+    TrialTable,
+};
 use crate::dynamics::Stability;
 use crate::learning::LearningRule;
-use crate::run::{DatasetInfo, TrainingInfo};
+use crate::run::train::METADATA_FILE;
+use crate::run::{DatasetInfo, OutputDir, TrainingInfo};
 use crate::seed::Seed;
 use crate::{PatternSet, Result};
+
+/// Name of the trial table.
+pub const TRIALS_FILE: &str = "trials.parquet";
+/// Name of the file with the aggregates of every cell.
+pub const SUMMARY_FILE: &str = "summary.json";
+
+/// Contents of [`SUMMARY_FILE`].
+#[derive(Serialize)]
+struct Summary {
+    cells: Vec<CellSummary>,
+}
 
 /// Training of one rule on one dataset, shared by all cells of the pair.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -121,6 +136,21 @@ impl ExperimentRun {
                 )
             })
             .collect()
+    }
+
+    /// Writes `metadata.json`, [`SUMMARY_FILE`] (`{"cells": [...]}` with the
+    /// [`CellSummary`] of every cell) and [`TRIALS_FILE`] (the
+    /// [`TrialTable`]). The last two depend only on the configuration and
+    /// the code, not on the time or the number of threads.
+    pub fn write(&self, config: &ExperimentConfig, out: &OutputDir) -> Result<()> {
+        out.write_json(METADATA_FILE, &ExperimentMetadata::new(config, self))?;
+        out.write_json(
+            SUMMARY_FILE,
+            &Summary {
+                cells: self.summaries(),
+            },
+        )?;
+        out.write_parquet(TRIALS_FILE, TrialTable::new(self).batch())
     }
 }
 

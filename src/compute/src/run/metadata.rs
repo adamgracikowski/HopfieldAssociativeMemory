@@ -9,6 +9,12 @@ use crate::build_info::BuildInfo;
 use crate::learning::Trained;
 use crate::weights::{Backend, WeightMatrix};
 
+/// The current time in RFC 3339 format, UTC, to the second, as recorded in
+/// the `created` field of metadata files.
+pub fn timestamp() -> String {
+    humantime::format_rfc3339_seconds(SystemTime::now()).to_string()
+}
+
 /// Result of training as recorded in the metadata.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub struct TrainingInfo {
@@ -67,7 +73,7 @@ impl<'a, R: Serialize> Metadata<'a, R> {
     ) -> Self {
         Self {
             command,
-            created: humantime::format_rfc3339_seconds(SystemTime::now()).to_string(),
+            created: timestamp(),
             build: BuildInfo::CURRENT,
             config,
             dataset,

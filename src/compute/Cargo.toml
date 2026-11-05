@@ -14,6 +14,7 @@ name = "compute"
 path = "src/main.rs"
 
 [dependencies]
+arrow-array = "60.1.0"
 clap = { version = "4.6.7", features = ["derive"] }
 csv = "1.4.0"
 humantime = "2.4.0"
@@ -21,6 +22,7 @@ image = { version = "0.25.10", default-features = false, features = ["jpeg", "pn
 miette = { version = "7.6.0", features = ["fancy"] }
 ndarray = { version = "0.17.2", features = ["rayon"] }
 npyz = "0.9.1"
+parquet = { version = "60.1.0", default-features = false, features = ["arrow", "zstd"] }
 rand = "0.10.3"
 rand_chacha = "0.10.0"
 rayon = "1.12.0"
@@ -32,6 +34,7 @@ thiserror = "2.0.21"
 toml = "1.1.8"
 
 [dev-dependencies]
+arrow-schema = "60.1.0"
 assert_cmd = "2.2.2"
 predicates = "3.1.4"
 tempfile = "3.27.0"
