@@ -6,56 +6,57 @@
       "mode": "synchronous",
       "noise": 0.0,
       "flips": 0,
-      "runs": 100,
+      "runs": 5,
+      "deterministic": true,
       "classes": {
         "pattern": {
-          "count": 60,
+          "count": 3,
           "fraction": 0.6,
-          "lower": 0.5020007846184025,
-          "upper": 0.6906002538863971
+          "lower": 0.6,
+          "upper": 0.6
         },
         "negation": {
-          "count": 20,
+          "count": 1,
           "fraction": 0.2,
-          "lower": 0.1333659225590988,
-          "upper": 0.28883096192650237
+          "lower": 0.2,
+          "upper": 0.2
         },
         "spurious": {
-          "count": 20,
+          "count": 1,
           "fraction": 0.2,
-          "lower": 0.1333659225590988,
-          "upper": 0.28883096192650237
+          "lower": 0.2,
+          "upper": 0.2
         },
         "cycle": {
           "count": 0,
           "fraction": 0.0,
           "lower": 0.0,
-          "upper": 0.03699480747600191
+          "upper": 0.0
         },
         "unconverged": {
           "count": 0,
           "fraction": 0.0,
           "lower": 0.0,
-          "upper": 0.03699480747600191
+          "upper": 0.0
         }
       },
       "recovered": {
-        "count": 60,
+        "count": 3,
         "fraction": 0.6,
-        "lower": 0.5020007846184025,
-        "upper": 0.6906002538863971
+        "lower": 0.6,
+        "upper": 0.6
       },
       "steps": {
         "mean": 1.0,
-        "std": 1.556997888323046
+        "std": 1.7320508075688772
       },
       "energy": {
-        "mean": -35.0530612244898,
-        "std": 4.3406109975621385
+        "mean": -35.053061224489795,
+        "std": 4.828624906978671
       },
       "final_overlap": {
-        "mean": 0.877551020408163,
-        "std": 0.1906528026518015
+        "mean": 0.8775510204081632,
+        "std": 0.2120878539880258
       }
     },
     {
@@ -65,6 +66,7 @@
       "noise": 0.1,
       "flips": 5,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 47,
@@ -123,6 +125,7 @@
       "noise": 0.2,
       "flips": 10,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 44,
@@ -181,6 +184,7 @@
       "noise": 0.3,
       "flips": 15,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 44,
@@ -239,6 +243,7 @@
       "noise": 0.0,
       "flips": 0,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 60,
@@ -297,6 +302,7 @@
       "noise": 0.1,
       "flips": 5,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 51,
@@ -355,6 +361,7 @@
       "noise": 0.2,
       "flips": 10,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 46,
@@ -413,6 +420,7 @@
       "noise": 0.3,
       "flips": 15,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 47,
@@ -470,43 +478,44 @@
       "mode": "synchronous",
       "noise": 0.0,
       "flips": 0,
-      "runs": 100,
+      "runs": 5,
+      "deterministic": true,
       "classes": {
         "pattern": {
-          "count": 100,
+          "count": 5,
           "fraction": 1.0,
-          "lower": 0.9630051925239981,
+          "lower": 1.0,
           "upper": 1.0
         },
         "negation": {
           "count": 0,
           "fraction": 0.0,
           "lower": 0.0,
-          "upper": 0.03699480747600191
+          "upper": 0.0
         },
         "spurious": {
           "count": 0,
           "fraction": 0.0,
           "lower": 0.0,
-          "upper": 0.03699480747600191
+          "upper": 0.0
         },
         "cycle": {
           "count": 0,
           "fraction": 0.0,
           "lower": 0.0,
-          "upper": 0.03699480747600191
+          "upper": 0.0
         },
         "unconverged": {
           "count": 0,
           "fraction": 0.0,
           "lower": 0.0,
-          "upper": 0.03699480747600191
+          "upper": 0.0
         }
       },
       "recovered": {
-        "count": 100,
+        "count": 5,
         "fraction": 1.0,
-        "lower": 0.9630051925239981,
+        "lower": 1.0,
         "upper": 1.0
       },
       "steps": {
@@ -514,8 +523,8 @@
         "std": 0.0
       },
       "energy": {
-        "mean": -21.999983882688543,
-        "std": 0.000025061767863113323
+        "mean": -21.999983882688525,
+        "std": 0.000027879456736554565
       },
       "final_overlap": {
         "mean": 1.0,
@@ -529,6 +538,7 @@
       "noise": 0.1,
       "flips": 5,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 100,
@@ -587,6 +597,7 @@
       "noise": 0.2,
       "flips": 10,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 98,
@@ -645,6 +656,7 @@
       "noise": 0.3,
       "flips": 15,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 71,
@@ -703,6 +715,7 @@
       "noise": 0.0,
       "flips": 0,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 100,
@@ -761,6 +774,7 @@
       "noise": 0.1,
       "flips": 5,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 100,
@@ -819,6 +833,7 @@
       "noise": 0.2,
       "flips": 10,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 95,
@@ -877,6 +892,7 @@
       "noise": 0.3,
       "flips": 15,
       "runs": 100,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 64,
@@ -934,56 +950,57 @@
       "mode": "synchronous",
       "noise": 0.0,
       "flips": 0,
-      "runs": 120,
+      "runs": 6,
+      "deterministic": true,
       "classes": {
         "pattern": {
-          "count": 40,
+          "count": 2,
           "fraction": 0.3333333333333333,
-          "lower": 0.255316102227993,
-          "upper": 0.4216906547906502
+          "lower": 0.3333333333333333,
+          "upper": 0.3333333333333333
         },
         "negation": {
           "count": 0,
           "fraction": 0.0,
           "lower": 0.0,
-          "upper": 0.031020271055929513
+          "upper": 0.0
         },
         "spurious": {
-          "count": 80,
+          "count": 4,
           "fraction": 0.6666666666666666,
-          "lower": 0.5783093452093498,
-          "upper": 0.744683897772007
+          "lower": 0.6666666666666666,
+          "upper": 0.6666666666666666
         },
         "cycle": {
           "count": 0,
           "fraction": 0.0,
           "lower": 0.0,
-          "upper": 0.031020271055929513
+          "upper": 0.0
         },
         "unconverged": {
           "count": 0,
           "fraction": 0.0,
           "lower": 0.0,
-          "upper": 0.031020271055929513
+          "upper": 0.0
         }
       },
       "recovered": {
-        "count": 40,
+        "count": 2,
         "fraction": 0.3333333333333333,
-        "lower": 0.255316102227993,
-        "upper": 0.4216906547906502
+        "lower": 0.3333333333333333,
+        "upper": 0.3333333333333333
       },
       "steps": {
         "mean": 2.5,
-        "std": 1.8103344785894533
+        "std": 1.9748417658131499
       },
       "energy": {
-        "mean": -88.53968253968259,
-        "std": 14.843576823690695
+        "mean": -88.53968253968252,
+        "std": 16.192430632112067
       },
       "final_overlap": {
-        "mean": 0.7301587301587298,
-        "std": 0.19972223577158485
+        "mean": 0.7301587301587301,
+        "std": 0.21787123729236177
       }
     },
     {
@@ -993,6 +1010,7 @@
       "noise": 0.1,
       "flips": 13,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 35,
@@ -1051,6 +1069,7 @@
       "noise": 0.2,
       "flips": 25,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 26,
@@ -1109,6 +1128,7 @@
       "noise": 0.3,
       "flips": 38,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 22,
@@ -1167,6 +1187,7 @@
       "noise": 0.0,
       "flips": 0,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 40,
@@ -1225,6 +1246,7 @@
       "noise": 0.1,
       "flips": 13,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 37,
@@ -1283,6 +1305,7 @@
       "noise": 0.2,
       "flips": 25,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 24,
@@ -1341,6 +1364,7 @@
       "noise": 0.3,
       "flips": 38,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 21,
@@ -1398,43 +1422,44 @@
       "mode": "synchronous",
       "noise": 0.0,
       "flips": 0,
-      "runs": 120,
+      "runs": 6,
+      "deterministic": true,
       "classes": {
         "pattern": {
-          "count": 120,
+          "count": 6,
           "fraction": 1.0,
-          "lower": 0.9689797289440706,
+          "lower": 1.0,
           "upper": 1.0
         },
         "negation": {
           "count": 0,
           "fraction": 0.0,
           "lower": 0.0,
-          "upper": 0.031020271055929513
+          "upper": 0.0
         },
         "spurious": {
           "count": 0,
           "fraction": 0.0,
           "lower": 0.0,
-          "upper": 0.031020271055929513
+          "upper": 0.0
         },
         "cycle": {
           "count": 0,
           "fraction": 0.0,
           "lower": 0.0,
-          "upper": 0.031020271055929513
+          "upper": 0.0
         },
         "unconverged": {
           "count": 0,
           "fraction": 0.0,
           "lower": 0.0,
-          "upper": 0.031020271055929513
+          "upper": 0.0
         }
       },
       "recovered": {
-        "count": 120,
+        "count": 6,
         "fraction": 1.0,
-        "lower": 0.9689797289440706,
+        "lower": 1.0,
         "upper": 1.0
       },
       "steps": {
@@ -1442,8 +1467,8 @@
         "std": 0.0
       },
       "energy": {
-        "mean": -59.99993148151355,
-        "std": 0.00008810259987733649
+        "mean": -59.999931481513535,
+        "std": 0.00009610858986128035
       },
       "final_overlap": {
         "mean": 1.0,
@@ -1457,6 +1482,7 @@
       "noise": 0.1,
       "flips": 13,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 120,
@@ -1515,6 +1541,7 @@
       "noise": 0.2,
       "flips": 25,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 120,
@@ -1573,6 +1600,7 @@
       "noise": 0.3,
       "flips": 38,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 119,
@@ -1631,6 +1659,7 @@
       "noise": 0.0,
       "flips": 0,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 120,
@@ -1689,6 +1718,7 @@
       "noise": 0.1,
       "flips": 13,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 120,
@@ -1747,6 +1777,7 @@
       "noise": 0.2,
       "flips": 25,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 120,
@@ -1805,6 +1836,7 @@
       "noise": 0.3,
       "flips": 38,
       "runs": 120,
+      "deterministic": false,
       "classes": {
         "pattern": {
           "count": 119,

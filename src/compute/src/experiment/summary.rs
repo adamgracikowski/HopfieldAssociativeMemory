@@ -2,7 +2,7 @@
 
 use serde::Serialize;
 
-use super::{FinalClass, TrialResult};
+use super::{Cell, FinalClass, TrialResult};
 use crate::dynamics::Mode;
 
 /// Quantile of the standard normal distribution for a 95% interval.
@@ -36,7 +36,7 @@ impl Proportion {
     ///
     /// Panics if `total` is 0 or smaller than `count`.
     pub fn wilson(count: usize, total: usize) -> Self {
-        assert!(total > 0 && count <= total, "{count} of {total} trials");
+        Self::check(count, total);
         let n = total as f64;
         let p = count as f64 / n;
         let z2 = Z_95 * Z_95;
@@ -49,6 +49,39 @@ impl Proportion {
             lower: (centre - half).clamp(0.0, p),
             upper: (centre + half).clamp(p, 1.0),
         }
+    }
+}
+
+impl Proportion {
+    /// Fraction `count / total` known exactly, e.g. of a deterministic
+    /// cell: both ends of the interval equal the fraction.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `total` is 0 or smaller than `count`.
+    pub fn exact(count: usize, total: usize) -> Self {
+        Self::check(count, total);
+        let fraction = count as f64 / total as f64;
+        Self {
+            count,
+            fraction,
+            lower: fraction,
+            upper: fraction,
+        }
+    }
+
+    /// Fraction `count / total`, [exact](Self::exact) if `deterministic`,
+    /// otherwise with the [Wilson](Self::wilson) interval.
+    pub fn of(count: usize, total: usize, deterministic: bool) -> Self {
+        if deterministic {
+            Self::exact(count, total)
+        } else {
+            Self::wilson(count, total)
+        }
+    }
+
+    fn check(count: usize, total: usize) {
+        assert!(total > 0 && count <= total, "{count} of {total} trials");
     }
 }
 
@@ -95,11 +128,12 @@ pub struct Classes {
 }
 
 impl Classes {
-    /// Class fractions of `results`, which must not be empty.
-    fn of(results: &[TrialResult]) -> Self {
+    /// Class fractions of `results`, which must not be empty; exact for a
+    /// `deterministic` cell.
+    fn of(results: &[TrialResult], deterministic: bool) -> Self {
         let share = |class: FinalClass| {
             let count = results.iter().filter(|r| r.class == class).count();
-            Proportion::wilson(count, results.len())
+            Proportion::of(count, results.len(), deterministic)
         };
         Self {
             pattern: share(FinalClass::Pattern),
@@ -126,6 +160,10 @@ pub struct CellSummary {
     pub flips: Option<usize>,
     /// Number of runs: trials times targets.
     pub runs: usize,
+    /// Whether the cell is deterministic (synchronous updates of undamaged
+    /// patterns): it ran a single trial and its fractions are exact, with
+    /// both interval ends equal to the fraction.
+    pub deterministic: bool,
     /// Fractions of the final state classes.
     pub classes: Classes,
     /// Fraction of runs that ended in their target; `None` for random
@@ -141,26 +179,23 @@ pub struct CellSummary {
 }
 
 impl CellSummary {
-    /// Aggregates `results`, all from the same cell, which are not empty.
-    pub fn new(
-        dataset: String,
-        learning: String,
-        mode: Mode,
-        noise: Option<f64>,
-        results: &[TrialResult],
-    ) -> Self {
+    /// Aggregates `results`, all from cell `cell`, which are not empty.
+    pub fn new(dataset: String, learning: String, cell: Cell, results: &[TrialResult]) -> Self {
         let first = results.first().expect("a cell has at least one run");
+        let deterministic = cell.is_deterministic(first.trial.flips);
         let recovered: Vec<bool> = results.iter().filter_map(|r| r.recovered).collect();
         Self {
             dataset,
             learning,
-            mode,
-            noise,
-            flips: noise.map(|_| first.trial.flips),
+            mode: cell.mode,
+            noise: cell.noise,
+            flips: cell.noise.map(|_| first.trial.flips),
             runs: results.len(),
-            classes: Classes::of(results),
+            deterministic,
+            classes: Classes::of(results, deterministic),
             recovered: (!recovered.is_empty()).then(|| {
-                Proportion::wilson(recovered.iter().filter(|&&r| r).count(), recovered.len())
+                let count = recovered.iter().filter(|&&r| r).count();
+                Proportion::of(count, recovered.len(), deterministic)
             }),
             steps: Moments::of(results.iter().map(|r| r.steps as f64))
                 .expect("a cell has at least one run"),
@@ -231,5 +266,12 @@ mod tests {
             })
         );
         assert_eq!(Moments::of([]), None);
+    }
+
+    #[test]
+    fn exact_proportion_has_no_width() {
+        let exact = Proportion::of(3, 5, true);
+        assert_eq!((exact.fraction, exact.lower, exact.upper), (0.6, 0.6, 0.6));
+        assert_eq!(Proportion::of(3, 5, false), Proportion::wilson(3, 5));
     }
 }

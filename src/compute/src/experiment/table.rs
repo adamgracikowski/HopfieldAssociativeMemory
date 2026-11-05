@@ -25,7 +25,7 @@ use super::{Cell, ExperimentRun, TrialResult};
 /// | `termination` | string | `fixed-point`, `two-cycle`, `step-limit` |
 /// | `class` | string | final state class |
 /// | `energy` | float64 | energy of the final state |
-/// | `recovered` | bool, nullable | final state equals the target |
+/// | `recovered` | bool, nullable | run ended in a fixed point equal to the target |
 /// | `initial_distance`, `final_distance` | uint32, nullable | Hamming distance to the target |
 /// | `final_overlap` | float64, nullable | overlap of the final state with the target |
 /// | `nearest` | uint32 | pattern with the largest `abs(m)` |

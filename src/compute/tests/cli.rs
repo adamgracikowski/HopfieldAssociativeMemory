@@ -513,7 +513,8 @@ fn train_with_another_backend_removes_the_old_weights() {
 }
 
 /// Hebbian learning on `small-7x7` (`p = 5`), both modes, two noise levels
-/// and 4 trials: 4 cells of 4 x 5 = 20 runs.
+/// and 4 trials: 3 cells of 4 x 5 = 20 runs and one deterministic cell
+/// (synchronous, no noise) of 5 runs.
 const EXPERIMENT: &str = "seed = 5\ndatasets = [\"small-7x7\"]\ntrials = 4\n\
     [[learning]]\nrule = \"hebb\"\n\
     [dynamics]\nmodes = [\"synchronous\", \"asynchronous\"]\n\
@@ -538,14 +539,19 @@ fn experiment(config: &Path) -> Command {
     command
 }
 
+/// The whole table of a Parquet file as one record batch.
 fn read_parquet(path: &Path) -> arrow_array::RecordBatch {
     let file = std::fs::File::open(path).unwrap();
-    let reader = parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder::try_new(file)
-        .unwrap()
+    let builder =
+        parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder::try_new(file).unwrap();
+    let rows = builder.metadata().file_metadata().num_rows() as usize;
+    let mut batches: Vec<_> = builder
+        .with_batch_size(rows)
         .build()
-        .unwrap();
-    let mut batches: Vec<_> = reader.map(Result::unwrap).collect();
-    assert_eq!(batches.len(), 1, "a small table is read in one batch");
+        .unwrap()
+        .map(Result::unwrap)
+        .collect();
+    assert_eq!(batches.len(), 1, "the table is read in one batch");
     batches.remove(0)
 }
 
@@ -560,10 +566,10 @@ fn experiment_writes_tables_and_metadata() {
         .assert()
         .success()
         .stderr(contains("trained      small-7x7, hebb: 0 epochs"))
-        .stdout(contains("grid         4 cells, 80 runs"));
+        .stdout(contains("grid         4 cells, 65 runs"));
 
     let trials = read_parquet(&out.join("trials.parquet"));
-    assert_eq!(trials.num_rows(), 80);
+    assert_eq!(trials.num_rows(), 65);
     let names: Vec<String> = trials
         .schema()
         .fields()
@@ -580,6 +586,9 @@ fn experiment_writes_tables_and_metadata() {
     assert_eq!(cells[1]["flips"], 10);
     assert_eq!(cells[1]["runs"], 20);
     assert!(cells[1]["recovered"]["lower"].is_f64());
+    assert_eq!(cells[0]["runs"], 5);
+    assert_eq!(cells[0]["deterministic"], true);
+    assert_eq!(cells[1]["deterministic"], false);
 
     let metadata = read_json(&out.join("metadata.json"));
     assert_eq!(metadata["command"], "experiment");
@@ -627,7 +636,7 @@ fn experiment_tables_do_not_depend_on_the_number_of_threads() {
             "{file}"
         );
     }
-    assert_eq!(read_parquet(&one.join("trials.parquet")).num_rows(), 160);
+    assert_eq!(read_parquet(&one.join("trials.parquet")).num_rows(), 130);
     let without_time = |out: &Path| {
         let mut metadata = read_json(&out.join("metadata.json"));
         metadata.as_object_mut().unwrap().remove("created");
@@ -668,10 +677,13 @@ fn experiment_requires_a_seed() {
 
 /// The committed results of the example experiment are what the current
 /// code computes, with one thread and with four. A change of the code that
-/// changes the results fails here until the results are regenerated.
+/// changes the results fails here until the results are regenerated. The
+/// trial table is compared as decoded data, because the Parquet file also
+/// records the version of the `parquet` crate; `summary.json` byte for byte.
 #[test]
 fn example_experiment_matches_the_committed_results() {
     let example = Path::new("../../data/experiments/00-example");
+    let committed = example.join("results");
     let dir = tempfile::tempdir().unwrap();
     for threads in ["1", "4"] {
         let out = dir.path().join(threads);
@@ -681,12 +693,15 @@ fn example_experiment_matches_the_committed_results() {
             .arg(&out)
             .assert()
             .success();
-        for file in ["trials.parquet", "summary.json"] {
-            assert!(
-                std::fs::read(out.join(file)).unwrap()
-                    == std::fs::read(example.join("results").join(file)).unwrap(),
-                "{file} with {threads} threads differs from the committed one"
-            );
-        }
+        assert!(
+            read_parquet(&out.join("trials.parquet"))
+                == read_parquet(&committed.join("trials.parquet")),
+            "trials.parquet with {threads} threads differs from the committed one"
+        );
+        assert!(
+            std::fs::read(out.join("summary.json")).unwrap()
+                == std::fs::read(committed.join("summary.json")).unwrap(),
+            "summary.json with {threads} threads differs from the committed one"
+        );
     }
 }

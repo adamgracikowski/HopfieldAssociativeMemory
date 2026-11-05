@@ -57,7 +57,8 @@ pub struct ExperimentRun {
 }
 
 impl ExperimentRun {
-    /// Loads the datasets and, for every (dataset, rule) pair in turn,
+    /// Loads the datasets, checks that their noise levels give different
+    /// numbers of flipped pixels and, for every (dataset, rule) pair in turn,
     /// trains the network, checks pattern stability, passes the training to
     /// `on_training` and runs the trials of the pair's cells in parallel.
     ///
@@ -77,6 +78,9 @@ impl ExperimentRun {
             .iter()
             .map(|name| DatasetInfo::load(&registry, name, config.directory()))
             .collect::<Result<Vec<_>>>()?;
+        for (info, _) in &loaded {
+            config.check_noise_levels(&info.name, info.neurons)?;
+        }
         let learning = config.learning_labels();
         let cells = config.cells();
         let mut trainings = Vec::new();
@@ -130,8 +134,7 @@ impl ExperimentRun {
                 CellSummary::new(
                     self.datasets[cell.dataset].name.clone(),
                     self.learning[cell.learning].clone(),
-                    cell.mode,
-                    cell.noise,
+                    cell,
                     results,
                 )
             })
@@ -155,7 +158,8 @@ impl ExperimentRun {
 }
 
 /// The trials of cell `index`: for every trial number every target (all
-/// stored patterns, or one random state).
+/// stored patterns, or one random state). A
+/// [deterministic](Cell::is_deterministic) cell has only trial 0.
 fn trials(
     config: &ExperimentConfig,
     index: usize,
@@ -171,8 +175,13 @@ fn trials(
         ExperimentInput::Random {} => vec![None],
     };
     let source = config.input.source();
+    let count = if cell.is_deterministic(flips) {
+        1
+    } else {
+        config.trials
+    };
     let mut trials = Vec::new();
-    for trial in 0..config.trials {
+    for trial in 0..count {
         for &target in &targets {
             let (flips_part, target_part) = match target {
                 Some(mu) => (flips.to_string(), mu.to_string()),
@@ -197,7 +206,7 @@ fn trials(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dynamics::Mode;
+    use crate::dynamics::{Mode, Termination};
     use crate::run::{RecallRun, RunConfig};
     use std::collections::HashMap;
     use std::path::Path;
@@ -234,7 +243,9 @@ mod tests {
 
     /// `small-7x7` has `p = 5` patterns of `N = 49` neurons: 2 rules x 2
     /// modes x 2 noise levels = 8 cells of 3 trials x 5 targets, with
-    /// `round(0.2 * 49) = 10` flipped pixels at the higher noise level.
+    /// `round(0.2 * 49) = 10` flipped pixels at the higher noise level,
+    /// except the 2 deterministic cells (synchronous, no noise) with one
+    /// trial: `6 * 15 + 2 * 5 = 100` runs.
     #[test]
     fn runs_every_trial_of_the_grid() {
         let mut trained = Vec::new();
@@ -250,42 +261,55 @@ mod tests {
             ]
         );
         assert_eq!(run.trainings.len(), 2);
-        assert_eq!(run.results.len(), 8 * 3 * 5);
+        assert_eq!(run.results.len(), 100);
         for result in &run.results {
             let cell = run.cells[result.trial.cell];
             let flips = if cell.noise == Some(0.2) { 10 } else { 0 };
             assert_eq!(result.trial.flips, flips);
             assert_eq!(result.initial_distance, Some(flips));
-            assert_eq!(result.recovered, Some(result.final_distance == Some(0)));
+            let fixed = result.termination == Termination::FixedPoint;
+            assert_eq!(
+                result.recovered,
+                Some(fixed && result.final_distance == Some(0))
+            );
         }
-        let first: Vec<_> = run.results[..6]
+        let first: Vec<_> = run.results[..11]
             .iter()
-            .map(|r| (r.trial.trial, r.trial.target))
+            .map(|r| (r.trial.cell, r.trial.trial, r.trial.target))
             .collect();
         assert_eq!(
             first,
             [
-                (0, Some(0)),
-                (0, Some(1)),
-                (0, Some(2)),
-                (0, Some(3)),
-                (0, Some(4)),
-                (1, Some(0))
+                (0, 0, Some(0)),
+                (0, 0, Some(1)),
+                (0, 0, Some(2)),
+                (0, 0, Some(3)),
+                (0, 0, Some(4)),
+                (1, 0, Some(0)),
+                (1, 0, Some(1)),
+                (1, 0, Some(2)),
+                (1, 0, Some(3)),
+                (1, 0, Some(4)),
+                (1, 1, Some(0))
             ]
         );
 
         let summaries = run.summaries();
         assert_eq!(summaries.len(), 8);
         for summary in &summaries {
-            assert_eq!(summary.runs, 15);
+            let deterministic = summary.mode == Mode::Synchronous && summary.flips == Some(0);
+            assert_eq!(summary.deterministic, deterministic);
+            assert_eq!(summary.runs, if deterministic { 5 } else { 15 });
             let classes = summary.classes;
             let total = classes.pattern.count
                 + classes.negation.count
                 + classes.spurious.count
                 + classes.cycle.count
                 + classes.unconverged.count;
-            assert_eq!(total, 15);
-            assert!(summary.recovered.is_some() && summary.final_overlap.is_some());
+            assert_eq!(total, summary.runs);
+            let recovered = summary.recovered.unwrap();
+            assert_eq!(recovered.lower == recovered.upper, deterministic);
+            assert!(summary.final_overlap.is_some());
         }
         assert_eq!(summaries[1].flips, Some(10));
         assert_eq!(summaries[2].mode, Mode::Asynchronous);

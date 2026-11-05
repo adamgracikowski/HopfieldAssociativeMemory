@@ -10,10 +10,12 @@ use crate::{PatternSet, Result};
 /// One run of a trained network from one initial state.
 ///
 /// The initial state is built by [`Input`] from the input stream of `seed`
-/// and the dynamics use its dynamics stream, exactly as in a `recall` run,
-/// so `recall` with this seed, the same dataset, rule and mode, and input
-/// `pattern` with `index = target` and `flips` (or `random`) repeats the
-/// trial.
+/// and the dynamics use its dynamics stream, exactly as in a `recall` run.
+/// So `recall` repeats the trial with this seed, the experiment's dataset,
+/// `registry`, `backend` and `[learning]` table of the rule, `[dynamics]`
+/// with the cell's `mode` and the experiment's `zero_field`, `order` and
+/// `max_steps`, and the input `pattern` with `index = target` and `flips`
+/// (or `random`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Trial {
     /// Index of the grid cell.
@@ -44,7 +46,8 @@ pub struct TrialResult {
     pub energy: f64,
     /// Class of the final state.
     pub class: FinalClass,
-    /// Whether the final state equals the target.
+    /// Whether the run ended in a fixed point equal to the target (a state
+    /// of a two-cycle or at the step limit does not count).
     pub recovered: Option<bool>,
     /// Hamming distance of the initial state to the target.
     pub initial_distance: Option<usize>,
@@ -92,11 +95,64 @@ impl Trial {
             termination: outcome.termination,
             energy: outcome.energy,
             class: FinalClass::of(&outcome, set),
-            recovered: target.map(|xi| outcome.state == xi),
+            recovered: target
+                .map(|xi| outcome.termination == Termination::FixedPoint && outcome.state == xi),
             initial_distance: target.map(|xi| initial.state.hamming(&xi)),
             final_distance: target.map(|xi| outcome.state.hamming(&xi)),
             final_overlap: self.target.map(|mu| overlaps[mu]),
             nearest: Nearest::of(&overlaps),
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::dynamics::Mode;
+    use crate::weights::DenseWeights;
+    use ndarray::array;
+
+    /// Two neurons with `w_01 = w_10 = 0.5` (Hebbian weights of `(1, 1)`).
+    fn weights() -> Weights {
+        Weights::from(DenseWeights::new(array![[0.0, 0.5], [0.5, 0.0]]).unwrap())
+    }
+
+    fn run(stored: ndarray::Array2<i8>, flips: usize) -> TrialResult {
+        let set = PatternSet::new(2, 1, stored).unwrap();
+        let trial = Trial {
+            cell: 0,
+            trial: 0,
+            target: Some(0),
+            flips,
+            seed: Seed(0),
+        };
+        let dynamics = Dynamics {
+            mode: Mode::Synchronous,
+            ..Dynamics::default()
+        };
+        trial.run(&weights(), &set, &dynamics).unwrap()
+    }
+
+    /// Target `(1, -1)` with both pixels flipped starts at `(-1, 1)`:
+    /// `h = (0.5, -0.5)` gives `(1, -1)`, then `h = (-0.5, 0.5)` gives
+    /// `(-1, 1)` again, a cycle of length 2 found after one step whose
+    /// final state equals the target. It is not a fixed point, so the run
+    /// does not count as recovered.
+    #[test]
+    fn a_two_cycle_through_the_target_is_not_recovered() {
+        let result = run(array![[1, -1]], 2);
+        assert_eq!(result.termination, Termination::TwoCycle);
+        assert_eq!(result.class, FinalClass::Cycle);
+        assert_eq!(result.final_distance, Some(0));
+        assert_eq!(result.recovered, Some(false));
+    }
+
+    /// `(1, 1)` has `h = (0.5, 0.5)`: a fixed point equal to the target.
+    #[test]
+    fn a_fixed_point_equal_to_the_target_is_recovered() {
+        let result = run(array![[1, 1]], 0);
+        assert_eq!(result.termination, Termination::FixedPoint);
+        assert_eq!(result.class, FinalClass::Pattern);
+        assert_eq!(result.recovered, Some(true));
     }
 }

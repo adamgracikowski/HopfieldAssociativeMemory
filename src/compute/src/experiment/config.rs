@@ -111,6 +111,27 @@ impl ExperimentConfig {
         Ok(())
     }
 
+    /// Checks that the noise levels give different numbers of flipped
+    /// pixels on dataset `name` of `neurons` neurons. Two levels with the
+    /// same number would give identical cells, because a trial's seed
+    /// depends on the number of flipped pixels, not on the level.
+    pub fn check_noise_levels(&self, name: &str, neurons: usize) -> Result<()> {
+        let levels: Vec<f64> = self.noise_levels().into_iter().flatten().collect();
+        for (i, &level) in levels.iter().enumerate() {
+            let flips = ExperimentInput::flips(level, neurons);
+            if let Some(&other) = levels[..i]
+                .iter()
+                .find(|&&other| ExperimentInput::flips(other, neurons) == flips)
+            {
+                return Err(self.invalid(format!(
+                    "noise levels {other} and {level} both flip {flips} pixels of \
+                     `{name}` (N = {neurons})"
+                )));
+            }
+        }
+        Ok(())
+    }
+
     /// Configuration file.
     pub fn path(&self) -> &Path {
         &self.path
@@ -325,6 +346,25 @@ mod tests {
             let message = invalid_message(&CONFIG.replace(from, to));
             assert!(message.contains(expected), "{to}: {message}");
         }
+    }
+
+    /// On `N = 49` neurons `0.1 * 49 = 4.9` and `0.11 * 49 = 5.39` both
+    /// round to 5 flipped pixels; on `N = 126` they give 13 and 14.
+    #[test]
+    fn rejects_noise_levels_with_the_same_flips() {
+        let config = parse(&CONFIG.replace("[0.0, 0.1, 0.2]", "[0.0, 0.1, 0.11]")).unwrap();
+        let error = config.check_noise_levels("small-7x7", 49).unwrap_err();
+        assert!(
+            error
+                .to_string()
+                .contains("noise levels 0.1 and 0.11 both flip 5 pixels of `small-7x7` (N = 49)"),
+            "{error}"
+        );
+        config.check_noise_levels("animals-14x9", 126).unwrap();
+        parse(CONFIG)
+            .unwrap()
+            .check_noise_levels("small-7x7", 49)
+            .unwrap();
     }
 
     #[test]
