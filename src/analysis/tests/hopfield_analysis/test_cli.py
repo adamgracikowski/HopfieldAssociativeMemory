@@ -63,3 +63,10 @@ def test_patterns_and_weights_write_figures(tmp_path):
     assert main(["weights", str(FIXTURES / "train"), "--out", str(out)]) == 0
     assert out.with_suffix(".png").is_file()
     assert main(["weights", str(tmp_path), "--out", str(out)]) == 1
+
+
+def test_classes_writes_a_figure(tmp_path):
+    results = str(FIXTURES.parents[3] / "data" / "experiments" / "00-example" / "results")
+    out = tmp_path / "classes"
+    assert main(["classes", results, "--out", str(out)]) == 0
+    assert out.with_suffix(".pdf").is_file() and out.with_suffix(".png").is_file()

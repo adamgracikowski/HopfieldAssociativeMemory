@@ -6,6 +6,8 @@ translation is shown as it is.
 """
 
 NOISE = "poziom szumu (odsetek odwróconych pikseli)"
+NOISE_SHORT = "poziom szumu"
+RANDOM_INPUT = "losowe"
 RECOVERED = "odsetek odzyskanych"
 FRACTION = "odsetek przebiegów"
 FRAME = "klatka"

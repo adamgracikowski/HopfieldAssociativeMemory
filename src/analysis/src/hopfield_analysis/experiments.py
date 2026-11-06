@@ -15,6 +15,15 @@ from matplotlib.figure import Figure
 
 from hopfield_analysis import labels, style
 
+CLASS_COLORS = {
+    "pattern": "C2",
+    "negation": "C0",
+    "spurious": "C1",
+    "cycle": "C4",
+    "unconverged": "0.6",
+}
+"""Colors of the final state classes, in the order of the stacked bars."""
+
 TRIALS_FILE = "trials.parquet"
 SUMMARY_FILE = "summary.json"
 METADATA_FILE = "metadata.json"
@@ -108,4 +117,59 @@ def plot_recovery(summary: pl.DataFrame) -> Figure:
     axes[0].set_ylabel(labels.RECOVERED)
     handles, names = axes[0].get_legend_handles_labels()
     figure.legend(handles, names, loc="outside lower center", ncols=min(len(names), 2))
+    return figure
+
+
+def plot_classes(summary: pl.DataFrame) -> Figure:
+    """Plots the fractions of the final state classes as stacked bars.
+
+    One row of panels per dataset and one column per learning rule and update
+    mode; in every panel one bar per noise level (or a single bar for random
+    inputs) stacked from the classes ``pattern``, ``negation``, ``spurious``,
+    ``cycle`` and ``unconverged``, with the class legend below the panels.
+
+    Args:
+        summary: Cell aggregates from :func:`load_summary`.
+
+    Returns:
+        The figure in the report style with Polish labels.
+    """
+    datasets = summary["dataset"].unique(maintain_order=True).to_list()
+    series = summary.select("learning", "mode").unique(maintain_order=True).rows()
+    figure = style.new_figure(height=1.5 * len(datasets) + 0.6)
+    axes = figure.subplots(len(datasets), len(series), squeeze=False, sharey=True)
+    for row, dataset in enumerate(datasets):
+        for column, (learning, mode) in enumerate(series):
+            ax = axes[row, column]
+            cells = summary.filter(
+                (pl.col("dataset") == dataset)
+                & (pl.col("learning") == learning)
+                & (pl.col("mode") == mode)
+            ).sort("noise")
+            positions = list(range(cells.height))
+            bottom = [0.0] * cells.height
+            for name, color in CLASS_COLORS.items():
+                fractions = cells[f"classes_{name}_fraction"].to_list()
+                ax.bar(
+                    positions,
+                    fractions,
+                    bottom=bottom,
+                    color=color,
+                    width=0.8,
+                    label=labels.final_class(name),
+                )
+                bottom = [b + f for b, f in zip(bottom, fractions, strict=True)]
+            noise = cells["noise"].to_list()
+            ax.set_xticks(
+                positions, [labels.RANDOM_INPUT if n is None else labels.number(n) for n in noise]
+            )
+            ax.set_ylim(0, 1)
+            ax.grid(False, axis="x")
+            if row == 0:
+                ax.set_title(f"{labels.rule(learning)}\n{labels.mode(mode)}", fontsize=8)
+            if row == len(datasets) - 1:
+                ax.set_xlabel(labels.NOISE_SHORT)
+        axes[row, 0].set_ylabel(f"{dataset}\n{labels.FRACTION}")
+    handles, names = axes[0, 0].get_legend_handles_labels()
+    figure.legend(handles, names, loc="outside lower center", ncols=len(names))
     return figure

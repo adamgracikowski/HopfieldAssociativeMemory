@@ -9,7 +9,7 @@ from matplotlib.figure import Figure
 
 from hopfield_analysis import style
 from hopfield_analysis.datasets import Registry, plot_patterns
-from hopfield_analysis.experiments import load_summary, plot_recovery
+from hopfield_analysis.experiments import load_summary, plot_classes, plot_recovery
 from hopfield_analysis.recall import Recall
 from hopfield_analysis.runs import animate, parse_frames, plot_frames, plot_run, select_frames
 from hopfield_analysis.weights import load_weights, plot_weights
@@ -103,6 +103,13 @@ def parser() -> argparse.ArgumentParser:
     recovery.add_argument("results", type=Path, help="results directory of an experiment")
     recovery.add_argument("--out", type=Path, required=True, help=OUT_HELP)
     recovery.set_defaults(handler=_recovery)
+
+    classes = commands.add_parser(
+        "classes", help="fractions of the final state classes of an experiment"
+    )
+    classes.add_argument("results", type=Path, help="results directory of an experiment")
+    classes.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    classes.set_defaults(handler=_classes)
     return parser
 
 
@@ -174,3 +181,7 @@ def _weights(args: argparse.Namespace) -> int:
 
 def _recovery(args: argparse.Namespace) -> int:
     return _save(plot_recovery(load_summary(args.results)), args.out)
+
+
+def _classes(args: argparse.Namespace) -> int:
+    return _save(plot_classes(load_summary(args.results)), args.out)

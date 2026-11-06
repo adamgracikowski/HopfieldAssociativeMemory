@@ -9,6 +9,7 @@ from hopfield_analysis.experiments import (
     load_metadata,
     load_summary,
     load_trials,
+    plot_classes,
     plot_recovery,
 )
 
@@ -143,3 +144,46 @@ def test_reads_the_results_of_the_example_experiment():
     }
     figure = plot_recovery(summary)
     assert len(figure.get_axes()) == len(config["datasets"])
+
+
+def stacked_heights(ax):
+    """Sum of the stacked bar heights at every position of ``ax``."""
+    totals = {}
+    for container in ax.containers:
+        for bar in container:
+            totals[bar.get_x()] = totals.get(bar.get_x(), 0) + bar.get_height()
+    return list(totals.values())
+
+
+def test_plot_classes_stacks_the_classes_of_every_cell(results):
+    figure = plot_classes(load_summary(results))
+    axes = [ax for ax in figure.axes]
+    assert len(axes) == 2 * 4
+    assert axes[0].get_title() == "Hebb\nsynchroniczny"
+    assert axes[0].get_ylabel() == "small-7x7\nodsetek przebiegów"
+    for ax in axes:
+        assert len(ax.containers) == 5
+        assert stacked_heights(ax) == pytest.approx([1.0, 1.0])
+    assert [tick.get_text() for tick in axes[0].get_xticklabels()] == ["0,00", "0,20"]
+    [legend] = figure.legends
+    assert [text.get_text() for text in legend.get_texts()] == [
+        "wzorzec",
+        "negacja",
+        "stan pozorny",
+        "cykl",
+        "brak zbieżności",
+    ]
+
+
+def test_plot_classes_shows_random_inputs_as_one_bar(results):
+    summary = load_summary(results).filter(pl.col("noise") == 0.0)
+    summary = summary.with_columns(pl.lit(None, dtype=pl.Float64).alias("noise"))
+    figure = plot_classes(summary)
+    assert [tick.get_text() for tick in figure.axes[0].get_xticklabels()] == ["losowe"]
+
+
+def test_plot_classes_of_the_example_experiment():
+    summary = load_summary(EXAMPLE)
+    figure = plot_classes(summary)
+    for ax in figure.axes:
+        assert stacked_heights(ax) == pytest.approx([1.0] * 4)
