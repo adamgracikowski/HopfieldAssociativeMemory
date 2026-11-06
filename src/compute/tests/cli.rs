@@ -604,6 +604,62 @@ fn experiment_writes_tables_and_metadata() {
             .len(),
         5
     );
+
+    let datasets = read_json(&out.join("datasets.json"));
+    let small = &datasets["datasets"][0];
+    assert_eq!(small["name"], "small-7x7");
+    assert_eq!(small["patterns"], 5);
+    assert_eq!(small["overlaps"].as_array().unwrap().len(), 5);
+    assert_eq!(small["overlap_sums"].as_array().unwrap().len(), 5);
+    assert!(small["max_abs_overlap"]["value"].is_f64());
+    assert!(!out.join("stability.parquet").exists());
+}
+
+/// With `stability_fields` the experiment writes one row per pattern and
+/// neuron of every training: 5 x 49 for `small-7x7` and one rule. Its
+/// negative fields agree with the unstable neurons in the metadata.
+#[test]
+fn experiment_writes_stability_fields_on_request() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = experiment_config(
+        dir.path(),
+        &format!("stability_fields = true\n{EXPERIMENT}"),
+    );
+    let out = dir.path().join("run");
+    experiment(&config)
+        .arg("--out")
+        .arg(&out)
+        .assert()
+        .success();
+
+    let fields = read_parquet(&out.join("stability.parquet"));
+    assert_eq!(fields.num_rows(), 245);
+    let column = |name: &str| fields.column_by_name(name).unwrap().clone();
+    let pattern = column("pattern");
+    let pattern = pattern
+        .as_any()
+        .downcast_ref::<arrow_array::UInt32Array>()
+        .unwrap();
+    let field = column("field");
+    let field = field
+        .as_any()
+        .downcast_ref::<arrow_array::Float64Array>()
+        .unwrap();
+    let mut negative = [0_u64; 5];
+    for row in 0..fields.num_rows() {
+        if field.value(row) < 0.0 {
+            negative[pattern.value(row) as usize] += 1;
+        }
+    }
+    let metadata = read_json(&out.join("metadata.json"));
+    assert_eq!(metadata["config"]["stability_fields"], true);
+    let unstable: Vec<u64> = metadata["trainings"][0]["stability"]["unstable_neurons"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|n| n.as_u64().unwrap())
+        .collect();
+    assert_eq!(unstable, negative);
 }
 
 /// The tables are byte for byte the same with one and with four threads;
@@ -613,7 +669,7 @@ fn experiment_tables_do_not_depend_on_the_number_of_threads() {
     let dir = tempfile::tempdir().unwrap();
     let config = experiment_config(
         dir.path(),
-        &EXPERIMENT.replace(
+        &format!("stability_fields = true\n{EXPERIMENT}").replace(
             "[[learning]]\nrule = \"hebb\"\n",
             "[[learning]]\nrule = \"hebb\"\n[[learning]]\nrule = \"oja\"\n",
         ),
@@ -629,7 +685,12 @@ fn experiment_tables_do_not_depend_on_the_number_of_threads() {
         out
     };
     let (one, four) = (run("1"), run("4"));
-    for file in ["trials.parquet", "summary.json"] {
+    for file in [
+        "trials.parquet",
+        "summary.json",
+        "datasets.json",
+        "stability.parquet",
+    ] {
         assert_eq!(
             std::fs::read(one.join(file)).unwrap(),
             std::fs::read(four.join(file)).unwrap(),
@@ -679,7 +740,8 @@ fn experiment_requires_a_seed() {
 /// code computes, with one thread and with four. A change of the code that
 /// changes the results fails here until the results are regenerated. The
 /// trial table is compared as decoded data, because the Parquet file also
-/// records the version of the `parquet` crate; `summary.json` byte for byte.
+/// records the version of the `parquet` crate; the JSON tables byte for
+/// byte.
 #[test]
 fn example_experiment_matches_the_committed_results() {
     let example = Path::new("../../data/experiments/00-example");
@@ -698,11 +760,13 @@ fn example_experiment_matches_the_committed_results() {
                 == read_parquet(&committed.join("trials.parquet")),
             "trials.parquet with {threads} threads differs from the committed one"
         );
-        assert!(
-            std::fs::read(out.join("summary.json")).unwrap()
-                == std::fs::read(committed.join("summary.json")).unwrap(),
-            "summary.json with {threads} threads differs from the committed one"
-        );
+        for file in ["summary.json", "datasets.json"] {
+            assert!(
+                std::fs::read(out.join(file)).unwrap()
+                    == std::fs::read(committed.join(file)).unwrap(),
+                "{file} with {threads} threads differs from the committed one"
+            );
+        }
     }
 }
 

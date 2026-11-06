@@ -131,6 +131,7 @@ datasets = ["small-7x7", "animals-14x9"]  # grid axis
 # registry = "../../datasets/datasets.toml"  # by default found from this file's directory upwards
 backend = "auto"          # as in a run configuration
 trials = 100              # trials per cell
+stability_fields = false  # optional: write stability.parquet
 
 [[learning]]              # grid axis, one table per rule, parameters as above
 rule = "hebb"
@@ -157,9 +158,11 @@ The final state is classified by exact equality: `pattern` (a fixed point equal 
 
 - `trials.parquet`: one row per run, ordered by cell, trial and target, with the columns `dataset`, `learning`, `mode`, `noise`, `flips`, `target`, `trial`, `seed`, `steps`, `changes`, `termination`, `class`, `energy`, `recovered` (the run ended in a fixed point equal to the target), `initial_distance`, `final_distance` (Hamming distances to the target), `final_overlap` (with the target), `nearest` and `nearest_overlap` (the pattern with the largest `|m|`); target columns are null for random inputs,
 - `summary.json`: `{"cells": [...]}` with, for every cell, the number of runs, whether it is `deterministic`, the fraction of every class and of recovered runs with a 95% Wilson interval (`count`, `fraction`, `lower`, `upper`; both ends equal the fraction in a deterministic cell), and the mean and sample standard deviation of steps, final energy and final overlap,
+- `datasets.json`: `{"datasets": [...]}` with, for every dataset, its size, the load `p/N`, the fraction of `1` in every pattern (`fraction_on`), the overlap matrix `m^{mu nu}` (`overlaps`), for every pattern the sum of `|m^{mu nu}|` over the other patterns (`overlap_sums`; with Hebbian weights a pattern whose sum is below `1 - p/N` is stable) and the largest `|m^{mu nu}|` of two different patterns with the pair,
+- `stability.parquet` (only with `stability_fields = true`): the aligned local field `xi_i^mu h_i` (`h = W xi^mu`) of every neuron of every stored pattern, one row per training, pattern and neuron, with the columns `dataset`, `learning`, `pattern`, `neuron` (row-major pixel index) and `field`; a negative field means the neuron would change, a zero one is decided by `zero_field`. It has `p N` rows per rule, so it is off by default,
 - `metadata.json`: command, time, build, the configuration with all defaults, the datasets and every training (backend, epochs, convergence, unstable neurons of every pattern).
 
-Running the experiment again gives identical `trials.parquet` and `summary.json`; `metadata.json` differs only in `created`.
+Running the experiment again gives identical `trials.parquet`, `summary.json`, `datasets.json` and `stability.parquet`; `metadata.json` differs only in `created`.
 
 ## Checks
 
