@@ -1,0 +1,59 @@
+{
+  "command": "recall",
+  "created": "2026-11-06T11:35:53Z",
+  "build": {
+    "version": "0.1.0",
+    "commit": "85bb9a32a4c3cc96b0aad7b3fee21efa0aefbcde",
+    "dirty": false
+  },
+  "config": {
+    "dataset": "small-7x7",
+    "seed": 2,
+    "backend": "auto",
+    "learning": {
+      "rule": "hebb"
+    },
+    "dynamics": {
+      "mode": "asynchronous",
+      "zero_field": "keep",
+      "order": "permutation",
+      "max_steps": 1000,
+      "record_every": 7
+    },
+    "input": {
+      "source": "pattern",
+      "index": 2,
+      "flips": 14
+    }
+  },
+  "dataset": {
+    "name": "small-7x7",
+    "registry": "../../../../data/datasets/datasets.toml",
+    "file": "small-7x7.csv",
+    "description": "Five simple geometric shapes: a diagonal cross, a frame, a small filled square, a diamond and four squares.",
+    "width": 7,
+    "height": 7,
+    "patterns": 5,
+    "neurons": 49
+  },
+  "training": {
+    "backend": "dense",
+    "neurons": 49,
+    "epochs": 0,
+    "converged": true
+  },
+  "outcome": {
+    "steps": 2,
+    "changes": 16,
+    "termination": "fixed-point",
+    "energy": -39.999999999999986,
+    "frames": 10,
+    "target": 2,
+    "initial_distance": 14,
+    "final_distance": 0,
+    "nearest": {
+      "pattern": 2,
+      "overlap": 1.0
+    }
+  }
+}
