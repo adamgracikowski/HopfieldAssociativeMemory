@@ -1,6 +1,7 @@
 """Command-line interface ``hopfield-analysis``."""
 
 import argparse
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -22,10 +23,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             ``None``.
 
     Returns:
-        The exit code.
+        The exit code: 0 on success, 1 if an input is missing or invalid
+        (the reason is printed to stderr without a traceback), 2 for invalid
+        arguments.
     """
-    args = parser().parse_args(argv)
-    return args.handler(args)
+    arguments = parser()
+    args = arguments.parse_args(argv)
+    try:
+        return args.handler(args)
+    except (OSError, ValueError, KeyError) as error:
+        message = f"`{error.filename}` not found" if isinstance(error, FileNotFoundError) else error
+        print(f"{arguments.prog}: error: {message}", file=sys.stderr)
+        return 1
 
 
 def parser() -> argparse.ArgumentParser:
@@ -61,6 +70,10 @@ def parser() -> argparse.ArgumentParser:
         "--max-frames", type=int, default=200, help="largest number of frames (default 200)"
     )
     gif.set_defaults(handler=_animate)
+
+    view = commands.add_parser("view", help="step through the frames of a recall run in a window")
+    view.add_argument("run", type=Path, help="output directory of `compute recall`")
+    view.set_defaults(handler=_view)
 
     recovery = commands.add_parser(
         "recovery",
@@ -101,6 +114,27 @@ def _animate(args: argparse.Namespace) -> int:
         max_frames=args.max_frames,
     )
     print(f"written to {path}")
+    return 0
+
+
+def _view(args: argparse.Namespace) -> int:
+    """Opens the viewer in a window.
+
+    pyplot, and with it a GUI backend, is imported only here. The viewer is
+    referenced until the window closes, because matplotlib keeps the
+    callbacks of its widgets only through weak references.
+    """
+    from matplotlib import pyplot as plt
+
+    from hopfield_analysis.viewer import RunViewer
+
+    recall = Recall.load(args.run)
+    style.apply()
+    figure = plt.figure(figsize=(8, 8), layout="constrained")
+    figure.canvas.manager.set_window_title(f"{recall.dataset}: {args.run}")
+    viewer = RunViewer(figure, recall)
+    plt.show()
+    del viewer
     return 0
 
 

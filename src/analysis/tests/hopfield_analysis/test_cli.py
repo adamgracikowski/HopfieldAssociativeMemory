@@ -18,8 +18,7 @@ def test_figure_commands_write_a_pdf_and_a_png(command, tmp_path, capsys):
 
 def test_frames_accepts_an_explicit_choice(tmp_path):
     assert main(["frames", RUN, "--out", str(tmp_path / "f"), "--frames", "0,9"]) == 0
-    with pytest.raises(ValueError, match="frame 12 does not exist"):
-        main(["frames", RUN, "--out", str(tmp_path / "f"), "--frames", "12"])
+    assert main(["frames", RUN, "--out", str(tmp_path / "f"), "--frames", "12"]) == 1
     with pytest.raises(SystemExit):
         main(["frames", RUN, "--out", str(tmp_path / "f"), "--frames", "0", "--max", "3"])
 
@@ -29,3 +28,27 @@ def test_animate_writes_a_gif(tmp_path, capsys):
     assert main(["animate", RUN, "--out", str(out), "--max-frames", "3"]) == 0
     assert out.read_bytes()[:6] == b"GIF89a"
     assert "written to" in capsys.readouterr().out
+
+
+def test_view_opens_the_viewer_in_a_window(monkeypatch):
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    from matplotlib import pyplot as plt
+
+    shown = []
+    monkeypatch.setattr(plt, "show", lambda: shown.append(plt.gcf()))
+    assert main(["view", RUN]) == 0
+    [figure] = shown
+    assert len(figure.axes) == 4
+    assert figure.axes[0].get_title().startswith("klatka 0/9")
+    plt.close("all")
+
+
+def test_reports_missing_or_invalid_inputs_without_a_traceback(tmp_path, capsys):
+    assert main(["frames", str(tmp_path / "missing"), "--out", str(tmp_path / "f")]) == 1
+    error = capsys.readouterr().err
+    assert error.startswith("hopfield-analysis: error: `")
+    assert "history.npy` not found" in error
+    assert main(["frames", RUN, "--out", str(tmp_path / "f"), "--frames", "12"]) == 1
+    assert "frame 12 does not exist, the run has 10 frames" in capsys.readouterr().err
