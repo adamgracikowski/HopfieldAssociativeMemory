@@ -52,3 +52,14 @@ def test_reports_missing_or_invalid_inputs_without_a_traceback(tmp_path, capsys)
     assert "history.npy` not found" in error
     assert main(["frames", RUN, "--out", str(tmp_path / "f"), "--frames", "12"]) == 1
     assert "frame 12 does not exist, the run has 10 frames" in capsys.readouterr().err
+
+
+def test_patterns_and_weights_write_figures(tmp_path):
+    registry = str(FIXTURES.parents[3] / "data" / "datasets" / "datasets.toml")
+    out = tmp_path / "patterns"
+    assert main(["patterns", "small-7x7", "--out", str(out), "--registry", registry]) == 0
+    assert out.with_suffix(".pdf").is_file() and out.with_suffix(".png").is_file()
+    out = tmp_path / "weights"
+    assert main(["weights", str(FIXTURES / "train"), "--out", str(out)]) == 0
+    assert out.with_suffix(".png").is_file()
+    assert main(["weights", str(tmp_path), "--out", str(out)]) == 1

@@ -8,9 +8,11 @@ from pathlib import Path
 from matplotlib.figure import Figure
 
 from hopfield_analysis import style
+from hopfield_analysis.datasets import Registry, plot_patterns
 from hopfield_analysis.experiments import load_summary, plot_recovery
 from hopfield_analysis.recall import Recall
 from hopfield_analysis.runs import animate, parse_frames, plot_frames, plot_run, select_frames
+from hopfield_analysis.weights import load_weights, plot_weights
 
 OUT_HELP = "output path without extension; writes <out>.pdf and <out>.png"
 
@@ -75,6 +77,25 @@ def parser() -> argparse.ArgumentParser:
     view.add_argument("run", type=Path, help="output directory of `compute recall`")
     view.set_defaults(handler=_view)
 
+    patterns = commands.add_parser("patterns", help="bitmaps of the patterns of a dataset")
+    patterns.add_argument("name", help="dataset name in the registry")
+    patterns.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    patterns.add_argument(
+        "--registry",
+        type=Path,
+        help="registry file (default: data/datasets/datasets.toml found from the current "
+        "directory upwards)",
+    )
+    patterns.add_argument(
+        "--columns", type=int, default=6, help="largest number of panels in a row (default 6)"
+    )
+    patterns.set_defaults(handler=_patterns)
+
+    weights = commands.add_parser("weights", help="heat map of the weights of a train run")
+    weights.add_argument("train", type=Path, help="output directory of `compute train`")
+    weights.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    weights.set_defaults(handler=_weights)
+
     recovery = commands.add_parser(
         "recovery",
         help="recovered fraction against the noise level of an experiment",
@@ -136,6 +157,19 @@ def _view(args: argparse.Namespace) -> int:
     plt.show()
     del viewer
     return 0
+
+
+def _patterns(args: argparse.Namespace) -> int:
+    if args.registry is None:
+        registry = Registry.discover(Path.cwd())
+    else:
+        registry = Registry.from_file(args.registry)
+    figure = plot_patterns(registry.load(args.name), columns=args.columns)
+    return _save(figure, args.out)
+
+
+def _weights(args: argparse.Namespace) -> int:
+    return _save(plot_weights(load_weights(args.train)), args.out)
 
 
 def _recovery(args: argparse.Namespace) -> int:
