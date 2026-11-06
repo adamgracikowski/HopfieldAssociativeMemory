@@ -705,3 +705,35 @@ fn example_experiment_matches_the_committed_results() {
         );
     }
 }
+
+/// The test fixtures of the presentation layer (`src/analysis/tests/fixtures`)
+/// are what `recall` and `train` write for their configurations. A change of
+/// the output fails here until the fixtures are regenerated with the
+/// commands in their README. Only the data files are compared: the metadata
+/// records the time and the build.
+#[test]
+fn analysis_fixtures_match_the_current_output() {
+    let fixtures = Path::new("../analysis/tests/fixtures");
+    let dir = tempfile::tempdir().unwrap();
+    for (command, files) in [
+        ("recall", &["history.npy", "frames.json"][..]),
+        ("train", &["weights.npy"][..]),
+    ] {
+        let out = dir.path().join(command);
+        compute()
+            .arg(command)
+            .arg("--config")
+            .arg(fixtures.join(format!("{command}.toml")))
+            .arg("--out")
+            .arg(&out)
+            .assert()
+            .success();
+        for file in files {
+            assert!(
+                std::fs::read(out.join(file)).unwrap()
+                    == std::fs::read(fixtures.join(command).join(file)).unwrap(),
+                "{command}/{file} differs from the fixture; regenerate it"
+            );
+        }
+    }
+}

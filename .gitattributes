@@ -7,3 +7,4 @@
 # Experiment results are compared byte for byte with what compute writes:
 # no end-of-line conversion on checkout.
 data/experiments/*/results/* -text
+src/analysis/tests/fixtures/*/* -text

@@ -1,0 +1,20 @@
+# Recall run used by the tests: animals-14x9 (14 wide, 9 high, so a swap of
+# width and height is noticed), Hebbian learning, pattern 4 with 30 flipped
+# pixels, asynchronous updates with a frame every 14 updates.
+# Regenerate from src/compute:
+#   cargo run --release -- recall --config ../analysis/tests/fixtures/recall.toml --out ../analysis/tests/fixtures/recall --force
+
+dataset = "animals-14x9"
+seed = 1
+
+[learning]
+rule = "hebb"
+
+[dynamics]
+mode = "asynchronous"
+record_every = 14
+
+[input]
+source = "pattern"
+index = 4
+flips = 30

@@ -1,0 +1,59 @@
+{
+  "command": "recall",
+  "created": "2026-11-06T12:52:28Z",
+  "build": {
+    "version": "0.1.0",
+    "commit": "8327eb15f63f05891116167ba30ec97fe1b6ceba",
+    "dirty": false
+  },
+  "config": {
+    "dataset": "animals-14x9",
+    "seed": 1,
+    "backend": "auto",
+    "learning": {
+      "rule": "hebb"
+    },
+    "dynamics": {
+      "mode": "asynchronous",
+      "zero_field": "keep",
+      "order": "permutation",
+      "max_steps": 1000,
+      "record_every": 14
+    },
+    "input": {
+      "source": "pattern",
+      "index": 4,
+      "flips": 30
+    }
+  },
+  "dataset": {
+    "name": "animals-14x9",
+    "registry": "../../../../data/datasets/datasets.toml",
+    "file": "animals-14x9.csv",
+    "description": "Six small animal silhouettes.",
+    "width": 14,
+    "height": 9,
+    "patterns": 6,
+    "neurons": 126
+  },
+  "training": {
+    "backend": "dense",
+    "neurons": 126,
+    "epochs": 0,
+    "converged": true
+  },
+  "outcome": {
+    "steps": 1,
+    "changes": 30,
+    "termination": "fixed-point",
+    "energy": -66.66666666666669,
+    "frames": 10,
+    "target": 4,
+    "initial_distance": 30,
+    "final_distance": 0,
+    "nearest": {
+      "pattern": 4,
+      "overlap": 1.0
+    }
+  }
+}
