@@ -16,7 +16,7 @@ __pycache__/
 data/experiments/**/artifacts/
 data/experiments/**/runs/
 data/experiments/*/*/results/*.png
-data/experiments/**/plots/*.png
+data/experiments/**/plots/
 
 # Logs of scripts
 logs/

@@ -96,13 +96,15 @@ def test_plot_recovery_has_a_panel_per_dataset_and_a_line_per_series(results):
     assert [ax.get_title() for ax in axes] == ["small-7x7", "animals-14x9"]
     for ax in axes:
         assert len(ax.get_lines()) >= 4
-        labels = ax.get_legend_handles_labels()[1]
-        assert labels == [
-            "hebb, synchronous",
-            "hebb, asynchronous",
-            "oja (subspace), synchronous",
-            "oja (subspace), asynchronous",
-        ]
+        assert ax.get_xlabel() == "poziom szumu (odsetek odwróconych pikseli)"
+    assert axes[0].get_ylabel() == "odsetek odzyskanych"
+    [legend] = figure.legends
+    assert [text.get_text() for text in legend.get_texts()] == [
+        "Hebb, synchroniczny",
+        "Hebb, asynchroniczny",
+        "Oja (podprzestrzeń), synchroniczny",
+        "Oja (podprzestrzeń), asynchroniczny",
+    ]
 
 
 def test_plot_recovery_rejects_random_inputs():
@@ -111,11 +113,12 @@ def test_plot_recovery_rejects_random_inputs():
         plot_recovery(summary)
 
 
-def test_cli_writes_a_png(results, tmp_path, capsys):
-    out = tmp_path / "plots" / "recovery.png"
+def test_cli_writes_a_pdf_and_a_png(results, tmp_path, capsys):
+    out = tmp_path / "plots" / "recovery"
     assert main(["recovery", str(results), "--out", str(out)]) == 0
-    assert out.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
-    assert "written to" in capsys.readouterr().out
+    assert (tmp_path / "plots" / "recovery.png").read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+    assert (tmp_path / "plots" / "recovery.pdf").read_bytes()[:5] == b"%PDF-"
+    assert capsys.readouterr().out.count("written to") == 2
 
 
 def test_reads_the_results_of_the_example_experiment():

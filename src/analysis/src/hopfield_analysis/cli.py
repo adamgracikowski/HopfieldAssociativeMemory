@@ -4,6 +4,7 @@ import argparse
 from collections.abc import Sequence
 from pathlib import Path
 
+from hopfield_analysis import style
 from hopfield_analysis.experiments import load_summary, plot_recovery
 
 
@@ -27,11 +28,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="plot the recovered fraction against the noise level of an experiment",
     )
     recovery.add_argument("results", type=Path, help="results directory of an experiment")
-    recovery.add_argument("--out", type=Path, required=True, help="output image (PNG)")
+    recovery.add_argument(
+        "--out", type=Path, required=True, help="output path without extension (PDF and PNG)"
+    )
     args = parser.parse_args(argv)
 
     figure = plot_recovery(load_summary(args.results))
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(args.out, dpi=150)
-    print(f"written to {args.out}")
+    for path in style.save(figure, args.out):
+        print(f"written to {path}")
     return 0

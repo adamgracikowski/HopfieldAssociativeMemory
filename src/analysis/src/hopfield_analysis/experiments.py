@@ -13,6 +13,8 @@ from typing import Any
 import polars as pl
 from matplotlib.figure import Figure
 
+from hopfield_analysis import labels, style
+
 TRIALS_FILE = "trials.parquet"
 SUMMARY_FILE = "summary.json"
 METADATA_FILE = "metadata.json"
@@ -64,7 +66,8 @@ def plot_recovery(summary: pl.DataFrame) -> Figure:
     """Plots the fraction of recovered runs against the noise level.
 
     One panel per dataset, one line per learning rule and update mode, with
-    the 95% Wilson intervals from the summary as error bars.
+    the 95% Wilson intervals from the summary as error bars and a legend
+    below the panels, all in the report style with Polish labels.
 
     Args:
         summary: Cell aggregates from :func:`load_summary` of an experiment
@@ -79,7 +82,7 @@ def plot_recovery(summary: pl.DataFrame) -> Figure:
     if "recovered_fraction" not in summary.columns:
         raise ValueError("the experiment has no recovery fractions (random inputs?)")
     datasets = summary["dataset"].unique(maintain_order=True).to_list()
-    figure = Figure(figsize=(4.5 * len(datasets), 3.5), layout="constrained")
+    figure = style.new_figure(height=2.8)
     axes = figure.subplots(1, len(datasets), squeeze=False, sharey=True)[0]
     for ax, dataset in zip(axes, datasets, strict=True):
         cells = summary.filter(pl.col("dataset") == dataset)
@@ -95,13 +98,14 @@ def plot_recovery(summary: pl.DataFrame) -> Figure:
                 fraction,
                 yerr=errors,
                 marker="o",
-                capsize=3,
-                label=f"{learning}, {mode}",
+                markersize=3,
+                capsize=2,
+                label=f"{labels.rule(learning)}, {labels.mode(mode)}",
             )
         ax.set_title(dataset)
-        ax.set_xlabel("noise (fraction of flipped pixels)")
+        ax.set_xlabel(labels.NOISE)
         ax.set_ylim(-0.05, 1.05)
-        ax.grid(alpha=0.3)
-    axes[0].set_ylabel("recovered fraction")
-    axes[-1].legend(fontsize="small")
+    axes[0].set_ylabel(labels.RECOVERED)
+    handles, names = axes[0].get_legend_handles_labels()
+    figure.legend(handles, names, loc="outside lower center", ncols=min(len(names), 2))
     return figure
