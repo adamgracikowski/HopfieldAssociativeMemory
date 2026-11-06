@@ -48,7 +48,7 @@ def plot_weights(weights: np.ndarray) -> Figure:
     figure = style.new_figure(width=0.6 * style.TEXT_WIDTH, height=0.5 * style.TEXT_WIDTH)
     ax = figure.subplots()
     limit = float(np.abs(weights).max()) or 1.0
-    image = ax.imshow(weights, cmap="RdBu_r", vmin=-limit, vmax=limit, interpolation="nearest")
+    image = ax.imshow(weights, cmap="RdBu_r", vmin=-limit, vmax=limit, interpolation="auto")
     ax.set_xlabel(f"{labels.NEURON} $j$")
     ax.set_ylabel(f"{labels.NEURON} $i$")
     ax.grid(False)

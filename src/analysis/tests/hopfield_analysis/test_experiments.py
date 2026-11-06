@@ -97,7 +97,7 @@ def test_plot_recovery_has_a_panel_per_dataset_and_a_line_per_series(results):
     assert [ax.get_title() for ax in axes] == ["small-7x7", "animals-14x9"]
     for ax in axes:
         assert len(ax.get_lines()) >= 4
-        assert ax.get_xlabel() == "poziom szumu (odsetek odwróconych pikseli)"
+    assert figure._supxlabel.get_text() == "poziom szumu (odsetek odwróconych pikseli)"
     assert axes[0].get_ylabel() == "odsetek odzyskanych"
     [legend] = figure.legends
     assert [text.get_text() for text in legend.get_texts()] == [
@@ -164,7 +164,7 @@ def test_plot_classes_stacks_the_classes_of_every_cell(results):
     for ax in axes:
         assert len(ax.containers) == 5
         assert stacked_heights(ax) == pytest.approx([1.0, 1.0])
-    assert [tick.get_text() for tick in axes[0].get_xticklabels()] == ["0,00", "0,20"]
+    assert [tick.get_text() for tick in axes[0].get_xticklabels()] == ["0", "0,2"]
     [legend] = figure.legends
     assert [text.get_text() for text in legend.get_texts()] == [
         "wzorzec",
@@ -187,3 +187,30 @@ def test_plot_classes_of_the_example_experiment():
     figure = plot_classes(summary)
     for ax in figure.axes:
         assert stacked_heights(ax) == pytest.approx([1.0] * 4)
+
+
+def grid_summary(datasets, noise_levels):
+    rows = [
+        cell(dataset, "hebb", "synchronous", noise, 5)
+        for dataset in datasets
+        for noise in noise_levels
+    ]
+    return pl.json_normalize(rows, separator="_", infer_schema_length=None)
+
+
+def test_plot_recovery_wraps_many_datasets_into_rows():
+    summary = grid_summary(["a", "b", "c", "d"], [0.0, 0.1])
+    figure = plot_recovery(summary)
+    visible = [ax for ax in figure.axes if ax.get_visible()]
+    assert [ax.get_title() for ax in visible] == ["a", "b", "c", "d"]
+    assert len(figure.axes) == 6
+    assert visible[0].get_ylabel() == visible[3].get_ylabel() == "odsetek odzyskanych"
+
+
+def test_plot_classes_labels_every_kth_of_many_noise_levels():
+    """11 levels and at most 6 labels: every ``ceil(11 / 6) = 2``-nd level is
+    labelled, with as many digits as the level needs."""
+    summary = grid_summary(["a"], [k * 0.025 for k in range(11)])
+    figure = plot_classes(summary)
+    ticks = [tick.get_text() for tick in figure.axes[0].get_xticklabels()]
+    assert ticks == ["0", "", "0,05", "", "0,1", "", "0,15", "", "0,2", "", "0,25"]

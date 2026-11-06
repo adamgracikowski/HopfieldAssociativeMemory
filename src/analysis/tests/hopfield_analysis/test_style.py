@@ -1,11 +1,11 @@
-import re
-
+import numpy as np
 import pytest
 from matplotlib import font_manager
 from matplotlib.ticker import ScalarFormatter
 from PIL import Image
 
 from hopfield_analysis import style
+from hopfield_analysis.bitmaps import draw_bitmap
 
 
 def test_new_figure_uses_latin_modern():
@@ -24,8 +24,9 @@ def test_save_writes_a_pdf_with_embedded_latin_modern_and_a_300_dpi_png(tmp_path
     ax.set_xlabel("łąka")
     pdf, png = style.save(figure, tmp_path / "out" / "figure.png")
     assert (pdf.name, png.name) == ("figure.pdf", "figure.png")
-    fonts = set(re.findall(rb"/BaseFont /\w+\+([\w-]+)", pdf.read_bytes()))
-    assert b"LMRoman10-Regular" in fonts
+    data = pdf.read_bytes()
+    assert b"LMRoman10-Regular" in data
+    assert b"/FontFile2" not in data and b"/Subtype /Type3" in data
     with Image.open(png) as image:
         assert image.info["dpi"] == pytest.approx((300, 300), abs=0.01)
         assert image.size == (900, 600)
@@ -56,3 +57,34 @@ def test_finish_keeps_formatters_that_are_not_scalar():
     assert type(ax.xaxis.get_major_formatter()) is category
     assert category is not ScalarFormatter
     assert isinstance(ax.yaxis.get_major_formatter(), style.CommaFormatter)
+
+
+def test_finish_keeps_the_formatter_settings():
+    figure = style.new_figure()
+    ax = figure.subplots()
+    ax.plot([800000, 800001], [0, 1])
+    ax.ticklabel_format(axis="x", style="plain", useOffset=False)
+    figure.canvas.draw()
+    before = [tick.get_text() for tick in ax.get_xticklabels()]
+    style.finish(figure)
+    figure.canvas.draw()
+    assert isinstance(ax.xaxis.get_major_formatter(), style.CommaFormatter)
+    assert [tick.get_text() for tick in ax.get_xticklabels()] == [
+        text.replace(".", ",") for text in before
+    ]
+    assert all(text.startswith(("7999", "8000")) for text in before)
+    assert ax.xaxis.get_offset_text().get_text() == ""
+
+
+def test_save_embeds_bitmaps_unresampled_in_the_pdf(tmp_path):
+    """A 300 x 200 bitmap in a panel narrower than 300 pixels at 300 dpi is
+    embedded with all its 300 columns in the PDF; the PNG uses ``auto``, and
+    the interpolation of the image is restored afterwards."""
+    rng = np.random.default_rng(0)
+    bitmap = np.where(rng.random((200, 300)) < 0.5, 1, -1)
+    figure = style.new_figure(width=0.8, height=0.6)
+    ax = figure.subplots()
+    image = draw_bitmap(ax, bitmap)
+    pdf, _ = style.save(figure, tmp_path / "bitmap")
+    assert b"/Width 300" in pdf.read_bytes()
+    assert image.get_interpolation() == "auto"

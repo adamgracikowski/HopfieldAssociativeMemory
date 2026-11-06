@@ -5,6 +5,7 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+import polars as pl
 from matplotlib.figure import Figure
 
 from hopfield_analysis import style
@@ -33,10 +34,40 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = arguments.parse_args(argv)
     try:
         return args.handler(args)
-    except (OSError, ValueError, KeyError) as error:
-        message = f"`{error.filename}` not found" if isinstance(error, FileNotFoundError) else error
-        print(f"{arguments.prog}: error: {message}", file=sys.stderr)
+    except (OSError, ValueError, KeyError, pl.exceptions.PolarsError) as error:
+        print(f"{arguments.prog}: error: {describe(error)}", file=sys.stderr)
         return 1
+
+
+def describe(error: Exception) -> str:
+    """One-line description of an error caused by a missing or invalid input.
+
+    Args:
+        error: The error.
+
+    Returns:
+        For a file error the reason and the file, e.g.
+        ``No such file or directory: `run/history.npy```; for a missing key of
+        a JSON file the key; otherwise the first line of the message.
+    """
+    if isinstance(error, OSError) and error.filename is not None:
+        return f"{error.strerror}: `{error.filename}`"
+    if isinstance(error, KeyError):
+        return f"missing field {error} in an input file"
+    return str(error).splitlines()[0]
+
+
+def at_least(minimum: int):
+    """Argument type of integers not smaller than ``minimum``."""
+
+    def convert(text: str) -> int:
+        value = int(text)
+        if value < minimum:
+            raise argparse.ArgumentTypeError(f"must be at least {minimum}, not {value}")
+        return value
+
+    convert.__name__ = "integer"
+    return convert
 
 
 def parser() -> argparse.ArgumentParser:
@@ -52,7 +83,10 @@ def parser() -> argparse.ArgumentParser:
     frames.add_argument("--out", type=Path, required=True, help=OUT_HELP)
     choice = frames.add_mutually_exclusive_group()
     choice.add_argument(
-        "--max", type=int, default=8, help="largest number of evenly spaced frames (default 8)"
+        "--max",
+        type=at_least(2),
+        default=8,
+        help="largest number of evenly spaced frames, at least 2 (default 8)",
     )
     choice.add_argument("--frames", help="comma-separated frame numbers, e.g. 0,2,5")
     frames.set_defaults(handler=_frames)
@@ -65,11 +99,20 @@ def parser() -> argparse.ArgumentParser:
     gif = commands.add_parser("animate", help="GIF animation of a recall run")
     gif.add_argument("run", type=Path, help="output directory of `compute recall`")
     gif.add_argument("--out", type=Path, required=True, help="output GIF file")
-    gif.add_argument("--scale", type=int, help="image pixels per bitmap pixel (default: auto)")
-    gif.add_argument("--duration", type=int, default=300, help="frame time in ms (default 300)")
-    gif.add_argument("--hold", type=int, default=1500, help="last frame time in ms (default 1500)")
     gif.add_argument(
-        "--max-frames", type=int, default=200, help="largest number of frames (default 200)"
+        "--scale", type=at_least(1), help="image pixels per bitmap pixel (default: auto)"
+    )
+    gif.add_argument(
+        "--duration", type=at_least(1), default=300, help="frame time in ms (default 300)"
+    )
+    gif.add_argument(
+        "--hold", type=at_least(1), default=1500, help="last frame time in ms (default 1500)"
+    )
+    gif.add_argument(
+        "--max-frames",
+        type=at_least(2),
+        default=200,
+        help="largest number of frames, at least 2 (default 200)",
     )
     gif.set_defaults(handler=_animate)
 
@@ -87,7 +130,10 @@ def parser() -> argparse.ArgumentParser:
         "directory upwards)",
     )
     patterns.add_argument(
-        "--columns", type=int, default=6, help="largest number of panels in a row (default 6)"
+        "--columns",
+        type=at_least(1),
+        default=6,
+        help="largest number of panels in a row (default 6)",
     )
     patterns.set_defaults(handler=_patterns)
 
@@ -148,20 +194,24 @@ def _animate(args: argparse.Namespace) -> int:
 def _view(args: argparse.Namespace) -> int:
     """Opens the viewer in a window.
 
-    pyplot, and with it a GUI backend, is imported only here. The viewer is
+    pyplot, and with it a GUI backend, is imported only here. The keys of the
+    viewer are taken from the toolbar shortcuts while the window is open, so
+    stepping through frames does not also undo a zoom. The viewer is
     referenced until the window closes, because matplotlib keeps the
     callbacks of its widgets only through weak references.
     """
+    import matplotlib as mpl
     from matplotlib import pyplot as plt
 
-    from hopfield_analysis.viewer import RunViewer
+    from hopfield_analysis.viewer import RunViewer, free_keymaps
 
     recall = Recall.load(args.run)
     style.apply()
-    figure = plt.figure(figsize=(8, 8), layout="constrained")
-    figure.canvas.manager.set_window_title(f"{recall.dataset}: {args.run}")
-    viewer = RunViewer(figure, recall)
-    plt.show()
+    with mpl.rc_context(free_keymaps()):
+        figure = plt.figure(figsize=(8, 8), layout="constrained")
+        figure.canvas.manager.set_window_title(f"{recall.dataset}: {args.run}")
+        viewer = RunViewer(figure, recall)
+        plt.show()
     del viewer
     return 0
 

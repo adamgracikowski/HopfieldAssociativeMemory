@@ -23,5 +23,5 @@ def test_draw_bitmap_maps_one_to_black_without_ticks():
     colors = image.to_rgba(STATE.astype(float))
     assert np.allclose(colors[0, 0, :3], 0)
     assert np.allclose(colors[0, 1, :3], 1)
-    assert image.get_interpolation() == "nearest"
+    assert image.get_interpolation() == "auto"
     assert list(ax.get_xticks()) == [] and list(ax.get_yticks()) == []

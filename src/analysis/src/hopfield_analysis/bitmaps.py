@@ -9,7 +9,10 @@ from PIL import Image
 def draw_bitmap(ax: Axes, state: np.ndarray) -> AxesImage:
     """Draws a bitmap without ticks or grid.
 
-    Pixels are not interpolated, so they stay sharp in PNG and PDF output.
+    The image uses interpolation ``auto``: sharp pixels when a small bitmap
+    is enlarged, smoothing instead of dropped rows when a large one is shrunk
+    on screen or in a PNG. :func:`hopfield_analysis.style.save` embeds it
+    unresampled in a PDF.
 
     Args:
         ax: Target axes.
@@ -18,7 +21,7 @@ def draw_bitmap(ax: Axes, state: np.ndarray) -> AxesImage:
     Returns:
         The image, whose data can be replaced with ``set_data``.
     """
-    image = ax.imshow(state, cmap="gray_r", vmin=-1, vmax=1, interpolation="nearest")
+    image = ax.imshow(state, cmap="gray_r", vmin=-1, vmax=1, interpolation="auto")
     ax.set_xticks([])
     ax.set_yticks([])
     ax.grid(False)

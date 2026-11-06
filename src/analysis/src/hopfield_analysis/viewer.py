@@ -1,5 +1,6 @@
 """Interactive viewer of the frames of a recall run."""
 
+import matplotlib as mpl
 from matplotlib.backend_bases import KeyEvent
 from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator
@@ -11,6 +12,25 @@ from hopfield_analysis.recall import Recall
 
 KEYS = {"right": 1, "left": -1}
 """Keys that move by a frame; ``home`` and ``end`` jump to the first and last."""
+VIEWER_KEYS = (*KEYS, "home", "end")
+
+
+def free_keymaps() -> dict[str, list[str]]:
+    """Toolbar shortcuts without the keys of the viewer.
+
+    By default matplotlib binds the arrows to the previous and next view and
+    ``home`` to the original view, so stepping through frames would also
+    change the zoom.
+
+    Returns:
+        The ``keymap.*`` parameters that use a viewer key, without it, for
+        ``matplotlib.rc_context``.
+    """
+    return {
+        name: [key for key in keys if key not in VIEWER_KEYS]
+        for name, keys in mpl.rcParams.items()
+        if name.startswith("keymap.") and any(key in VIEWER_KEYS for key in keys)
+    }
 
 
 class RunViewer:

@@ -30,7 +30,7 @@ def test_plot_frames_shows_a_captioned_panel_per_frame(recall):
     figure = plot_frames(recall, [0, 4, 9], columns=2)
     visible = [ax for ax in figure.axes if ax.get_visible()]
     assert [ax.get_title() for ax in visible] == ["klatka 0", "klatka 4", "klatka 9"]
-    assert visible[-1].get_xlabel() == "$E$ = −40,00"
+    assert visible[-1].get_xlabel() == "$E$ = −66,67"
     assert len(figure.axes) == 4
 
 
@@ -38,10 +38,10 @@ def test_plot_run_highlights_the_target(recall):
     figure = plot_run(recall)
     energy_ax, overlap_ax = figure.axes
     assert len(energy_ax.get_lines()) == 1
-    assert len(overlap_ax.get_lines()) == 5
+    assert len(overlap_ax.get_lines()) == 6
     [legend] = figure.legends
     assert [text.get_text() for text in legend.get_texts()] == [
-        "wzorzec 2 (cel)",
+        "wzorzec 4 (cel)",
         "pozostałe wzorce",
     ]
 
@@ -49,11 +49,11 @@ def test_plot_run_highlights_the_target(recall):
 def test_animate_writes_a_looping_gif(recall, tmp_path):
     out = animate(recall, tmp_path / "gif" / "run.gif", duration=100, hold=900, max_frames=4)
     with Image.open(out) as image:
-        assert image.size == (7 * 36, 7 * 36)
+        assert image.size == (14 * 18, 9 * 18)
         assert image.info["loop"] == 0
         durations = [frame.info["duration"] for frame in ImageSequence.Iterator(image)]
     assert durations == [100, 100, 100, 900]
     small = animate(recall, tmp_path / "small.gif", scale=2)
     with Image.open(small) as image:
-        assert image.size == (14, 14)
+        assert image.size == (28, 18)
         assert image.n_frames == 10

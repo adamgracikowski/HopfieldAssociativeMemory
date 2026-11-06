@@ -48,8 +48,8 @@ def test_view_opens_the_viewer_in_a_window(monkeypatch):
 def test_reports_missing_or_invalid_inputs_without_a_traceback(tmp_path, capsys):
     assert main(["frames", str(tmp_path / "missing"), "--out", str(tmp_path / "f")]) == 1
     error = capsys.readouterr().err
-    assert error.startswith("hopfield-analysis: error: `")
-    assert "history.npy` not found" in error
+    assert error.startswith("hopfield-analysis: error: No such file or directory: `")
+    assert error.rstrip().endswith("history.npy`")
     assert main(["frames", RUN, "--out", str(tmp_path / "f"), "--frames", "12"]) == 1
     assert "frame 12 does not exist, the run has 10 frames" in capsys.readouterr().err
 
@@ -70,3 +70,28 @@ def test_classes_writes_a_figure(tmp_path):
     out = tmp_path / "classes"
     assert main(["classes", results, "--out", str(out)]) == 0
     assert out.with_suffix(".pdf").is_file() and out.with_suffix(".png").is_file()
+
+
+def test_reports_registry_summary_and_metadata_errors(tmp_path, capsys):
+    out = str(tmp_path / "f")
+    assert (
+        main(["patterns", "small-7x7", "--out", out, "--registry", str(tmp_path / "r.toml")]) == 1
+    )
+    assert "No such file or directory: `" in capsys.readouterr().err
+    (tmp_path / "summary.json").write_text('{"cells": []}', encoding="utf-8")
+    assert main(["recovery", str(tmp_path), "--out", out]) == 1
+    assert "no recovery fractions" in capsys.readouterr().err
+    assert main(["classes", str(tmp_path), "--out", out]) == 1
+    assert len(capsys.readouterr().err.strip().splitlines()) == 1
+
+
+def test_rejects_too_small_numbers(tmp_path, capsys):
+    for args in (
+        ["patterns", "small-7x7", "--out", "x", "--columns", "0"],
+        ["frames", RUN, "--out", "x", "--max", "1"],
+        ["animate", RUN, "--out", "x.gif", "--scale", "0"],
+    ):
+        with pytest.raises(SystemExit) as exit:
+            main(args)
+        assert exit.value.code == 2
+    assert "must be at least" in capsys.readouterr().err

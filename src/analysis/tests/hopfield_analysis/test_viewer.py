@@ -3,7 +3,7 @@ import pytest
 from matplotlib.backend_bases import KeyEvent
 
 from hopfield_analysis import style
-from hopfield_analysis.viewer import RunViewer
+from hopfield_analysis.viewer import RunViewer, free_keymaps
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def shown(viewer):
 def test_starts_at_the_first_frame(viewer, recall):
     assert viewer.frame == 0
     assert np.array_equal(shown(viewer), recall.frames[0])
-    assert viewer.title == "klatka 0/9, $E$ = \u22124,41, zmiany: 0"
+    assert viewer.title == "klatka 0/9, $E$ = \u221218,35, zmiany: 0"
 
 
 def test_set_frame_updates_bitmap_title_markers_and_slider(viewer, recall):
@@ -60,3 +60,11 @@ def test_the_slider_reaches_every_frame(viewer, recall):
         viewer.slider.set_val(frame)
         assert viewer.frame == frame
         assert np.array_equal(shown(viewer), recall.frames[frame])
+
+
+def test_free_keymaps_drops_the_viewer_keys_from_the_toolbar():
+    keymaps = free_keymaps()
+    assert {"keymap.back", "keymap.forward", "keymap.home"} <= set(keymaps)
+    for keys in keymaps.values():
+        assert not {"left", "right", "home", "end"} & set(keys)
+    assert "backspace" in keymaps["keymap.back"]

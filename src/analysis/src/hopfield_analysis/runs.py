@@ -154,7 +154,10 @@ def animate(
         max_frames: Largest number of frames, chosen with :func:`select_frames`.
 
     Returns:
-        The written file.
+        The written file. Pillow stores identical consecutive images as one
+        frame with the sum of their display times, so the GIF can have fewer
+        frames than chosen (e.g. every second frame of a two-cycle); the
+        animation still shows the same sequence for the same time.
     """
     if scale is None:
         scale = max(1, GIF_SIDE // max(recall.frames.shape[1:]))

@@ -20,6 +20,8 @@ TEXT_WIDTH = 15 / 2.54
 """Text width of the report in inches: A4 with 3 cm side margins."""
 DPI = 300
 FORMATS = ("pdf", "png")
+FONT_TIMESTAMP_LOGGER = "fontTools.ttLib.tables._h_e_a_d"
+"""Logger that warns about the old timestamps of the Latin Modern files."""
 
 RC_PARAMS = {
     "font.family": "serif",
@@ -33,10 +35,12 @@ RC_PARAMS = {
     "ytick.labelsize": 8,
     "axes.grid": True,
     "grid.alpha": 0.3,
-    "image.interpolation": "nearest",
-    "pdf.fonttype": 42,
+    "pdf.fonttype": 3,
     "savefig.dpi": DPI,
 }
+"""Style parameters. ``pdf.fonttype`` 3 embeds the glyph outlines: type 42
+would put the CFF-based OpenType files into a TrueType font slot, which PDF
+tools report as a font type mismatch."""
 
 
 def apply() -> None:
@@ -44,14 +48,14 @@ def apply() -> None:
 
     Artists read the parameters when they are created, so this runs before a
     figure is made (see :func:`new_figure`). Calling it again is harmless.
+    The warning of fontTools about the timestamps of the font files, issued
+    whenever it subsets them for a PDF, is silenced; its other messages stay.
     """
     registered = {entry.fname for entry in font_manager.fontManager.ttflist}
     for path in sorted(FONT_DIR.glob("*.otf")):
         if str(path) not in registered:
             font_manager.fontManager.addfont(str(path))
-    # fontTools warns about the old timestamps of the font files when it
-    # subsets them for a PDF; the warning is harmless.
-    logging.getLogger("fontTools").setLevel(logging.ERROR)
+    logging.getLogger(FONT_TIMESTAMP_LOGGER).setLevel(logging.ERROR)
     mpl.rcParams.update(RC_PARAMS)
 
 
@@ -84,6 +88,10 @@ class CommaFormatter(ScalarFormatter):
 def finish(figure: Figure) -> None:
     """Switches every scalar axis of ``figure`` to :class:`CommaFormatter`.
 
+    The formatter keeps its settings (offset, scientific notation, power
+    limits): only its class changes, so axes configured by the caller look
+    the same apart from the decimal comma.
+
     Args:
         figure: The figure, after all its axes were drawn.
     """
@@ -91,11 +99,18 @@ def finish(figure: Figure) -> None:
         for axis in (ax.xaxis, ax.yaxis):
             formatter = axis.get_major_formatter()
             if type(formatter) is ScalarFormatter:
-                axis.set_major_formatter(CommaFormatter())
+                formatter.__class__ = CommaFormatter
 
 
 def save(figure: Figure, stem: Path) -> list[Path]:
     """Saves ``figure`` as ``<stem>.pdf`` and ``<stem>.png`` (300 dpi).
+
+    Images (bitmaps, heat maps) are resampled differently per format. The
+    PDF embeds them unresampled (interpolation ``none``), so every pixel of
+    a large bitmap is kept and stays sharp when zoomed in. The PNG uses
+    ``auto``: nearest neighbour when a small bitmap is enlarged at least 3
+    times, smoothing when a large one is shrunk, which keeps thin lines
+    instead of dropping whole rows and columns.
 
     Args:
         figure: The figure.
@@ -109,7 +124,15 @@ def save(figure: Figure, stem: Path) -> list[Path]:
         stem = stem.with_suffix("")
     stem.parent.mkdir(parents=True, exist_ok=True)
     finish(figure)
-    paths = [stem.with_name(f"{stem.name}.{extension}") for extension in FORMATS]
-    for path in paths:
+    images = [image for ax in figure.axes for image in ax.images]
+    interpolations = [image.get_interpolation() for image in images]
+    paths = []
+    for extension in FORMATS:
+        for image in images:
+            image.set_interpolation("none" if extension == "pdf" else "auto")
+        path = stem.with_name(f"{stem.name}.{extension}")
         figure.savefig(path, dpi=DPI)
+        paths.append(path)
+    for image, interpolation in zip(images, interpolations, strict=True):
+        image.set_interpolation(interpolation)
     return paths

@@ -7,6 +7,7 @@ them.
 """
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +24,11 @@ CLASS_COLORS = {
     "unconverged": "0.6",
 }
 """Colors of the final state classes, in the order of the stacked bars."""
+
+PANELS_PER_ROW = 3
+"""Largest number of dataset panels in a row of :func:`plot_recovery`."""
+TICK_LABELS = 6
+"""Largest number of labelled noise levels on an axis of :func:`plot_classes`."""
 
 TRIALS_FILE = "trials.parquet"
 SUMMARY_FILE = "summary.json"
@@ -74,9 +80,10 @@ def load_metadata(results: Path) -> dict[str, Any]:
 def plot_recovery(summary: pl.DataFrame) -> Figure:
     """Plots the fraction of recovered runs against the noise level.
 
-    One panel per dataset, one line per learning rule and update mode, with
-    the 95% Wilson intervals from the summary as error bars and a legend
-    below the panels, all in the report style with Polish labels.
+    One panel per dataset, at most three in a row, one line per learning
+    rule and update mode, with the 95% Wilson intervals from the summary as
+    error bars, the legend above and one noise axis label below the panels, all in
+    the report style with Polish labels.
 
     Args:
         summary: Cell aggregates from :func:`load_summary` of an experiment
@@ -91,8 +98,13 @@ def plot_recovery(summary: pl.DataFrame) -> Figure:
     if "recovered_fraction" not in summary.columns:
         raise ValueError("the experiment has no recovery fractions (random inputs?)")
     datasets = summary["dataset"].unique(maintain_order=True).to_list()
-    figure = style.new_figure(height=2.8)
-    axes = figure.subplots(1, len(datasets), squeeze=False, sharey=True)[0]
+    columns = min(len(datasets), PANELS_PER_ROW)
+    rows = math.ceil(len(datasets) / columns)
+    figure = style.new_figure(height=2.1 * rows + 0.7)
+    grid = figure.subplots(rows, columns, squeeze=False, sharey=True)
+    for ax in grid.flat[len(datasets) :]:
+        ax.set_visible(False)
+    axes = grid.flat[: len(datasets)]
     for ax, dataset in zip(axes, datasets, strict=True):
         cells = summary.filter(pl.col("dataset") == dataset)
         for (learning, mode), series in cells.group_by(["learning", "mode"], maintain_order=True):
@@ -112,11 +124,12 @@ def plot_recovery(summary: pl.DataFrame) -> Figure:
                 label=f"{labels.rule(learning)}, {labels.mode(mode)}",
             )
         ax.set_title(dataset)
-        ax.set_xlabel(labels.NOISE)
         ax.set_ylim(-0.05, 1.05)
-    axes[0].set_ylabel(labels.RECOVERED)
+    for row in grid:
+        row[0].set_ylabel(labels.RECOVERED)
+    figure.supxlabel(labels.NOISE, fontsize=9)
     handles, names = axes[0].get_legend_handles_labels()
-    figure.legend(handles, names, loc="outside lower center", ncols=min(len(names), 2))
+    figure.legend(handles, names, loc="outside upper center", ncols=min(len(names), 2))
     return figure
 
 
@@ -126,7 +139,9 @@ def plot_classes(summary: pl.DataFrame) -> Figure:
     One row of panels per dataset and one column per learning rule and update
     mode; in every panel one bar per noise level (or a single bar for random
     inputs) stacked from the classes ``pattern``, ``negation``, ``spurious``,
-    ``cycle`` and ``unconverged``, with the class legend below the panels.
+    ``cycle`` and ``unconverged``, with the class legend above the panels.
+    With more than six noise levels only every k-th bar is labelled, so the
+    labels do not overlap.
 
     Args:
         summary: Cell aggregates from :func:`load_summary`.
@@ -159,17 +174,20 @@ def plot_classes(summary: pl.DataFrame) -> Figure:
                     label=labels.final_class(name),
                 )
                 bottom = [b + f for b, f in zip(bottom, fractions, strict=True)]
-            noise = cells["noise"].to_list()
+            step = math.ceil(cells.height / TICK_LABELS)
+            names = [
+                labels.RANDOM_INPUT if n is None else labels.decimal(n)
+                for n in cells["noise"].to_list()
+            ]
             ax.set_xticks(
-                positions, [labels.RANDOM_INPUT if n is None else labels.number(n) for n in noise]
+                positions, [name if k % step == 0 else "" for k, name in enumerate(names)]
             )
             ax.set_ylim(0, 1)
             ax.grid(False, axis="x")
             if row == 0:
                 ax.set_title(f"{labels.rule(learning)}\n{labels.mode(mode)}", fontsize=8)
-            if row == len(datasets) - 1:
-                ax.set_xlabel(labels.NOISE_SHORT)
         axes[row, 0].set_ylabel(f"{dataset}\n{labels.FRACTION}")
+    figure.supxlabel(labels.NOISE_SHORT, fontsize=9)
     handles, names = axes[0, 0].get_legend_handles_labels()
-    figure.legend(handles, names, loc="outside lower center", ncols=len(names))
+    figure.legend(handles, names, loc="outside upper center", ncols=len(names))
     return figure

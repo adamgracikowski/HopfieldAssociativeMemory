@@ -13,7 +13,7 @@ FRACTION = "odsetek przebiegów"
 FRAME = "klatka"
 CHANGES = "zmiany"
 ENERGY = "energia $E$"
-OVERLAP = "overlap $m^\\mu$"
+OVERLAP = "nakładanie $m^\\mu$"
 PATTERN = "wzorzec"
 TARGET = "cel"
 NEAREST = "najbliższy"
@@ -67,3 +67,16 @@ def number(value: float, digits: int = 2) -> str:
         The text, e.g. ``-98,98`` for ``-98.984``.
     """
     return f"{value:.{digits}f}".replace(".", ",").replace("-", "−")
+
+
+def decimal(value: float) -> str:
+    """Formats ``value`` with the digits it needs, a decimal comma and a minus sign.
+
+    Args:
+        value: The number, e.g. a noise level.
+
+    Returns:
+        The shortest text that keeps 6 significant digits, e.g. ``0,025`` for
+        ``0.025`` and ``0,1`` for ``0.1``.
+    """
+    return f"{value:g}".replace(".", ",").replace("-", "\u2212")
