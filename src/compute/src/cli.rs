@@ -1,5 +1,6 @@
 //! Parsing of the command line and dispatch to the subcommands.
 
+mod capacity;
 mod convert_images;
 mod experiment;
 mod inspect;
@@ -9,6 +10,7 @@ mod train;
 use clap::{Parser, Subcommand};
 use compute::build_info;
 
+use capacity::CapacityArgs;
 use convert_images::ConvertImagesArgs;
 use experiment::ExperimentArgs;
 use inspect::InspectArgs;
@@ -32,6 +34,7 @@ impl Cli {
             Command::Train(args) => args.run(),
             Command::Recall(args) => args.run(),
             Command::Experiment(args) => args.run(),
+            Command::Capacity(args) => args.run(),
         }
     }
 }
@@ -55,4 +58,8 @@ enum Command {
     /// Run a grid of datasets, learning rules, update modes and noise levels
     /// with many trials and save the trial table and the cell summaries.
     Experiment(ExperimentArgs),
+
+    /// Check how many stored patterns stay stable as their number grows, for
+    /// prefixes of datasets and for random patterns.
+    Capacity(CapacityArgs),
 }

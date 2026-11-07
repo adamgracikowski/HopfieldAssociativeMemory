@@ -392,6 +392,7 @@ dependencies = [
  "csv",
  "humantime",
  "image",
+ "libm",
  "miette",
  "ndarray",
  "npyz",

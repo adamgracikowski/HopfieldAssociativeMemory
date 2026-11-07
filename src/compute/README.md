@@ -164,6 +164,42 @@ The final state is classified by exact equality: `pattern` (a fixed point equal 
 
 Running the experiment again gives identical `trials.parquet`, `summary.json`, `datasets.json` and `stability.parquet`; `metadata.json` differs only in `created`.
 
+### `capacity`
+
+Counts the stable stored patterns as their number `p` grows, without running the dynamics: for the prefixes of registered datasets (the first 1, 2, ..., `p` patterns) and for sets of independent random patterns, in parallel over the sets.
+
+```bash
+cargo run --release -- capacity --config ../../data/experiments/08-capacity/config.toml
+```
+
+The results go to `results/` next to the configuration, or to `--out <dir>` (`--force` as above). The configuration:
+
+```toml
+seed = 7                  # master seed, required
+datasets = ["letters-14x20"]  # optional: prefixes of these datasets
+# registry = "../../datasets/datasets.toml"  # by default found from this file's directory upwards
+backend = "auto"          # as in a run configuration
+zero_field = "keep"       # sgn(0) in the stability check
+trials = 50               # random sets for every (N, p)
+
+[[random]]                # optional, one table per number of neurons
+neurons = 280
+patterns = { start = 2, end = 80, step = 2 }  # p = 2, 4, ..., 80; step 1 by default
+
+[[learning]]              # one table per rule, parameters as above
+rule = "hebb"
+[[learning]]
+rule = "oja"
+```
+
+There must be at least one dataset or random entry; datasets, numbers of neurons and rule names must not repeat, and a random set has at most `N` patterns. A dataset prefix is fixed, so it has a single trial. The patterns of a random set are drawn from the input stream of the seed derived from `seed/random/N/p/trial` (as in `experiment`); it does not depend on the rule, so every rule sees the same sets. The command writes:
+
+- `capacity.parquet`: one row per pattern set and rule, ordered by source (datasets, then random entries), `p`, trial and rule, with the columns `source` (dataset name or `random`), `learning`, `neurons`, `patterns`, `trial`, `seed` (null for a prefix), `stable`, `unstable_neurons` (over all patterns), `epochs` and `converged`,
+- `summary.json`: `{"rows": [...]}` with, for every source, `p` and rule, the load `p/N`, the number of trials, whether it is `deterministic`, the mean and sample standard deviation of the fraction of stable patterns (`stable_fraction`) and of neurons that would change (`bit_errors`), the fraction of sets with all patterns stable with a 95% Wilson interval (`all_stable`, exact for a prefix) and, for random sets with the Hebbian rule, the signal-to-noise prediction (`theory`: `bit_error = Phi(-sqrt(N/p))` and `pattern_stable = (1 - bit_error)^N`),
+- `metadata.json`: command, time, build, the configuration with all defaults and the datasets.
+
+Running it again gives identical `capacity.parquet` and `summary.json`; `metadata.json` differs only in `created`. Oja's subspace rule on random sets is the slow part: its epochs cost `O(p^3)` and their number grows with `p`.
+
 ## Checks
 
 The same checks run in CI:

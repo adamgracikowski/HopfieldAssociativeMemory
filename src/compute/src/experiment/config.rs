@@ -198,7 +198,7 @@ impl ExperimentConfig {
 }
 
 /// Checks that the axis `name` has at least one value and no value twice.
-fn check_axis<T: PartialEq + std::fmt::Debug>(
+pub(crate) fn check_axis<T: PartialEq + std::fmt::Debug>(
     name: &str,
     values: &[T],
 ) -> std::result::Result<(), String> {
