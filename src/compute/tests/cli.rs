@@ -860,10 +860,10 @@ fn capacity_rejects_too_many_random_patterns() {
 }
 
 /// The test fixtures of the presentation layer (`src/analysis/tests/fixtures`)
-/// are what `recall` and `train` write for their configurations. A change of
-/// the output fails here until the fixtures are regenerated with the
-/// commands in their README. Only the data files are compared: the metadata
-/// records the time and the build.
+/// are what `recall`, `train`, `experiment` and `capacity` write for their
+/// configurations. A change of the output fails here until the fixtures are
+/// regenerated with the commands in their README. Only the data files are
+/// compared: the metadata records the time and the build.
 #[test]
 fn analysis_fixtures_match_the_current_output() {
     let fixtures = Path::new("../analysis/tests/fixtures");
@@ -871,6 +871,16 @@ fn analysis_fixtures_match_the_current_output() {
     for (command, files) in [
         ("recall", &["history.npy", "frames.json"][..]),
         ("train", &["weights.npy"][..]),
+        (
+            "experiment",
+            &[
+                "trials.parquet",
+                "summary.json",
+                "datasets.json",
+                "stability.parquet",
+            ][..],
+        ),
+        ("capacity", &["capacity.parquet", "summary.json"][..]),
     ] {
         let out = dir.path().join(command);
         compute()

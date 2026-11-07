@@ -12,5 +12,15 @@ Artifacts written by the compute layer, so the tests check the real file formats
   ```bash
   cargo run --release -- train --config ../analysis/tests/fixtures/train.toml --out ../analysis/tests/fixtures/train --force
   ```
+- `experiment/`: `compute experiment` with `experiment.toml` (stored patterns of `small-7x7` and `animals-14x9` as inputs, both learning rules, synchronous updates, 2 trials, with `stability.parquet`). Regenerate from `src/compute`:
 
-The tests check the shapes and statistics of the fixture, not the time or the build in `metadata.json`. A test of `src/compute` (`tests/cli.rs`) runs both configurations and compares the data files with these fixtures, so a change of the output format fails there until the fixtures are regenerated.
+  ```bash
+  cargo run --release -- experiment --config ../analysis/tests/fixtures/experiment.toml --out ../analysis/tests/fixtures/experiment --force
+  ```
+- `capacity/`: `compute capacity` with `capacity.toml` (prefixes of `small-7x7` and 5 random sets of 49 neurons for every `p` from 2 to 20 in steps of 2, both learning rules). Regenerate from `src/compute`:
+
+  ```bash
+  cargo run --release -- capacity --config ../analysis/tests/fixtures/capacity.toml --out ../analysis/tests/fixtures/capacity --force
+  ```
+
+The tests check the shapes and statistics of the fixtures, not the time or the build in `metadata.json`. A test of `src/compute` (`tests/cli.rs`) runs every configuration and compares the data files with these fixtures, so a change of the output format fails there until the fixtures are regenerated.
