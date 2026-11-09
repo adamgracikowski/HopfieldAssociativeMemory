@@ -1,3 +1,6 @@
+import re
+
+import matplotlib as mpl
 import numpy as np
 import pytest
 from matplotlib import font_manager
@@ -88,3 +91,35 @@ def test_save_embeds_bitmaps_unresampled_in_the_pdf(tmp_path):
     pdf, _ = style.save(figure, tmp_path / "bitmap")
     assert b"/Width 300" in pdf.read_bytes()
     assert image.get_interpolation() == "auto"
+
+
+def test_save_repeats_the_pixels_of_an_enlarged_image_in_the_pdf(tmp_path):
+    """A 14 x 20 bitmap (14 columns) with a masked overlay in a 2 x 2 inch
+    figure: the panel is wider than 14 pixels at 300 dpi, so the PDF holds
+    a raster with ``14 k`` columns for an integer ``k > 1``, made of whole
+    copies of every pixel. The data of both images is restored afterwards."""
+    rng = np.random.default_rng(0)
+    bitmap = np.where(rng.random((20, 14)) < 0.5, 1, -1)
+    mask = rng.random((20, 14)) < 0.2
+    figure = style.new_figure(width=2.0, height=2.0)
+    ax = figure.subplots()
+    image = draw_bitmap(ax, bitmap)
+    overlay = ax.imshow(np.ma.masked_where(~mask, np.ones((20, 14))), interpolation="auto")
+    figure.draw_without_rendering()
+    rows, columns = style.pixel_repeats(image)
+    assert rows > 1 and columns > 1
+    with mpl.rc_context({"pdf.compression": 0}):
+        pdf, _ = style.save(figure, tmp_path / "small")
+    widths = {int(w) for w in re.findall(rb"/Width (\d+)", pdf.read_bytes())}
+    assert 14 * columns in widths
+    assert all(width % 14 == 0 for width in widths)
+    np.testing.assert_array_equal(image.get_array(), bitmap)
+    np.testing.assert_array_equal(np.ma.getmaskarray(overlay.get_array()), ~mask)
+    assert image.get_interpolation() == overlay.get_interpolation() == "auto"
+
+
+def test_pixel_repeats_keeps_a_large_bitmap():
+    figure = style.new_figure(width=0.8, height=0.6)
+    image = draw_bitmap(figure.subplots(), np.ones((200, 300)))
+    figure.draw_without_rendering()
+    assert style.pixel_repeats(image) == (1, 1)

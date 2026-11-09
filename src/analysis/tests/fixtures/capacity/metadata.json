@@ -1,0 +1,52 @@
+{
+  "command": "capacity",
+  "created": "2026-11-07T19:31:59Z",
+  "build": {
+    "version": "0.1.0",
+    "commit": "22edd2e94b20934d73bf96f483531282a3855756",
+    "dirty": false
+  },
+  "config": {
+    "seed": 1,
+    "datasets": [
+      "small-7x7"
+    ],
+    "backend": "auto",
+    "zero_field": "keep",
+    "trials": 5,
+    "random": [
+      {
+        "neurons": 49,
+        "patterns": {
+          "start": 2,
+          "end": 20,
+          "step": 2
+        }
+      }
+    ],
+    "learning": [
+      {
+        "rule": "hebb"
+      },
+      {
+        "rule": "oja",
+        "variant": "subspace",
+        "eta": 0.5,
+        "max_epochs": 100000,
+        "tolerance": 1e-6
+      }
+    ]
+  },
+  "datasets": [
+    {
+      "name": "small-7x7",
+      "registry": "../../../../data/datasets/datasets.toml",
+      "file": "small-7x7.csv",
+      "description": "Five simple geometric shapes: a diagonal cross, a frame, a small filled square, a diamond and four squares.",
+      "width": 7,
+      "height": 7,
+      "patterns": 5,
+      "neurons": 49
+    }
+  ]
+}

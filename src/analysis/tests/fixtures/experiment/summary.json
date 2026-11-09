@@ -1,0 +1,240 @@
+{
+  "cells": [
+    {
+      "dataset": "small-7x7",
+      "learning": "hebb",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 5,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 3,
+          "fraction": 0.6,
+          "lower": 0.6,
+          "upper": 0.6
+        },
+        "negation": {
+          "count": 1,
+          "fraction": 0.2,
+          "lower": 0.2,
+          "upper": 0.2
+        },
+        "spurious": {
+          "count": 1,
+          "fraction": 0.2,
+          "lower": 0.2,
+          "upper": 0.2
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 3,
+        "fraction": 0.6,
+        "lower": 0.6,
+        "upper": 0.6
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 1.7320508075688772
+      },
+      "energy": {
+        "mean": -35.053061224489795,
+        "std": 4.828624906978671
+      },
+      "final_overlap": {
+        "mean": 0.8775510204081632,
+        "std": 0.2120878539880258
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (subspace)",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 5,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 5,
+          "fraction": 1.0,
+          "lower": 1.0,
+          "upper": 1.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
+      "steps": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -21.999983882688525,
+        "std": 0.000027879456736554565
+      },
+      "final_overlap": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "hebb",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 6,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 2,
+          "fraction": 0.3333333333333333,
+          "lower": 0.3333333333333333,
+          "upper": 0.3333333333333333
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 4,
+          "fraction": 0.6666666666666666,
+          "lower": 0.6666666666666666,
+          "upper": 0.6666666666666666
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 2,
+        "fraction": 0.3333333333333333,
+        "lower": 0.3333333333333333,
+        "upper": 0.3333333333333333
+      },
+      "steps": {
+        "mean": 2.5,
+        "std": 1.9748417658131499
+      },
+      "energy": {
+        "mean": -88.53968253968252,
+        "std": 16.192430632112067
+      },
+      "final_overlap": {
+        "mean": 0.7301587301587301,
+        "std": 0.21787123729236177
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "oja (subspace)",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 6,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 6,
+          "fraction": 1.0,
+          "lower": 1.0,
+          "upper": 1.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 6,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
+      "steps": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -59.999931481513535,
+        "std": 0.00009610858986128035
+      },
+      "final_overlap": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    }
+  ]
+}

@@ -20,6 +20,7 @@ use crate::{Error, Result};
 /// datasets = ["small-7x7", "animals-14x9"]
 /// backend = "auto"         # optional, `auto` by default
 /// trials = 100
+/// stability_fields = false # optional, writes stability.parquet when true
 ///
 /// [[learning]]
 /// rule = "hebb"
@@ -59,6 +60,11 @@ pub struct ExperimentConfig {
     pub dynamics: ExperimentDynamics,
     /// Initial states and noise levels.
     pub input: ExperimentInput,
+    /// Whether to write the aligned local field of every neuron of every
+    /// stored pattern (`stability.parquet`); off by default, because the
+    /// table has `p N` rows per learning rule.
+    #[serde(default)]
+    pub stability_fields: bool,
     #[serde(skip)]
     path: PathBuf,
 }
@@ -192,7 +198,7 @@ impl ExperimentConfig {
 }
 
 /// Checks that the axis `name` has at least one value and no value twice.
-fn check_axis<T: PartialEq + std::fmt::Debug>(
+pub(crate) fn check_axis<T: PartialEq + std::fmt::Debug>(
     name: &str,
     values: &[T],
 ) -> std::result::Result<(), String> {

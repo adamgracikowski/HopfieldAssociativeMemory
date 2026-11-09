@@ -1,0 +1,71 @@
+{
+  "command": "capacity",
+  "created": "2026-11-07T20:23:28Z",
+  "build": {
+    "version": "0.1.0",
+    "commit": "2b7a2116e5d35d776070220ccc80437ad150489a",
+    "dirty": false
+  },
+  "config": {
+    "seed": 20261106,
+    "datasets": [
+      "letters-14x20",
+      "large-25x25.plus"
+    ],
+    "backend": "auto",
+    "zero_field": "keep",
+    "trials": 50,
+    "random": [
+      {
+        "neurons": 280,
+        "patterns": {
+          "start": 2,
+          "end": 80,
+          "step": 2
+        }
+      },
+      {
+        "neurons": 625,
+        "patterns": {
+          "start": 5,
+          "end": 150,
+          "step": 5
+        }
+      }
+    ],
+    "learning": [
+      {
+        "rule": "hebb"
+      },
+      {
+        "rule": "oja",
+        "variant": "subspace",
+        "eta": 0.5,
+        "max_epochs": 100000,
+        "tolerance": 1e-6
+      }
+    ]
+  },
+  "datasets": [
+    {
+      "name": "letters-14x20",
+      "registry": "../../datasets/datasets.toml",
+      "file": "letters-14x20.csv",
+      "description": "Lowercase letters a to z.",
+      "width": 14,
+      "height": 20,
+      "patterns": 26,
+      "neurons": 280
+    },
+    {
+      "name": "large-25x25.plus",
+      "registry": "../../datasets/datasets.toml",
+      "file": "large-25x25.plus.csv",
+      "description": "The six pictures of large-25x25 followed by nine more.",
+      "width": 25,
+      "height": 25,
+      "patterns": 15,
+      "neurons": 625
+    }
+  ]
+}

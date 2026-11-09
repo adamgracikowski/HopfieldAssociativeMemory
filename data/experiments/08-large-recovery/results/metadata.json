@@ -1,0 +1,223 @@
+{
+  "command": "experiment",
+  "created": "2026-11-07T19:47:07Z",
+  "build": {
+    "version": "0.1.0",
+    "commit": "2b7a2116e5d35d776070220ccc80437ad150489a",
+    "dirty": false
+  },
+  "config": {
+    "seed": 20261106,
+    "datasets": [
+      "large-25x25",
+      "large-25x25.plus",
+      "large-25x50"
+    ],
+    "backend": "auto",
+    "trials": 100,
+    "learning": [
+      {
+        "rule": "hebb"
+      },
+      {
+        "rule": "oja",
+        "variant": "subspace",
+        "eta": 0.5,
+        "max_epochs": 100000,
+        "tolerance": 1e-6
+      }
+    ],
+    "dynamics": {
+      "modes": [
+        "synchronous",
+        "asynchronous"
+      ],
+      "zero_field": "keep",
+      "order": "permutation",
+      "max_steps": 1000
+    },
+    "input": {
+      "source": "pattern",
+      "noise": [
+        0.0,
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3,
+        0.35,
+        0.4,
+        0.45,
+        0.5
+      ]
+    },
+    "stability_fields": false
+  },
+  "datasets": [
+    {
+      "name": "large-25x25",
+      "registry": "../../datasets/datasets.toml",
+      "file": "large-25x25.csv",
+      "description": "Six larger pictures.",
+      "width": 25,
+      "height": 25,
+      "patterns": 6,
+      "neurons": 625
+    },
+    {
+      "name": "large-25x25.plus",
+      "registry": "../../datasets/datasets.toml",
+      "file": "large-25x25.plus.csv",
+      "description": "The six pictures of large-25x25 followed by nine more.",
+      "width": 25,
+      "height": 25,
+      "patterns": 15,
+      "neurons": 625
+    },
+    {
+      "name": "large-25x50",
+      "registry": "../../datasets/datasets.toml",
+      "file": "large-25x50.csv",
+      "description": "The six pictures of large-25x25 in the top half, the bottom half filled with 1.",
+      "width": 25,
+      "height": 50,
+      "patterns": 6,
+      "neurons": 1250
+    }
+  ],
+  "trainings": [
+    {
+      "dataset": "large-25x25",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 5,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          30,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 176,
+      "converged": true,
+      "stability": {
+        "stable": 6,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 1,
+        "unstable_neurons": [
+          18,
+          100,
+          0,
+          77,
+          93,
+          108,
+          74,
+          103,
+          116,
+          16,
+          56,
+          114,
+          77,
+          22,
+          93
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 538,
+      "converged": true,
+      "stability": {
+        "stable": 15,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x50",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 1250,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          157,
+          86,
+          192,
+          77,
+          99,
+          89
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x50",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 1250,
+      "epochs": 409,
+      "converged": true,
+      "stability": {
+        "stable": 6,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  ]
+}

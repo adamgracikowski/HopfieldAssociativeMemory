@@ -1,0 +1,311 @@
+{
+  "command": "experiment",
+  "created": "2026-11-07T19:45:42Z",
+  "build": {
+    "version": "0.1.0",
+    "commit": "2b7a2116e5d35d776070220ccc80437ad150489a",
+    "dirty": false
+  },
+  "config": {
+    "seed": 20261106,
+    "datasets": [
+      "small-7x7",
+      "letters-abc-8x12",
+      "animals-14x9",
+      "letters-14x20",
+      "OCRA-12x30-cut",
+      "large-25x25",
+      "large-25x25.plus",
+      "large-25x50"
+    ],
+    "backend": "auto",
+    "trials": 20,
+    "learning": [
+      {
+        "rule": "oja",
+        "variant": "single-neuron",
+        "eta": 0.5,
+        "max_epochs": 100000,
+        "tolerance": 1e-6
+      }
+    ],
+    "dynamics": {
+      "modes": [
+        "synchronous",
+        "asynchronous"
+      ],
+      "zero_field": "keep",
+      "order": "permutation",
+      "max_steps": 100
+    },
+    "input": {
+      "source": "pattern",
+      "noise": [
+        0.0
+      ]
+    },
+    "stability_fields": true
+  },
+  "datasets": [
+    {
+      "name": "small-7x7",
+      "registry": "../../datasets/datasets.toml",
+      "file": "small-7x7.csv",
+      "description": "Five simple geometric shapes: a diagonal cross, a frame, a small filled square, a diamond and four squares.",
+      "width": 7,
+      "height": 7,
+      "patterns": 5,
+      "neurons": 49
+    },
+    {
+      "name": "letters-abc-8x12",
+      "registry": "../../datasets/datasets.toml",
+      "file": "letters-abc-8x12.csv",
+      "description": "Lowercase letters a, b and c.",
+      "width": 8,
+      "height": 12,
+      "patterns": 3,
+      "neurons": 96
+    },
+    {
+      "name": "animals-14x9",
+      "registry": "../../datasets/datasets.toml",
+      "file": "animals-14x9.csv",
+      "description": "Six small animal silhouettes.",
+      "width": 14,
+      "height": 9,
+      "patterns": 6,
+      "neurons": 126
+    },
+    {
+      "name": "letters-14x20",
+      "registry": "../../datasets/datasets.toml",
+      "file": "letters-14x20.csv",
+      "description": "Lowercase letters a to z.",
+      "width": 14,
+      "height": 20,
+      "patterns": 26,
+      "neurons": 280
+    },
+    {
+      "name": "OCRA-12x30-cut",
+      "registry": "../../datasets/datasets.toml",
+      "file": "OCRA-12x30-cut.csv",
+      "description": "Seven uppercase OCR-A letters (A, B, C, K, Q, R, Z), cut to 12x30.",
+      "width": 12,
+      "height": 30,
+      "patterns": 7,
+      "neurons": 360
+    },
+    {
+      "name": "large-25x25",
+      "registry": "../../datasets/datasets.toml",
+      "file": "large-25x25.csv",
+      "description": "Six larger pictures.",
+      "width": 25,
+      "height": 25,
+      "patterns": 6,
+      "neurons": 625
+    },
+    {
+      "name": "large-25x25.plus",
+      "registry": "../../datasets/datasets.toml",
+      "file": "large-25x25.plus.csv",
+      "description": "The six pictures of large-25x25 followed by nine more.",
+      "width": 25,
+      "height": 25,
+      "patterns": 15,
+      "neurons": 625
+    },
+    {
+      "name": "large-25x50",
+      "registry": "../../datasets/datasets.toml",
+      "file": "large-25x50.csv",
+      "description": "The six pictures of large-25x25 in the top half, the bottom half filled with 1.",
+      "width": 25,
+      "height": 50,
+      "patterns": 6,
+      "neurons": 1250
+    }
+  ],
+  "trainings": [
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (single-neuron)",
+      "backend": "dense",
+      "neurons": 49,
+      "epochs": 122,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          14,
+          14,
+          2,
+          15,
+          10
+        ]
+      }
+    },
+    {
+      "dataset": "letters-abc-8x12",
+      "learning": "oja (single-neuron)",
+      "backend": "dense",
+      "neurons": 96,
+      "epochs": 29,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          5,
+          3,
+          6
+        ]
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "oja (single-neuron)",
+      "backend": "dense",
+      "neurons": 126,
+      "epochs": 147,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          31,
+          27,
+          19,
+          43,
+          43,
+          26
+        ]
+      }
+    },
+    {
+      "dataset": "letters-14x20",
+      "learning": "oja (single-neuron)",
+      "backend": "dense",
+      "neurons": 280,
+      "epochs": 48,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          29,
+          18,
+          15,
+          28,
+          19,
+          21,
+          37,
+          24,
+          17,
+          25,
+          31,
+          19,
+          35,
+          18,
+          19,
+          20,
+          30,
+          10,
+          26,
+          18,
+          20,
+          34,
+          52,
+          41,
+          46,
+          35
+        ]
+      }
+    },
+    {
+      "dataset": "OCRA-12x30-cut",
+      "learning": "oja (single-neuron)",
+      "backend": "dense",
+      "neurons": 360,
+      "epochs": 120,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          153,
+          78,
+          55,
+          92,
+          91,
+          78,
+          82
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25",
+      "learning": "oja (single-neuron)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 208,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          214,
+          134,
+          311,
+          112,
+          154,
+          134
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus",
+      "learning": "oja (single-neuron)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 172,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          282,
+          140,
+          312,
+          112,
+          178,
+          148,
+          91,
+          169,
+          144,
+          276,
+          238,
+          190,
+          96,
+          210,
+          210
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x50",
+      "learning": "oja (single-neuron)",
+      "backend": "dense",
+      "neurons": 1250,
+      "epochs": 60,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          214,
+          134,
+          314,
+          112,
+          154,
+          134
+        ]
+      }
+    }
+  ]
+}

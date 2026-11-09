@@ -1,14 +1,16 @@
 //! Execution of an experiment.
 
+use ndarray::Array2;
 use rayon::prelude::*;
 use serde::Serialize;
 
 use super::{
-    Cell, CellSummary, ExperimentConfig, ExperimentInput, ExperimentMetadata, Trial, TrialResult,
-    TrialTable,
+    Cell, CellSummary, DatasetStatistics, ExperimentConfig, ExperimentInput, ExperimentMetadata,
+    FieldTable, Trial, TrialResult, TrialTable,
 };
 use crate::dynamics::Stability;
 use crate::learning::LearningRule;
+use crate::patterns::summary::Summary as PatternSummary;
 use crate::run::train::METADATA_FILE;
 use crate::run::{DatasetInfo, OutputDir, TrainingInfo};
 use crate::seed::Seed;
@@ -18,11 +20,21 @@ use crate::{PatternSet, Result};
 pub const TRIALS_FILE: &str = "trials.parquet";
 /// Name of the file with the aggregates of every cell.
 pub const SUMMARY_FILE: &str = "summary.json";
+/// Name of the file with the statistics of every dataset.
+pub const DATASETS_FILE: &str = "datasets.json";
+/// Name of the table of aligned local fields (see [`FieldTable`]).
+pub const FIELDS_FILE: &str = "stability.parquet";
 
 /// Contents of [`SUMMARY_FILE`].
 #[derive(Serialize)]
 struct Summary {
     cells: Vec<CellSummary>,
+}
+
+/// Contents of [`DATASETS_FILE`].
+#[derive(Serialize)]
+struct Datasets<'a> {
+    datasets: &'a [DatasetStatistics],
 }
 
 /// Training of one rule on one dataset, shared by all cells of the pair.
@@ -46,10 +58,16 @@ pub struct Training {
 pub struct ExperimentRun {
     /// The datasets in configuration order.
     pub datasets: Vec<DatasetInfo>,
+    /// Statistics of the datasets in configuration order.
+    pub statistics: Vec<DatasetStatistics>,
     /// Names of the learning rules in configuration order.
     pub learning: Vec<String>,
     /// Trainings ordered by dataset, then rule.
     pub trainings: Vec<Training>,
+    /// The [aligned fields](Stability::aligned_fields) (`p x N`) of every
+    /// training, in the order of `trainings`, if the configuration asks for
+    /// `stability_fields`; otherwise empty.
+    pub fields: Vec<Array2<f64>>,
     /// Cells of the grid.
     pub cells: Vec<Cell>,
     /// Results ordered by cell, then trial, then target.
@@ -81,21 +99,36 @@ impl ExperimentRun {
         for (info, _) in &loaded {
             config.check_noise_levels(&info.name, info.neurons)?;
         }
+        let statistics = loaded
+            .iter()
+            .map(|(info, set)| {
+                DatasetStatistics::from(&PatternSummary::new(&info.name, &info.description, set))
+            })
+            .collect();
         let learning = config.learning_labels();
         let cells = config.cells();
         let mut trainings = Vec::new();
+        let mut fields = Vec::new();
         let mut results = Vec::new();
         for (d, (info, set)) in loaded.iter().enumerate() {
             for (l, rule) in config.learning.iter().enumerate() {
                 let trained = rule.train(set, config.backend)?;
+                let aligned = Stability::aligned_fields(&trained.weights, set);
                 let training = Training {
                     dataset: info.name.clone(),
                     learning: learning[l].clone(),
                     info: TrainingInfo::from(&trained),
-                    stability: Stability::of(&trained.weights, set, config.dynamics.zero_field),
+                    stability: Stability::from_aligned_fields(
+                        aligned.view(),
+                        set,
+                        config.dynamics.zero_field,
+                    ),
                 };
                 on_training(&training);
                 trainings.push(training);
+                if config.stability_fields {
+                    fields.push(aligned);
+                }
 
                 let tasks: Vec<(Trial, Cell)> = cells
                     .iter()
@@ -118,8 +151,10 @@ impl ExperimentRun {
         }
         Ok(Self {
             datasets: loaded.into_iter().map(|(info, _)| info).collect(),
+            statistics,
             learning,
             trainings,
+            fields,
             cells,
             results,
         })
@@ -142,9 +177,13 @@ impl ExperimentRun {
     }
 
     /// Writes `metadata.json`, [`SUMMARY_FILE`] (`{"cells": [...]}` with the
-    /// [`CellSummary`] of every cell) and [`TRIALS_FILE`] (the
-    /// [`TrialTable`]). The last two depend only on the configuration and
-    /// the code, not on the time or the number of threads.
+    /// [`CellSummary`] of every cell), [`DATASETS_FILE`]
+    /// (`{"datasets": [...]}` with the [`DatasetStatistics`] of every
+    /// dataset), [`TRIALS_FILE`] (the [`TrialTable`]) and, if the run kept
+    /// them, [`FIELDS_FILE`] (the [`FieldTable`]); otherwise an old
+    /// [`FIELDS_FILE`] is removed, so a run without fields in a reused
+    /// directory leaves none. All files but the metadata depend only on the
+    /// configuration and the code, not on the time or the number of threads.
     pub fn write(&self, config: &ExperimentConfig, out: &OutputDir) -> Result<()> {
         out.write_json(METADATA_FILE, &ExperimentMetadata::new(config, self))?;
         out.write_json(
@@ -153,7 +192,18 @@ impl ExperimentRun {
                 cells: self.summaries(),
             },
         )?;
-        out.write_parquet(TRIALS_FILE, TrialTable::new(self).batch())
+        out.write_json(
+            DATASETS_FILE,
+            &Datasets {
+                datasets: &self.statistics,
+            },
+        )?;
+        out.write_parquet(TRIALS_FILE, TrialTable::new(self).batch())?;
+        if config.stability_fields {
+            out.write_parquet(FIELDS_FILE, FieldTable::new(self).batch())
+        } else {
+            out.remove(FIELDS_FILE)
+        }
     }
 }
 

@@ -10,7 +10,7 @@ use super::PatternSet;
 ///
 /// [`Display`](fmt::Display) prints a plain-text report with three decimal
 /// places.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Summary {
     /// Dataset name.
     pub name: String,
@@ -48,6 +48,25 @@ impl Summary {
     /// Load ratio $p / N$.
     pub fn load(&self) -> f64 {
         self.patterns as f64 / self.neurons as f64
+    }
+
+    /// For every pattern `mu`, the sum of `|m^{mu nu}|` over the other
+    /// patterns `nu`. With Hebbian weights pattern `mu` is stable when this
+    /// sum is below the signal `1 - p/N` (a sufficient condition: the
+    /// crosstalk at every neuron is at most the sum).
+    pub fn overlap_sums(&self) -> Vec<f64> {
+        self.overlaps
+            .rows()
+            .into_iter()
+            .enumerate()
+            .map(|(mu, row)| {
+                row.iter()
+                    .enumerate()
+                    .filter(|&(nu, _)| nu != mu)
+                    .map(|(_, m)| m.abs())
+                    .sum()
+            })
+            .collect()
     }
 
     /// Largest $|m^{\mu\nu}|$ over pairs of different patterns, with the first
@@ -131,6 +150,14 @@ mod tests {
         assert_eq!(summary.fraction_on, [1.0, 0.5, 0.75]);
         assert_eq!(summary.load(), 0.75);
         assert_eq!(summary.max_abs_overlap(), Some((0.5, 0, 2)));
+    }
+
+    /// Overlaps of the three patterns: `m^{01} = 0`, `m^{02} = 0.5`,
+    /// `m^{12} = -0.5`, so the sums are `0 + 0.5`, `0 + 0.5` and
+    /// `0.5 + 0.5`.
+    #[test]
+    fn sums_absolute_overlaps_with_the_other_patterns() {
+        assert_eq!(summary().overlap_sums(), [0.5, 0.5, 1.0]);
     }
 
     #[test]

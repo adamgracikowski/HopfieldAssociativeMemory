@@ -1,0 +1,948 @@
+{
+  "cells": [
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (single-neuron)",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 5,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 5,
+          "fraction": 1.0,
+          "lower": 1.0,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -144.75960127802014,
+        "std": 0.0
+      },
+      "final_overlap": {
+        "mean": 0.5510204081632654,
+        "std": 0.21980264518916345
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (single-neuron)",
+      "mode": "asynchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 100,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "spurious": {
+          "count": 100,
+          "fraction": 1.0,
+          "lower": 0.9630051925239981,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.03699480747600191
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.03699480747600191
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -144.75960127801997,
+        "std": 1.7138935651119235e-13
+      },
+      "final_overlap": {
+        "mean": 0.5510204081632651,
+        "std": 0.1975878842074545
+      }
+    },
+    {
+      "dataset": "letters-abc-8x12",
+      "learning": "oja (single-neuron)",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 3,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 3,
+          "fraction": 1.0,
+          "lower": 1.0,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -450.4468745240358,
+        "std": 0.0
+      },
+      "final_overlap": {
+        "mean": 0.9027777777777778,
+        "std": 0.03182344232608222
+      }
+    },
+    {
+      "dataset": "letters-abc-8x12",
+      "learning": "oja (single-neuron)",
+      "mode": "asynchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 60,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.06017393047793289
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.06017393047793289
+        },
+        "spurious": {
+          "count": 60,
+          "fraction": 1.0,
+          "lower": 0.9398260695220669,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.06017393047793289
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.06017393047793289
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.06017393047793289
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -450.44687452403633,
+        "std": 5.159080679739528e-13
+      },
+      "final_overlap": {
+        "mean": 0.902777777777778,
+        "std": 0.0262030077388783
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "oja (single-neuron)",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 6,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 6,
+          "fraction": 1.0,
+          "lower": 1.0,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -612.2651119054694,
+        "std": 0.0
+      },
+      "final_overlap": {
+        "mean": 0.49999999999999994,
+        "std": 0.15413997950870112
+      }
+    },
+    {
+      "dataset": "animals-14x9",
+      "learning": "oja (single-neuron)",
+      "mode": "asynchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 120,
+          "fraction": 1.0,
+          "lower": 0.9689797289440706,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.031020271055929513
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -612.2651119054697,
+        "std": 2.2832702836850957e-13
+      },
+      "final_overlap": {
+        "mean": 0.49999999999999944,
+        "std": 0.14129988754758563
+      }
+    },
+    {
+      "dataset": "letters-14x20",
+      "learning": "oja (single-neuron)",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 26,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 26,
+          "fraction": 1.0,
+          "lower": 1.0,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -2206.05320877681,
+        "std": 1.3912593695548234e-12
+      },
+      "final_overlap": {
+        "mean": 0.8112637362637363,
+        "std": 0.07279193375707362
+      }
+    },
+    {
+      "dataset": "letters-14x20",
+      "learning": "oja (single-neuron)",
+      "mode": "asynchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 520,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.007333514558599393
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.007333514558599393
+        },
+        "spurious": {
+          "count": 520,
+          "fraction": 1.0,
+          "lower": 0.9926664854414006,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.007333514558599393
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.007333514558599393
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.007333514558599393
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -2206.0532087768297,
+        "std": 1.82074095850493e-11
+      },
+      "final_overlap": {
+        "mean": 0.8112637362637354,
+        "std": 0.07144709577914127
+      }
+    },
+    {
+      "dataset": "OCRA-12x30-cut",
+      "learning": "oja (single-neuron)",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 7,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 7,
+          "fraction": 1.0,
+          "lower": 1.0,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -2855.3132023970907,
+        "std": 0.0
+      },
+      "final_overlap": {
+        "mean": 0.5007936507936508,
+        "std": 0.16897867287656515
+      }
+    },
+    {
+      "dataset": "OCRA-12x30-cut",
+      "learning": "oja (single-neuron)",
+      "mode": "asynchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 140,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.02670715564899167
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.02670715564899167
+        },
+        "spurious": {
+          "count": 140,
+          "fraction": 1.0,
+          "lower": 0.9732928443510084,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.02670715564899167
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.02670715564899167
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.02670715564899167
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -2855.3132023970866,
+        "std": 4.1074218108549035e-12
+      },
+      "final_overlap": {
+        "mean": 0.500793650793651,
+        "std": 0.15700559093869032
+      }
+    },
+    {
+      "dataset": "large-25x25",
+      "learning": "oja (single-neuron)",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 6,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 6,
+          "fraction": 1.0,
+          "lower": 1.0,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -6679.433007527281,
+        "std": 0.0
+      },
+      "final_overlap": {
+        "mean": 0.43520000000000003,
+        "std": 0.23850413832887676
+      }
+    },
+    {
+      "dataset": "large-25x25",
+      "learning": "oja (single-neuron)",
+      "mode": "asynchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 120,
+          "fraction": 1.0,
+          "lower": 0.9689797289440706,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.031020271055929513
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -6679.433007527268,
+        "std": 1.2786313588636537e-11
+      },
+      "final_overlap": {
+        "mean": 0.4351999999999995,
+        "std": 0.21863638514108993
+      }
+    },
+    {
+      "dataset": "large-25x25.plus",
+      "learning": "oja (single-neuron)",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 15,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 15,
+          "fraction": 1.0,
+          "lower": 1.0,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -7050.635038594438,
+        "std": 1.88283291029353e-12
+      },
+      "final_overlap": {
+        "mean": 0.4035200000000001,
+        "std": 0.2186121000441519
+      }
+    },
+    {
+      "dataset": "large-25x25.plus",
+      "learning": "oja (single-neuron)",
+      "mode": "asynchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 300,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.012643429997735661
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.012643429997735661
+        },
+        "spurious": {
+          "count": 300,
+          "fraction": 1.0,
+          "lower": 0.9873565700022643,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.012643429997735661
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.012643429997735661
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.012643429997735661
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -7050.635038594467,
+        "std": 3.097448709741281e-11
+      },
+      "final_overlap": {
+        "mean": 0.40351999999999977,
+        "std": 0.2115522349058158
+      }
+    },
+    {
+      "dataset": "large-25x50",
+      "learning": "oja (single-neuron)",
+      "mode": "synchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 6,
+      "deterministic": true,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "spurious": {
+          "count": 6,
+          "fraction": 1.0,
+          "lower": 1.0,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.0
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -19907.380941746702,
+        "std": 0.0
+      },
+      "final_overlap": {
+        "mean": 0.7168,
+        "std": 0.12098793328262121
+      }
+    },
+    {
+      "dataset": "large-25x50",
+      "learning": "oja (single-neuron)",
+      "mode": "asynchronous",
+      "noise": 0.0,
+      "flips": 0,
+      "runs": 120,
+      "deterministic": false,
+      "classes": {
+        "pattern": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "negation": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "spurious": {
+          "count": 120,
+          "fraction": 1.0,
+          "lower": 0.9689797289440706,
+          "upper": 1.0
+        },
+        "cycle": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        },
+        "unconverged": {
+          "count": 0,
+          "fraction": 0.0,
+          "lower": 0.0,
+          "upper": 0.031020271055929513
+        }
+      },
+      "recovered": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.031020271055929513
+      },
+      "steps": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "energy": {
+        "mean": -19907.380941746742,
+        "std": 4.018555699285769e-11
+      },
+      "final_overlap": {
+        "mean": 0.7168000000000009,
+        "std": 0.11090945659872832
+      }
+    }
+  ]
+}

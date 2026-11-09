@@ -1,0 +1,754 @@
+{
+  "rows": [
+    {
+      "source": "small-7x7",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 1,
+      "load": 0.02040816326530612,
+      "trials": 1,
+      "deterministic": true,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": null
+      },
+      "all_stable": {
+        "count": 1,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": null
+      },
+      "theory": null
+    },
+    {
+      "source": "small-7x7",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 1,
+      "load": 0.02040816326530612,
+      "trials": 1,
+      "deterministic": true,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": null
+      },
+      "all_stable": {
+        "count": 1,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": null
+      },
+      "theory": null
+    },
+    {
+      "source": "small-7x7",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 2,
+      "load": 0.04081632653061224,
+      "trials": 1,
+      "deterministic": true,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": null
+      },
+      "all_stable": {
+        "count": 1,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": null
+      },
+      "theory": null
+    },
+    {
+      "source": "small-7x7",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 2,
+      "load": 0.04081632653061224,
+      "trials": 1,
+      "deterministic": true,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": null
+      },
+      "all_stable": {
+        "count": 1,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": null
+      },
+      "theory": null
+    },
+    {
+      "source": "small-7x7",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 3,
+      "load": 0.061224489795918366,
+      "trials": 1,
+      "deterministic": true,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": null
+      },
+      "all_stable": {
+        "count": 1,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": null
+      },
+      "theory": null
+    },
+    {
+      "source": "small-7x7",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 3,
+      "load": 0.061224489795918366,
+      "trials": 1,
+      "deterministic": true,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": null
+      },
+      "all_stable": {
+        "count": 1,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": null
+      },
+      "theory": null
+    },
+    {
+      "source": "small-7x7",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 4,
+      "load": 0.08163265306122448,
+      "trials": 1,
+      "deterministic": true,
+      "stable_fraction": {
+        "mean": 0.75,
+        "std": null
+      },
+      "all_stable": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "bit_errors": {
+        "mean": 0.01020408163265306,
+        "std": null
+      },
+      "theory": null
+    },
+    {
+      "source": "small-7x7",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 4,
+      "load": 0.08163265306122448,
+      "trials": 1,
+      "deterministic": true,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": null
+      },
+      "all_stable": {
+        "count": 1,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": null
+      },
+      "theory": null
+    },
+    {
+      "source": "small-7x7",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 5,
+      "load": 0.10204081632653061,
+      "trials": 1,
+      "deterministic": true,
+      "stable_fraction": {
+        "mean": 0.6,
+        "std": null
+      },
+      "all_stable": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "bit_errors": {
+        "mean": 0.02857142857142857,
+        "std": null
+      },
+      "theory": null
+    },
+    {
+      "source": "small-7x7",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 5,
+      "load": 0.10204081632653061,
+      "trials": 1,
+      "deterministic": true,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": null
+      },
+      "all_stable": {
+        "count": 1,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": null
+      },
+      "theory": null
+    },
+    {
+      "source": "random",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 2,
+      "load": 0.04081632653061224,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "all_stable": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 0.5655085052479191,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "theory": {
+        "bit_error": 3.7154918617070755e-7,
+        "pattern_stable": 0.9999817942522209
+      }
+    },
+    {
+      "source": "random",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 2,
+      "load": 0.04081632653061224,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "all_stable": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 0.5655085052479191,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "theory": null
+    },
+    {
+      "source": "random",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 4,
+      "load": 0.08163265306122448,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "all_stable": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 0.5655085052479191,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "theory": {
+        "bit_error": 0.00023262907903552502,
+        "pattern_stable": 0.988664584561482
+      }
+    },
+    {
+      "source": "random",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 4,
+      "load": 0.08163265306122448,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "all_stable": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 0.5655085052479191,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "theory": null
+    },
+    {
+      "source": "random",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 6,
+      "load": 0.12244897959183673,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 0.9,
+        "std": 0.22360679774997896
+      },
+      "all_stable": {
+        "count": 4,
+        "fraction": 0.8,
+        "lower": 0.3755282641185388,
+        "upper": 0.9637768390302125
+      },
+      "bit_errors": {
+        "mean": 0.002040816326530612,
+        "std": 0.004563404035713856
+      },
+      "theory": {
+        "bit_error": 0.0021333624110880687,
+        "pattern_stable": 0.9006429135928258
+      }
+    },
+    {
+      "source": "random",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 6,
+      "load": 0.12244897959183673,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "all_stable": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 0.5655085052479191,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "theory": null
+    },
+    {
+      "source": "random",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 8,
+      "load": 0.16326530612244897,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 0.9,
+        "std": 0.10458250331675945
+      },
+      "all_stable": {
+        "count": 2,
+        "fraction": 0.4,
+        "lower": 0.1176182311592533,
+        "upper": 0.769280067791163
+      },
+      "bit_errors": {
+        "mean": 0.002040816326530612,
+        "std": 0.0021343368023828456
+      },
+      "theory": {
+        "bit_error": 0.006664164390408784,
+        "pattern_stable": 0.7206245696768687
+      }
+    },
+    {
+      "source": "random",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 8,
+      "load": 0.16326530612244897,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "all_stable": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 0.5655085052479191,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "theory": null
+    },
+    {
+      "source": "random",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 10,
+      "load": 0.20408163265306123,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 0.68,
+        "std": 0.10954451150103323
+      },
+      "all_stable": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.43449149475208104
+      },
+      "bit_errors": {
+        "mean": 0.009387755102040816,
+        "std": 0.006388765649999398
+      },
+      "theory": {
+        "bit_error": 0.013428347753762213,
+        "pattern_stable": 0.5155882253126406
+      }
+    },
+    {
+      "source": "random",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 10,
+      "load": 0.20408163265306123,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "all_stable": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 0.5655085052479191,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "theory": null
+    },
+    {
+      "source": "random",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 12,
+      "load": 0.24489795918367346,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 0.6,
+        "std": 0.1989556064385554
+      },
+      "all_stable": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.43449149475208104
+      },
+      "bit_errors": {
+        "mean": 0.010884353741496598,
+        "std": 0.005458097461184086
+      },
+      "theory": {
+        "bit_error": 0.021654071405395988,
+        "pattern_stable": 0.34208155611999225
+      }
+    },
+    {
+      "source": "random",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 12,
+      "load": 0.24489795918367346,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "all_stable": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 0.5655085052479191,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "theory": null
+    },
+    {
+      "source": "random",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 14,
+      "load": 0.2857142857142857,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 0.3,
+        "std": 0.09313146293146642
+      },
+      "all_stable": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.43449149475208104
+      },
+      "bit_errors": {
+        "mean": 0.025364431486880466,
+        "std": 0.013620184987519624
+      },
+      "theory": {
+        "bit_error": 0.030684414569701102,
+        "pattern_stable": 0.21716737937989888
+      }
+    },
+    {
+      "source": "random",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 14,
+      "load": 0.2857142857142857,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "all_stable": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 0.5655085052479191,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "theory": null
+    },
+    {
+      "source": "random",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 16,
+      "load": 0.32653061224489793,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 0.0875,
+        "std": 0.07126096406869613
+      },
+      "all_stable": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.43449149475208104
+      },
+      "bit_errors": {
+        "mean": 0.0423469387755102,
+        "std": 0.012735955016700629
+      },
+      "theory": {
+        "bit_error": 0.04005915686381709,
+        "pattern_stable": 0.13488977851726253
+      }
+    },
+    {
+      "source": "random",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 16,
+      "load": 0.32653061224489793,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "all_stable": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 0.5655085052479191,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "theory": null
+    },
+    {
+      "source": "random",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 18,
+      "load": 0.3673469387755102,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 0.12222222222222223,
+        "std": 0.07243558228002943
+      },
+      "all_stable": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.43449149475208104
+      },
+      "bit_errors": {
+        "mean": 0.039002267573696146,
+        "std": 0.005108335748784039
+      },
+      "theory": {
+        "bit_error": 0.04948007700970293,
+        "pattern_stable": 0.08319552820911287
+      }
+    },
+    {
+      "source": "random",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 18,
+      "load": 0.3673469387755102,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "all_stable": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 0.5655085052479191,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "theory": null
+    },
+    {
+      "source": "random",
+      "learning": "hebb",
+      "neurons": 49,
+      "patterns": 20,
+      "load": 0.40816326530612246,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 0.09999999999999999,
+        "std": 0.08660254037844387
+      },
+      "all_stable": {
+        "count": 0,
+        "fraction": 0.0,
+        "lower": 0.0,
+        "upper": 0.43449149475208104
+      },
+      "bit_errors": {
+        "mean": 0.05244897959183674,
+        "std": 0.017038066501830044
+      },
+      "theory": {
+        "bit_error": 0.0587624340483196,
+        "pattern_stable": 0.05143554570352796
+      }
+    },
+    {
+      "source": "random",
+      "learning": "oja (subspace)",
+      "neurons": 49,
+      "patterns": 20,
+      "load": 0.40816326530612246,
+      "trials": 5,
+      "deterministic": false,
+      "stable_fraction": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "all_stable": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 0.5655085052479191,
+        "upper": 1.0
+      },
+      "bit_errors": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "theory": null
+    }
+  ]
+}

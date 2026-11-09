@@ -604,6 +604,74 @@ fn experiment_writes_tables_and_metadata() {
             .len(),
         5
     );
+
+    let datasets = read_json(&out.join("datasets.json"));
+    let small = &datasets["datasets"][0];
+    assert_eq!(small["name"], "small-7x7");
+    assert_eq!(small["patterns"], 5);
+    assert_eq!(small["overlaps"].as_array().unwrap().len(), 5);
+    assert_eq!(small["overlap_sums"].as_array().unwrap().len(), 5);
+    assert!(small["max_abs_overlap"]["value"].is_f64());
+    assert!(!out.join("stability.parquet").exists());
+}
+
+/// With `stability_fields` the experiment writes one row per pattern and
+/// neuron of every training: 5 x 49 for `small-7x7` and one rule. Its
+/// negative fields agree with the unstable neurons in the metadata.
+#[test]
+fn experiment_writes_stability_fields_on_request() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = experiment_config(
+        dir.path(),
+        &format!("stability_fields = true\n{EXPERIMENT}"),
+    );
+    let out = dir.path().join("run");
+    experiment(&config)
+        .arg("--out")
+        .arg(&out)
+        .assert()
+        .success();
+
+    let fields = read_parquet(&out.join("stability.parquet"));
+    assert_eq!(fields.num_rows(), 245);
+    let column = |name: &str| fields.column_by_name(name).unwrap().clone();
+    let pattern = column("pattern");
+    let pattern = pattern
+        .as_any()
+        .downcast_ref::<arrow_array::UInt32Array>()
+        .unwrap();
+    let field = column("field");
+    let field = field
+        .as_any()
+        .downcast_ref::<arrow_array::Float64Array>()
+        .unwrap();
+    let mut negative = [0_u64; 5];
+    for row in 0..fields.num_rows() {
+        if field.value(row) < 0.0 {
+            negative[pattern.value(row) as usize] += 1;
+        }
+    }
+    let metadata = read_json(&out.join("metadata.json"));
+    assert_eq!(metadata["config"]["stability_fields"], true);
+    let unstable: Vec<u64> = metadata["trainings"][0]["stability"]["unstable_neurons"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|n| n.as_u64().unwrap())
+        .collect();
+    assert_eq!(unstable, negative);
+
+    let config = experiment_config(dir.path(), EXPERIMENT);
+    experiment(&config)
+        .arg("--out")
+        .arg(&out)
+        .arg("--force")
+        .assert()
+        .success();
+    assert!(
+        !out.join("stability.parquet").exists(),
+        "a run without fields leaves an old stability.parquet"
+    );
 }
 
 /// The tables are byte for byte the same with one and with four threads;
@@ -613,7 +681,7 @@ fn experiment_tables_do_not_depend_on_the_number_of_threads() {
     let dir = tempfile::tempdir().unwrap();
     let config = experiment_config(
         dir.path(),
-        &EXPERIMENT.replace(
+        &format!("stability_fields = true\n{EXPERIMENT}").replace(
             "[[learning]]\nrule = \"hebb\"\n",
             "[[learning]]\nrule = \"hebb\"\n[[learning]]\nrule = \"oja\"\n",
         ),
@@ -629,7 +697,12 @@ fn experiment_tables_do_not_depend_on_the_number_of_threads() {
         out
     };
     let (one, four) = (run("1"), run("4"));
-    for file in ["trials.parquet", "summary.json"] {
+    for file in [
+        "trials.parquet",
+        "summary.json",
+        "datasets.json",
+        "stability.parquet",
+    ] {
         assert_eq!(
             std::fs::read(one.join(file)).unwrap(),
             std::fs::read(four.join(file)).unwrap(),
@@ -679,7 +752,8 @@ fn experiment_requires_a_seed() {
 /// code computes, with one thread and with four. A change of the code that
 /// changes the results fails here until the results are regenerated. The
 /// trial table is compared as decoded data, because the Parquet file also
-/// records the version of the `parquet` crate; `summary.json` byte for byte.
+/// records the version of the `parquet` crate; the JSON tables byte for
+/// byte.
 #[test]
 fn example_experiment_matches_the_committed_results() {
     let example = Path::new("../../data/experiments/00-example");
@@ -698,19 +772,150 @@ fn example_experiment_matches_the_committed_results() {
                 == read_parquet(&committed.join("trials.parquet")),
             "trials.parquet with {threads} threads differs from the committed one"
         );
+        for file in ["summary.json", "datasets.json"] {
+            assert!(
+                std::fs::read(out.join(file)).unwrap()
+                    == std::fs::read(committed.join(file)).unwrap(),
+                "{file} with {threads} threads differs from the committed one"
+            );
+        }
+    }
+}
+
+const CAPACITY: &str = "seed = 3\ndatasets = [\"small-7x7\"]\ntrials = 4\n\
+    [[random]]\nneurons = 60\npatterns = { start = 2, end = 8, step = 3 }\n\
+    [[learning]]\nrule = \"hebb\"\n[[learning]]\nrule = \"oja\"\n";
+
+fn capacity(config: &Path) -> Command {
+    let mut command = compute();
+    command.arg("capacity").arg("--config").arg(config);
+    command
+}
+
+/// `small-7x7` gives 5 prefixes, the random entry `p = 2, 5, 8` with 4
+/// trials each: 17 sets, 2 rules, 34 rows and `(5 + 3) * 2 = 16` summary
+/// rows.
+#[test]
+fn capacity_writes_tables_and_metadata() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = experiment_config(dir.path(), CAPACITY);
+    let out = dir.path().join("run");
+    capacity(&config)
+        .arg("--out")
+        .arg(&out)
+        .assert()
+        .success()
+        .stdout(contains("sets         17 pattern sets x 2 rules"));
+
+    let table = read_parquet(&out.join("capacity.parquet"));
+    assert_eq!(table.num_rows(), 34);
+    let summary = read_json(&out.join("summary.json"));
+    let rows = summary["rows"].as_array().unwrap();
+    assert_eq!(rows.len(), 16);
+    assert_eq!(rows[0]["source"], "small-7x7");
+    assert_eq!(rows[0]["deterministic"], true);
+    assert!(rows[0]["theory"].is_null());
+    assert_eq!(rows[10]["source"], "random");
+    assert_eq!(rows[10]["learning"], "hebb");
+    assert_eq!(rows[10]["trials"], 4);
+    assert!(rows[10]["theory"]["bit_error"].is_f64());
+    assert!(rows[11]["theory"].is_null());
+
+    let metadata = read_json(&out.join("metadata.json"));
+    assert_eq!(metadata["command"], "capacity");
+    assert_eq!(metadata["config"]["zero_field"], "keep");
+    assert_eq!(metadata["datasets"][0]["neurons"], 49);
+}
+
+/// The tables are byte for byte the same with one and with four threads,
+/// and the results go next to the configuration by default.
+#[test]
+fn capacity_tables_do_not_depend_on_the_number_of_threads() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = experiment_config(dir.path(), CAPACITY);
+    let run = |threads: &str| {
+        let out = dir.path().join(format!("threads-{threads}"));
+        capacity(&config)
+            .env("RAYON_NUM_THREADS", threads)
+            .arg("--out")
+            .arg(&out)
+            .assert()
+            .success();
+        out
+    };
+    let (one, four) = (run("1"), run("4"));
+    for file in ["capacity.parquet", "summary.json"] {
+        assert_eq!(
+            std::fs::read(one.join(file)).unwrap(),
+            std::fs::read(four.join(file)).unwrap(),
+            "{file}"
+        );
+    }
+    capacity(&config).assert().success();
+    assert!(
+        dir.path()
+            .join("results")
+            .join("capacity.parquet")
+            .is_file()
+    );
+}
+
+#[test]
+fn capacity_rejects_too_many_random_patterns() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = experiment_config(dir.path(), &CAPACITY.replace("end = 8", "end = 61"));
+    capacity(&config)
+        .assert()
+        .failure()
+        .stderr(contains("compute::invalid_config"))
+        .stderr(contains("at most N"));
+}
+
+/// Whether the written file `name` in `out` equals the one in `expected`: a
+/// Parquet table as decoded data, because the file also records the version
+/// of the `parquet` crate; any other file byte for byte.
+fn same_file(out: &Path, expected: &Path, name: &str) -> bool {
+    if name.ends_with(".parquet") {
+        read_parquet(&out.join(name)) == read_parquet(&expected.join(name))
+    } else {
+        std::fs::read(out.join(name)).unwrap() == std::fs::read(expected.join(name)).unwrap()
+    }
+}
+
+/// The committed results of the pattern stability experiment with Oja's
+/// single-neuron rule are what the current code computes (the run takes a
+/// fraction of a second; the other committed experiments of the same kind
+/// train Oja's subspace rule for many epochs and are too slow for a test).
+#[test]
+fn single_neuron_stability_matches_the_committed_results() {
+    let experiment_dir = Path::new("../../data/experiments/08-stability-single-neuron");
+    let committed = experiment_dir.join("results");
+    let dir = tempfile::tempdir().unwrap();
+    let out = dir.path().join("run");
+    experiment(&experiment_dir.join("config.toml"))
+        .arg("--out")
+        .arg(&out)
+        .assert()
+        .success();
+    for file in [
+        "trials.parquet",
+        "summary.json",
+        "datasets.json",
+        "stability.parquet",
+    ] {
         assert!(
-            std::fs::read(out.join("summary.json")).unwrap()
-                == std::fs::read(committed.join("summary.json")).unwrap(),
-            "summary.json with {threads} threads differs from the committed one"
+            same_file(&out, &committed, file),
+            "{file} differs from the committed one"
         );
     }
 }
 
 /// The test fixtures of the presentation layer (`src/analysis/tests/fixtures`)
-/// are what `recall` and `train` write for their configurations. A change of
-/// the output fails here until the fixtures are regenerated with the
-/// commands in their README. Only the data files are compared: the metadata
-/// records the time and the build.
+/// are what `recall`, `train`, `experiment` and `capacity` write for their
+/// configurations. A change of the output fails here until the fixtures are
+/// regenerated with the commands in their README. Only the data files are
+/// compared (see [`same_file`]): the metadata records the time and the
+/// build.
 #[test]
 fn analysis_fixtures_match_the_current_output() {
     let fixtures = Path::new("../analysis/tests/fixtures");
@@ -718,6 +923,16 @@ fn analysis_fixtures_match_the_current_output() {
     for (command, files) in [
         ("recall", &["history.npy", "frames.json"][..]),
         ("train", &["weights.npy"][..]),
+        (
+            "experiment",
+            &[
+                "trials.parquet",
+                "summary.json",
+                "datasets.json",
+                "stability.parquet",
+            ][..],
+        ),
+        ("capacity", &["capacity.parquet", "summary.json"][..]),
     ] {
         let out = dir.path().join(command);
         compute()
@@ -730,8 +945,7 @@ fn analysis_fixtures_match_the_current_output() {
             .success();
         for file in files {
             assert!(
-                std::fs::read(out.join(file)).unwrap()
-                    == std::fs::read(fixtures.join(command).join(file)).unwrap(),
+                same_file(&out, &fixtures.join(command), file),
                 "{command}/{file} differs from the fixture; regenerate it"
             );
         }

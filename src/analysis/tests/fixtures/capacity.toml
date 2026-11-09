@@ -1,0 +1,18 @@
+# Capacity run used by the tests of the capacity plot: prefixes of
+# small-7x7 and random sets of 49 neurons, both learning rules.
+# Regenerate from src/compute:
+#   cargo run --release -- capacity --config ../analysis/tests/fixtures/capacity.toml --out ../analysis/tests/fixtures/capacity --force
+
+seed = 1
+datasets = ["small-7x7"]
+trials = 5
+
+[[random]]
+neurons = 49
+patterns = { start = 2, end = 20, step = 2 }
+
+[[learning]]
+rule = "hebb"
+
+[[learning]]
+rule = "oja"

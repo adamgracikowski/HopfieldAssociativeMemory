@@ -20,6 +20,18 @@ NEAREST = "najbliższy"
 OTHER_PATTERNS = "pozostałe wzorce"
 NEURON = "neuron"
 WEIGHT = "waga $w_{ij}$"
+STABLE_FRACTION = "odsetek stabilnych wzorców"
+FIELD = "pole $\\xi_i^\\mu h_i$"
+NEURON_COUNT = "liczba neuronów"
+UNSTABLE_PIXELS = "liczba niestabilnych pikseli (zaznaczone na czerwono)"
+OVERLAP_MATRIX = "nakładanie $m^{\\mu\\nu}$"
+LOAD = "obciążenie $p/N$"
+STABLE_FRACTION_WRAPPED = "odsetek stabilnych\nwzorców"
+BIT_ERRORS_WRAPPED = "odsetek niestabilnych\nneuronów"
+RANDOM_PATTERNS = "wzorce losowe"
+THEORY = "teoria (wzorce losowe, Hebb)"
+HOPFIELD_LOAD = "$p/N = 0{,}138$"
+STABLE_LOAD = "$p/N = 1/(2 \\ln N)$"
 
 MODES = {
     "synchronous": "synchroniczny",

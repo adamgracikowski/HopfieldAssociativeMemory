@@ -9,10 +9,23 @@ import polars as pl
 from matplotlib.figure import Figure
 
 from hopfield_analysis import style
+from hopfield_analysis.capacity import load_capacity_summary, plot_capacity
 from hopfield_analysis.datasets import Registry, plot_patterns
 from hopfield_analysis.experiments import load_summary, plot_classes, plot_recovery
 from hopfield_analysis.recall import Recall
 from hopfield_analysis.runs import animate, parse_frames, plot_frames, plot_run, select_frames
+from hopfield_analysis.stability import (
+    aligned_fields,
+    load_datasets,
+    load_fields,
+    load_stability,
+    plot_fields,
+    plot_overlaps,
+    plot_stable,
+    plot_unstable,
+    unstable_mask,
+    zero_field,
+)
 from hopfield_analysis.weights import load_weights, plot_weights
 
 OUT_HELP = "output path without extension; writes <out>.pdf and <out>.png"
@@ -156,7 +169,73 @@ def parser() -> argparse.ArgumentParser:
     classes.add_argument("results", type=Path, help="results directory of an experiment")
     classes.add_argument("--out", type=Path, required=True, help=OUT_HELP)
     classes.set_defaults(handler=_classes)
+
+    stable = commands.add_parser(
+        "stable", help="fraction of stable stored patterns of one or more experiments"
+    )
+    stable.add_argument("results", type=Path, nargs="+", help="results directories of experiments")
+    stable.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    stable.set_defaults(handler=_stable)
+
+    fields = commands.add_parser(
+        "fields", help="histograms of the aligned fields of the stored patterns"
+    )
+    fields.add_argument(
+        "results", type=Path, help="results directory of an experiment with stability fields"
+    )
+    fields.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    fields.add_argument("--datasets", type=names, help="comma-separated datasets (default: all)")
+    fields.add_argument("--log", action="store_true", help="logarithmic count axis")
+    fields.set_defaults(handler=_fields)
+
+    unstable = commands.add_parser(
+        "unstable", help="stored patterns of a dataset with their unstable pixels"
+    )
+    unstable.add_argument(
+        "results", type=Path, help="results directory of an experiment with stability fields"
+    )
+    unstable.add_argument("--dataset", required=True, help="dataset name")
+    unstable.add_argument(
+        "--learning", required=True, help="learning rule as in the results, e.g. hebb"
+    )
+    unstable.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    unstable.add_argument(
+        "--registry",
+        type=Path,
+        help="registry file (default: data/datasets/datasets.toml found from the current "
+        "directory upwards)",
+    )
+    unstable.add_argument(
+        "--columns",
+        type=at_least(1),
+        default=6,
+        help="largest number of panels in a row (default 6)",
+    )
+    unstable.set_defaults(handler=_unstable)
+
+    overlaps = commands.add_parser(
+        "overlaps", help="heat maps of the overlaps between the patterns of datasets"
+    )
+    overlaps.add_argument("results", type=Path, help="results directory of an experiment")
+    overlaps.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    overlaps.add_argument("--datasets", type=names, help="comma-separated datasets (default: all)")
+    overlaps.set_defaults(handler=_overlaps)
+
+    capacity = commands.add_parser(
+        "capacity", help="stability of the stored patterns against the load of a capacity run"
+    )
+    capacity.add_argument("results", type=Path, help="results directory of `compute capacity`")
+    capacity.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    capacity.set_defaults(handler=_capacity)
     return parser
+
+
+def names(text: str) -> list[str]:
+    """Argument type of a comma-separated list of names."""
+    values = [value.strip() for value in text.split(",")]
+    if not all(values):
+        raise argparse.ArgumentTypeError(f"empty name in `{text}`")
+    return values
 
 
 def _save(figure: Figure, out: Path) -> int:
@@ -235,3 +314,38 @@ def _recovery(args: argparse.Namespace) -> int:
 
 def _classes(args: argparse.Namespace) -> int:
     return _save(plot_classes(load_summary(args.results)), args.out)
+
+
+def _stable(args: argparse.Namespace) -> int:
+    table = pl.concat([load_stability(results) for results in args.results])
+    return _save(plot_stable(table), args.out)
+
+
+def _fields(args: argparse.Namespace) -> int:
+    return _save(plot_fields(load_fields(args.results), args.datasets, log=args.log), args.out)
+
+
+def _unstable(args: argparse.Namespace) -> int:
+    if args.registry is None:
+        registry = Registry.discover(Path.cwd())
+    else:
+        registry = Registry.from_file(args.registry)
+    patterns = registry.load(args.dataset)
+    fields = aligned_fields(
+        load_fields(args.results), args.dataset, args.learning, patterns.shape[1:]
+    )
+    if fields.shape != patterns.shape:
+        raise ValueError(
+            f"the results have {fields.shape[0]} patterns of `{args.dataset}`, "
+            f"the registry {patterns.shape[0]}"
+        )
+    mask = unstable_mask(patterns, fields, zero_field(args.results))
+    return _save(plot_unstable(patterns, mask, columns=args.columns), args.out)
+
+
+def _overlaps(args: argparse.Namespace) -> int:
+    return _save(plot_overlaps(load_datasets(args.results), args.datasets), args.out)
+
+
+def _capacity(args: argparse.Namespace) -> int:
+    return _save(plot_capacity(load_capacity_summary(args.results)), args.out)
