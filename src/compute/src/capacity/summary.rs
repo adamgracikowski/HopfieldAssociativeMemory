@@ -28,13 +28,16 @@ pub struct Theory {
 
 impl Theory {
     /// The prediction for `patterns` random patterns of `neurons` neurons;
-    /// `Phi(x) = erfc(-x / sqrt(2)) / 2`.
+    /// `Phi(x) = erfc(-x / sqrt(2)) / 2`. Both `erfc` and the power come
+    /// from `libm`, a pure Rust implementation, so the values are the same
+    /// on every platform (the precision of `f64::powi` is unspecified and
+    /// differs between them).
     pub fn new(neurons: usize, patterns: usize) -> Self {
         let ratio = (neurons as f64 / patterns as f64).sqrt();
         let bit_error = 0.5 * libm::erfc(ratio / std::f64::consts::SQRT_2);
         Self {
             bit_error,
-            pattern_stable: (1.0 - bit_error).powi(neurons as i32),
+            pattern_stable: libm::pow(1.0 - bit_error, neurons as f64),
         }
     }
 }
