@@ -1,0 +1,27 @@
+# Capacity: stability of the stored patterns against the number of patterns,
+# for prefixes of two datasets and for random patterns of the same sizes
+# (50 random sets per number of patterns), with the Hebbian rule and Oja's
+# subspace rule.
+#
+# Run from src/compute (about 40 min with 8 threads):
+#   cargo run --release -- capacity --config ../../data/experiments/08-capacity/config.toml
+# Plot from src/analysis:
+#   uv run hopfield-analysis capacity ../../data/experiments/08-capacity/results --out ../../data/experiments/08-capacity/plots/capacity
+
+seed = 20261106
+datasets = ["letters-14x20", "large-25x25.plus"]
+trials = 50
+
+[[random]]
+neurons = 280
+patterns = { start = 2, end = 80, step = 2 }
+
+[[random]]
+neurons = 625
+patterns = { start = 5, end = 150, step = 5 }
+
+[[learning]]
+rule = "hebb"
+
+[[learning]]
+rule = "oja"

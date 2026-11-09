@@ -1,0 +1,35 @@
+# Stability of the stored patterns: every CSV dataset trained with the
+# Hebbian rule and Oja's subspace rule, each stored pattern given as the
+# input in both update modes, with the aligned fields written.
+#
+# Run from src/compute:
+#   cargo run --release -- experiment --config ../../data/experiments/08-stability/config.toml
+# Plot from src/analysis:
+#   uv run hopfield-analysis stable ../../data/experiments/08-stability/results --out ../../data/experiments/08-stability/plots/stable
+
+seed = 20261106
+datasets = [
+    "small-7x7",
+    "letters-abc-8x12",
+    "animals-14x9",
+    "letters-14x20",
+    "OCRA-12x30-cut",
+    "large-25x25",
+    "large-25x25.plus",
+    "large-25x50",
+]
+trials = 20
+stability_fields = true
+
+[[learning]]
+rule = "hebb"
+
+[[learning]]
+rule = "oja"
+
+[dynamics]
+modes = ["synchronous", "asynchronous"]
+
+[input]
+source = "pattern"
+noise = [0.0]
