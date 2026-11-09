@@ -180,9 +180,10 @@ impl ExperimentRun {
     /// [`CellSummary`] of every cell), [`DATASETS_FILE`]
     /// (`{"datasets": [...]}` with the [`DatasetStatistics`] of every
     /// dataset), [`TRIALS_FILE`] (the [`TrialTable`]) and, if the run kept
-    /// them, [`FIELDS_FILE`] (the [`FieldTable`]). All files but the
-    /// metadata depend only on the configuration and the code, not on the
-    /// time or the number of threads.
+    /// them, [`FIELDS_FILE`] (the [`FieldTable`]); otherwise an old
+    /// [`FIELDS_FILE`] is removed, so a run without fields in a reused
+    /// directory leaves none. All files but the metadata depend only on the
+    /// configuration and the code, not on the time or the number of threads.
     pub fn write(&self, config: &ExperimentConfig, out: &OutputDir) -> Result<()> {
         out.write_json(METADATA_FILE, &ExperimentMetadata::new(config, self))?;
         out.write_json(
@@ -199,9 +200,10 @@ impl ExperimentRun {
         )?;
         out.write_parquet(TRIALS_FILE, TrialTable::new(self).batch())?;
         if config.stability_fields {
-            out.write_parquet(FIELDS_FILE, FieldTable::new(self).batch())?;
+            out.write_parquet(FIELDS_FILE, FieldTable::new(self).batch())
+        } else {
+            out.remove(FIELDS_FILE)
         }
-        Ok(())
     }
 }
 

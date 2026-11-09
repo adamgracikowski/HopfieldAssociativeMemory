@@ -11,6 +11,13 @@ use crate::experiment::{Moments, Proportion};
 /// `N p`, so a neuron is unstable with probability
 /// `Phi(-sqrt(N / p))`, and a pattern of `N` independent neurons is stable
 /// with probability `(1 - Phi(-sqrt(N / p)))^N`.
+///
+/// This is the large-`N` form of the literature. With the zero diagonal of
+/// [`Hebb`](crate::learning::Hebb) the aligned field `N xi_i h_i` has mean
+/// `N - 1` and crosstalk variance `(p - 1)(N - 1)`, so the exact moments
+/// give the slightly smaller `Phi(-sqrt((N - 1) / (p - 1)))`; and the
+/// neurons of a pattern are not independent. Measured random sets are
+/// therefore a little more stable than this prediction.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 pub struct Theory {
     /// Probability that one neuron of a pattern is unstable.
@@ -120,6 +127,56 @@ mod tests {
             (theory.pattern_stable - 0.924686).abs() < 1e-6,
             "{theory:?}"
         );
+    }
+
+    /// Three random sets of `p = 2` patterns of `N = 4` neurons with 2, 1
+    /// and 0 stable patterns and 0, 3 and 3 unstable neurons. Stable
+    /// fractions `1, 0.5, 0`: mean `0.5`, sample std
+    /// `sqrt((0.25 + 0 + 0.25) / 2) = sqrt(0.25) = 0.5`. Unstable neurons
+    /// per `p N = 8`: `0, 0.375, 0.375`, mean `0.25`, sample std
+    /// `sqrt((0.0625 + 0.015625 + 0.015625) / 2) = sqrt(0.046875)`. One set
+    /// of three has all patterns stable.
+    #[test]
+    fn aggregates_the_sets_of_a_group() {
+        use crate::capacity::{CapacityRow, Task};
+        use crate::dynamics::Stability;
+        use crate::run::TrainingInfo;
+        use crate::weights::Backend;
+
+        let rows: Vec<CapacityRow> = [(2, vec![0, 0]), (1, vec![0, 3]), (0, vec![1, 2])]
+            .into_iter()
+            .enumerate()
+            .map(|(trial, (stable, unstable_neurons))| CapacityRow {
+                task: Task::random(1, 4, 2, trial),
+                learning: 0,
+                training: TrainingInfo {
+                    backend: Backend::Dense,
+                    neurons: 4,
+                    epochs: 0,
+                    converged: true,
+                },
+                stability: Stability {
+                    stable,
+                    unstable_neurons,
+                },
+            })
+            .collect();
+        let refs: Vec<&CapacityRow> = rows.iter().collect();
+        let summary = CapacitySummary::new("random".into(), "hebb".into(), &refs, true);
+        assert_eq!(
+            (summary.neurons, summary.patterns, summary.trials),
+            (4, 2, 3)
+        );
+        assert_eq!(summary.load, 0.5);
+        assert!(!summary.deterministic);
+        assert!((summary.stable_fraction.mean - 0.5).abs() < 1e-12);
+        assert!((summary.stable_fraction.std.unwrap() - 0.5).abs() < 1e-12);
+        assert!((summary.bit_errors.mean - 0.25).abs() < 1e-12);
+        assert!((summary.bit_errors.std.unwrap() - 0.046875_f64.sqrt()).abs() < 1e-12);
+        assert_eq!(summary.all_stable.count, 1);
+        assert!((summary.all_stable.fraction - 1.0 / 3.0).abs() < 1e-12);
+        assert!(summary.all_stable.lower < 1.0 / 3.0 && summary.all_stable.upper > 1.0 / 3.0);
+        assert_eq!(summary.theory, Some(Theory::new(4, 2)));
     }
 
     /// More patterns, more crosstalk: the bit error grows with `p`.

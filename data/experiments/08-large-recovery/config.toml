@@ -3,8 +3,8 @@
 #
 # Run from src/compute:
 #   cargo run --release -- experiment --config ../../data/experiments/08-large-recovery/config.toml
-# Plot from src/analysis:
-#   uv run hopfield-analysis recovery ../../data/experiments/08-large-recovery/results --out ../../data/experiments/08-large-recovery/plots/recovery
+# Report figure, from src/analysis:
+#   uv run hopfield-analysis recovery ../../data/experiments/08-large-recovery/results --out ../../data/experiments/08-large-recovery/figures/recovery
 
 seed = 20261106
 datasets = ["large-25x25", "large-25x25.plus", "large-25x50"]

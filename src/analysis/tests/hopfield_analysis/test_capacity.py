@@ -106,6 +106,12 @@ def test_plot_capacity_has_a_column_per_number_of_neurons():
     )
     figure = plot_capacity(summary)
     assert [ax.get_title() for ax in figure.axes[:2]] == ["$N = 280$", "$N = 625$"]
+    [legend] = figure.legends
+    assert [text.get_text() for text in legend.get_texts()][:2] == [
+        "letters-14x20, Hebb",
+        "wzorce losowe, Hebb",
+    ]
+    assert legend.get_texts()[-1].get_text() == "$p/N = 1/(2 \\ln N)$"
     left, right = figure.axes[0], figure.axes[1]
     assert [line.get_label() for line in left.get_lines()][:2] == [
         "letters-14x20, Hebb",

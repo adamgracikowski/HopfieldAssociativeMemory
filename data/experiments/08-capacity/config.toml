@@ -5,8 +5,8 @@
 #
 # Run from src/compute (about 40 min with 8 threads):
 #   cargo run --release -- capacity --config ../../data/experiments/08-capacity/config.toml
-# Plot from src/analysis:
-#   uv run hopfield-analysis capacity ../../data/experiments/08-capacity/results --out ../../data/experiments/08-capacity/plots/capacity
+# Report figure, from src/analysis:
+#   uv run hopfield-analysis capacity ../../data/experiments/08-capacity/results --out ../../data/experiments/08-capacity/figures/capacity
 
 seed = 20261106
 datasets = ["letters-14x20", "large-25x25.plus"]

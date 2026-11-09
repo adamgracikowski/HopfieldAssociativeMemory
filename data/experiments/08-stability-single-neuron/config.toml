@@ -5,8 +5,8 @@
 #
 # Run from src/compute:
 #   cargo run --release -- experiment --config ../../data/experiments/08-stability-single-neuron/config.toml
-# Plot from src/analysis:
-#   uv run hopfield-analysis stable ../../data/experiments/08-stability/results ../../data/experiments/08-stability-single-neuron/results --out ../../data/experiments/08-stability/plots/stable-all
+# Plotted together with 08-stability: see the `stable` command in
+# ../08-stability/config.toml.
 
 seed = 20261106
 datasets = [

@@ -169,7 +169,15 @@ def plot_stable(table: pl.DataFrame) -> Figure:
 
     Returns:
         The figure in the report style with Polish labels.
+
+    Raises:
+        ValueError: If a (dataset, rule) pair occurs more than once, e.g.
+            when the same experiment is given twice.
     """
+    pairs = table.select("dataset", "learning")
+    if pairs.is_duplicated().any():
+        dataset, rule = pairs.filter(pairs.is_duplicated()).row(0)
+        raise ValueError(f"`{dataset}` / `{rule}` occurs more than once")
     datasets = table["dataset"].unique(maintain_order=True).to_list()
     rules = table["learning"].unique(maintain_order=True).to_list()
     figure = style.new_figure(height=2.8)

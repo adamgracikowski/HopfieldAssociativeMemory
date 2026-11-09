@@ -4,8 +4,13 @@
 #
 # Run from src/compute:
 #   cargo run --release -- experiment --config ../../data/experiments/08-stability/config.toml
-# Plot from src/analysis:
-#   uv run hopfield-analysis stable ../../data/experiments/08-stability/results --out ../../data/experiments/08-stability/plots/stable
+# Report figures, from src/analysis (the bars also show Oja's single-neuron
+# rule from 08-stability-single-neuron):
+#   uv run hopfield-analysis stable ../../data/experiments/08-stability/results ../../data/experiments/08-stability-single-neuron/results --out ../../data/experiments/08-stability/figures/stable
+#   uv run hopfield-analysis fields ../../data/experiments/08-stability/results --log --out ../../data/experiments/08-stability/figures/fields
+#   uv run hopfield-analysis overlaps ../../data/experiments/08-stability/results --datasets large-25x25,large-25x50 --out ../../data/experiments/08-stability/figures/overlaps-large
+#   uv run hopfield-analysis unstable ../../data/experiments/08-stability/results --dataset large-25x50 --learning hebb --out ../../data/experiments/08-stability/figures/unstable-large-25x50
+#   uv run hopfield-analysis unstable ../../data/experiments/08-stability/results --dataset letters-14x20 --learning hebb --columns 9 --out ../../data/experiments/08-stability/figures/unstable-letters-14x20
 
 seed = 20261106
 datasets = [

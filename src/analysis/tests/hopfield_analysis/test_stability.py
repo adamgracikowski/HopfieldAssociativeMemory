@@ -125,6 +125,14 @@ def test_plot_stable_skips_missing_combinations():
     assert len(ax.patches) == 3
 
 
+def test_plot_stable_rejects_a_repeated_training(capsys, tmp_path):
+    table = load_stability(RESULTS)
+    with pytest.raises(ValueError, match="`small-7x7` / `hebb` occurs more than once"):
+        plot_stable(pl.concat([table, table]))
+    assert main(["stable", str(RESULTS), str(RESULTS), "--out", str(tmp_path / "s")]) == 1
+    assert "occurs more than once" in capsys.readouterr().err
+
+
 def test_plot_fields_counts_every_field(fields):
     figure = plot_fields(fields)
     axes = [ax for ax in figure.axes if ax.get_visible()]
@@ -189,7 +197,7 @@ def test_plot_overlaps_writes_no_values_into_large_matrices():
 @pytest.mark.parametrize(
     "arguments",
     [
-        ["stable", str(RESULTS), str(RESULTS)],
+        ["stable", str(RESULTS)],
         ["fields", str(RESULTS), "--datasets", "small-7x7", "--log"],
         ["unstable", str(RESULTS), "--dataset", "animals-14x9", "--learning", "hebb"],
         ["overlaps", str(RESULTS), "--datasets", "small-7x7,animals-14x9"],

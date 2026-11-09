@@ -78,7 +78,9 @@ def plot_capacity(summary: pl.DataFrame) -> Figure:
     fraction of stable patterns of a set, below the mean fraction of
     unstable neurons. One line per source and learning rule (the same color
     in every panel), the prediction for random Hebbian sets as a black dashed
-    line, and vertical lines at ``p / N = 0.138`` and ``1 / (2 ln N)``.
+    line, and vertical lines at ``p / N = 0.138`` and ``1 / (2 ln N)``; the
+    legend lists the series of every panel first, then the theory and the
+    lines.
 
     Args:
         summary: Aggregates from :func:`load_capacity_summary`.
@@ -134,6 +136,8 @@ def plot_capacity(summary: pl.DataFrame) -> Figure:
     for ax in axes[0]:
         for handle, name in zip(*ax.get_legend_handles_labels(), strict=True):
             entries.setdefault(name, handle)
+    references = (labels.THEORY, labels.HOPFIELD_LOAD, labels.STABLE_LOAD)
+    entries = {name: entries[name] for name in sorted(entries, key=lambda name: name in references)}
     figure.legend(
         list(entries.values()),
         list(entries),

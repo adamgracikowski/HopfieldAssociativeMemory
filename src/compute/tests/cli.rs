@@ -660,6 +660,18 @@ fn experiment_writes_stability_fields_on_request() {
         .map(|n| n.as_u64().unwrap())
         .collect();
     assert_eq!(unstable, negative);
+
+    let config = experiment_config(dir.path(), EXPERIMENT);
+    experiment(&config)
+        .arg("--out")
+        .arg(&out)
+        .arg("--force")
+        .assert()
+        .success();
+    assert!(
+        !out.join("stability.parquet").exists(),
+        "a run without fields leaves an old stability.parquet"
+    );
 }
 
 /// The tables are byte for byte the same with one and with four threads;
@@ -859,11 +871,51 @@ fn capacity_rejects_too_many_random_patterns() {
         .stderr(contains("at most N"));
 }
 
+/// Whether the written file `name` in `out` equals the one in `expected`: a
+/// Parquet table as decoded data, because the file also records the version
+/// of the `parquet` crate; any other file byte for byte.
+fn same_file(out: &Path, expected: &Path, name: &str) -> bool {
+    if name.ends_with(".parquet") {
+        read_parquet(&out.join(name)) == read_parquet(&expected.join(name))
+    } else {
+        std::fs::read(out.join(name)).unwrap() == std::fs::read(expected.join(name)).unwrap()
+    }
+}
+
+/// The committed results of the pattern stability experiment with Oja's
+/// single-neuron rule are what the current code computes (the run takes a
+/// fraction of a second; the other committed experiments of the same kind
+/// train Oja's subspace rule for many epochs and are too slow for a test).
+#[test]
+fn single_neuron_stability_matches_the_committed_results() {
+    let experiment_dir = Path::new("../../data/experiments/08-stability-single-neuron");
+    let committed = experiment_dir.join("results");
+    let dir = tempfile::tempdir().unwrap();
+    let out = dir.path().join("run");
+    experiment(&experiment_dir.join("config.toml"))
+        .arg("--out")
+        .arg(&out)
+        .assert()
+        .success();
+    for file in [
+        "trials.parquet",
+        "summary.json",
+        "datasets.json",
+        "stability.parquet",
+    ] {
+        assert!(
+            same_file(&out, &committed, file),
+            "{file} differs from the committed one"
+        );
+    }
+}
+
 /// The test fixtures of the presentation layer (`src/analysis/tests/fixtures`)
 /// are what `recall`, `train`, `experiment` and `capacity` write for their
 /// configurations. A change of the output fails here until the fixtures are
 /// regenerated with the commands in their README. Only the data files are
-/// compared: the metadata records the time and the build.
+/// compared (see [`same_file`]): the metadata records the time and the
+/// build.
 #[test]
 fn analysis_fixtures_match_the_current_output() {
     let fixtures = Path::new("../analysis/tests/fixtures");
@@ -893,8 +945,7 @@ fn analysis_fixtures_match_the_current_output() {
             .success();
         for file in files {
             assert!(
-                std::fs::read(out.join(file)).unwrap()
-                    == std::fs::read(fixtures.join(command).join(file)).unwrap(),
+                same_file(&out, &fixtures.join(command), file),
                 "{command}/{file} differs from the fixture; regenerate it"
             );
         }
