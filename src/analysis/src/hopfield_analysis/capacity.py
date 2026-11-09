@@ -89,7 +89,7 @@ def plot_capacity(summary: pl.DataFrame) -> Figure:
     sizes = sorted(summary["neurons"].unique().to_list())
     series = summary.select("source", "learning").unique(maintain_order=True).rows()
     colors = {key: f"C{k}" for k, key in enumerate(series)}
-    figure = style.new_figure(height=4.2)
+    figure = style.new_figure(height=5.2)
     axes = figure.subplots(2, len(sizes), squeeze=False, sharex="col")
     for column, neurons in enumerate(sizes):
         top, bottom = axes[0, column], axes[1, column]
@@ -138,6 +138,6 @@ def plot_capacity(summary: pl.DataFrame) -> Figure:
         list(entries.values()),
         list(entries),
         loc="outside upper center",
-        ncols=min(len(entries), 3),
+        ncols=min(len(entries), 2),
     )
     return figure

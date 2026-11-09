@@ -205,7 +205,9 @@ def plot_stable(table: pl.DataFrame) -> Figure:
     return figure
 
 
-def plot_fields(fields: pl.DataFrame, datasets: list[str] | None = None) -> Figure:
+def plot_fields(
+    fields: pl.DataFrame, datasets: list[str] | None = None, log: bool = False
+) -> Figure:
     """Plots histograms of the aligned fields.
 
     One panel per dataset (at most four in a row), one step histogram per
@@ -215,6 +217,9 @@ def plot_fields(fields: pl.DataFrame, datasets: list[str] | None = None) -> Figu
     Args:
         fields: Table from :func:`load_fields`.
         datasets: Datasets to show, in this order; all by default.
+        log: Logarithmic count axis, so the narrow peak of one rule does not
+            flatten the spread of another and single unstable neurons stay
+            visible.
 
     Returns:
         The figure in the report style with Polish labels.
@@ -243,6 +248,9 @@ def plot_fields(fields: pl.DataFrame, datasets: list[str] | None = None) -> Figu
                 counts, _ = np.histogram(series, bins=bins)
                 ax.stairs(counts, bins, color=f"C{k}", label=labels.rule(rule))
         ax.axvline(0, color="black", linestyle="--", linewidth=0.8)
+        if log:
+            ax.set_yscale("log")
+            ax.set_ylim(bottom=0.7)
         ax.set_title(dataset)
     for row in grid:
         row[0].set_ylabel(labels.NEURON_COUNT)
@@ -261,8 +269,9 @@ def plot_unstable(patterns: np.ndarray, unstable: np.ndarray, columns: int = 6) 
         columns: Largest number of panels in a row.
 
     Returns:
-        The figure in the report style, panels titled ``wzorzec 0``, ... and
-        labelled with the number of unstable pixels.
+        The figure in the report style, panels titled ``wzorzec 0``, ...
+        with the number of unstable pixels below each panel, explained by
+        the common label under the grid.
 
     Raises:
         ValueError: If the shapes differ.
@@ -287,8 +296,9 @@ def plot_unstable(patterns: np.ndarray, unstable: np.ndarray, columns: int = 6) 
             vmax=1,
             interpolation="auto",
         )
-        ax.set_title(f"{labels.PATTERN} {mu}")
-        ax.set_xlabel(f"{labels.UNSTABLE}: {int(unstable[mu].sum())}", fontsize=8)
+        ax.set_title(f"{labels.PATTERN} {mu}", fontsize=8)
+        ax.set_xlabel(str(int(unstable[mu].sum())), fontsize=8)
+    figure.supxlabel(labels.UNSTABLE_PIXELS, fontsize=9)
     return figure
 
 

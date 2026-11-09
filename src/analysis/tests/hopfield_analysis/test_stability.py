@@ -135,6 +135,12 @@ def test_plot_fields_counts_every_field(fields):
     assert figure._supxlabel.get_text() == "pole $\\xi_i^\\mu h_i$"
 
 
+def test_plot_fields_can_use_a_logarithmic_count_axis(fields):
+    figure = plot_fields(fields, log=True)
+    assert {ax.get_yscale() for ax in figure.axes} == {"log"}
+    assert {ax.get_yscale() for ax in plot_fields(fields).axes} == {"linear"}
+
+
 def test_plot_fields_shows_the_chosen_datasets(fields):
     figure = plot_fields(fields, ["animals-14x9"])
     assert [ax.get_title() for ax in figure.axes] == ["animals-14x9"]
@@ -152,11 +158,8 @@ def test_plot_unstable_marks_the_masked_pixels():
         bitmap, marks = ax.images
         np.testing.assert_array_equal(bitmap.get_array(), patterns[mu])
         np.testing.assert_array_equal(~np.ma.getmaskarray(marks.get_array()), unstable[mu])
-    assert [ax.get_xlabel() for ax in figure.axes] == [
-        "niestabilne: 0",
-        "niestabilne: 1",
-        "niestabilne: 2",
-    ]
+    assert [ax.get_xlabel() for ax in figure.axes] == ["0", "1", "2"]
+    assert figure._supxlabel.get_text().startswith("liczba niestabilnych pikseli")
     with pytest.raises(ValueError, match="differ in shape"):
         plot_unstable(patterns, unstable[:2])
 
@@ -187,7 +190,7 @@ def test_plot_overlaps_writes_no_values_into_large_matrices():
     "arguments",
     [
         ["stable", str(RESULTS), str(RESULTS)],
-        ["fields", str(RESULTS), "--datasets", "small-7x7"],
+        ["fields", str(RESULTS), "--datasets", "small-7x7", "--log"],
         ["unstable", str(RESULTS), "--dataset", "animals-14x9", "--learning", "hebb"],
         ["overlaps", str(RESULTS), "--datasets", "small-7x7,animals-14x9"],
     ],

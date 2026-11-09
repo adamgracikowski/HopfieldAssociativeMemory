@@ -7,11 +7,14 @@ comma. Every figure is saved as PDF and as PNG at 300 dpi.
 """
 
 import logging
+import math
 from pathlib import Path
 
 import matplotlib as mpl
+import numpy as np
 from matplotlib import font_manager
 from matplotlib.figure import Figure
+from matplotlib.image import AxesImage
 from matplotlib.ticker import ScalarFormatter
 
 FONT_DIR = Path(__file__).parent / "fonts"
@@ -106,11 +109,16 @@ def save(figure: Figure, stem: Path) -> list[Path]:
     """Saves ``figure`` as ``<stem>.pdf`` and ``<stem>.png`` (300 dpi).
 
     Images (bitmaps, heat maps) are resampled differently per format. The
-    PDF embeds them unresampled (interpolation ``none``), so every pixel of
-    a large bitmap is kept and stays sharp when zoomed in. The PNG uses
-    ``auto``: nearest neighbour when a small bitmap is enlarged at least 3
-    times, smoothing when a large one is shrunk, which keeps thin lines
-    instead of dropping whole rows and columns.
+    PDF embeds them without resampling (interpolation ``none``), so every
+    pixel of a large bitmap is kept and stays sharp when zoomed in; an
+    image shown larger than its own resolution at 300 dpi is embedded with
+    every pixel repeated an integer number of times (see
+    :func:`pixel_repeats`), because PDF viewers smooth an enlarged embedded
+    image and would blur a small bitmap or heat map. The PNG uses ``auto``:
+    nearest neighbour when a small bitmap is enlarged at least 3 times,
+    smoothing when a large one is shrunk, which keeps thin lines instead of
+    dropping whole rows and columns. The data and interpolation of the
+    images are restored afterwards.
 
     Args:
         figure: The figure.
@@ -126,13 +134,47 @@ def save(figure: Figure, stem: Path) -> list[Path]:
     finish(figure)
     images = [image for ax in figure.axes for image in ax.images]
     interpolations = [image.get_interpolation() for image in images]
+    data = [image.get_array() for image in images]
+    figure.draw_without_rendering()
+    repeats = [pixel_repeats(image) for image in images]
     paths = []
     for extension in FORMATS:
-        for image in images:
-            image.set_interpolation("none" if extension == "pdf" else "auto")
+        for image, array, (rows, columns) in zip(images, data, repeats, strict=True):
+            if extension == "pdf":
+                image.set_interpolation("none")
+                image.set_data(np.repeat(np.repeat(array, rows, axis=0), columns, axis=1))
+            else:
+                image.set_interpolation("auto")
+                image.set_data(array)
         path = stem.with_name(f"{stem.name}.{extension}")
         figure.savefig(path, dpi=DPI)
         paths.append(path)
-    for image, interpolation in zip(images, interpolations, strict=True):
+    for image, array, interpolation in zip(images, data, interpolations, strict=True):
+        image.set_data(array)
         image.set_interpolation(interpolation)
     return paths
+
+
+def pixel_repeats(image: AxesImage) -> tuple[int, int]:
+    """How many times every pixel of ``image`` is repeated in a PDF.
+
+    The image keeps its extent, so repeating its pixels only raises the
+    resolution of the embedded raster: ``ceil(shown pixels at 300 dpi /
+    image pixels)`` per axis, at least 1. A 14 x 20 bitmap shown 0.66 inch
+    wide gets ``ceil(198 / 14) = 15`` columns per pixel; a bitmap with more
+    pixels than its size at 300 dpi gets 1.
+
+    Args:
+        image: An image of a figure drawn at least once (its position is
+            known).
+
+    Returns:
+        Repeats of every row and of every column.
+    """
+    rows, columns = image.get_array().shape[:2]
+    box = image.get_window_extent()
+    scale = DPI / image.figure.dpi
+    return (
+        max(1, math.ceil(box.height * scale / rows)),
+        max(1, math.ceil(box.width * scale / columns)),
+    )

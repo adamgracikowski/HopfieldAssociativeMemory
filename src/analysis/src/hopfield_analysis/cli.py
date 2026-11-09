@@ -185,6 +185,7 @@ def parser() -> argparse.ArgumentParser:
     )
     fields.add_argument("--out", type=Path, required=True, help=OUT_HELP)
     fields.add_argument("--datasets", type=names, help="comma-separated datasets (default: all)")
+    fields.add_argument("--log", action="store_true", help="logarithmic count axis")
     fields.set_defaults(handler=_fields)
 
     unstable = commands.add_parser(
@@ -321,7 +322,7 @@ def _stable(args: argparse.Namespace) -> int:
 
 
 def _fields(args: argparse.Namespace) -> int:
-    return _save(plot_fields(load_fields(args.results), args.datasets), args.out)
+    return _save(plot_fields(load_fields(args.results), args.datasets, log=args.log), args.out)
 
 
 def _unstable(args: argparse.Namespace) -> int:
