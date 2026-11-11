@@ -4,6 +4,8 @@
 #
 # Run from src/compute:
 #   cargo run --release -- experiment --config ../../data/experiments/09-load/config.toml
+# Report figure, from src/analysis:
+#   uv run hopfield-analysis load ../../data/experiments/09-load/results --levels 0.2,0.3,0.4,0.45 --out ../../data/experiments/09-load/figures/load
 
 seed = 20261110
 datasets = [

@@ -4,6 +4,8 @@
 #
 # Run from src/compute:
 #   cargo run --release -- experiment --config ../../data/experiments/09-noise/config.toml
+# Report figure, from src/analysis:
+#   uv run hopfield-analysis recovery ../../data/experiments/09-noise/results --out ../../data/experiments/09-noise/figures/recovery
 
 seed = 20261110
 datasets = [
