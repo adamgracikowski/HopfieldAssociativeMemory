@@ -37,7 +37,7 @@ DAMAGE_SOURCES = {"pattern": "noise", "occlusion": "occlusion"}
 PANELS_PER_ROW = 3
 """Largest number of dataset panels in a row of :func:`plot_recovery`."""
 TICK_LABELS = 6
-"""Largest number of labelled noise levels on an axis of :func:`plot_classes`."""
+"""Largest number of labelled damage levels on an axis of :func:`plot_classes`."""
 
 TRIALS_FILE = "trials.parquet"
 SUMMARY_FILE = "summary.json"
@@ -237,15 +237,20 @@ def plot_load(
         The figure in the report style with Polish labels.
 
     Raises:
-        ValueError: If the metric is unknown or missing, or no cell has the
-            mode or one of the levels.
+        ValueError: If the metric is unknown or missing, a requested level is
+            not in the summary, or no cell has the mode.
     """
     column = _metric_column(summary, metric)
     cells = summary.filter(pl.col("mode") == mode).join(sizes, on="dataset", how="inner")
     if levels is not None:
+        known = set(summary["noise"].drop_nulls().to_list())
+        missing = [level for level in levels if level not in known]
+        if missing:
+            names = ", ".join(labels.decimal(level) for level in missing)
+            raise ValueError(f"damage levels not in the experiment: {names}")
         cells = cells.filter(pl.col("noise").is_in(list(levels)))
     if cells.is_empty():
-        raise ValueError(f"no cells with mode `{mode}` and the chosen levels")
+        raise ValueError(f"no cells with mode `{mode}`")
     names = cells["name"].unique(maintain_order=True).to_list()
     rules = cells["learning"].unique(maintain_order=True).to_list()
     drawn = sorted(cells["noise"].unique().to_list())
@@ -279,10 +284,10 @@ def plot_classes(summary: pl.DataFrame, damage: str = "noise") -> Figure:
     """Plots the fractions of the final state classes as stacked bars.
 
     One row of panels per dataset and one column per learning rule and update
-    mode; in every panel one bar per noise level (or a single bar for random
+    mode; in every panel one bar per damage level (or a single bar for random
     inputs) stacked from the classes ``pattern``, ``negation``, ``spurious``,
     ``cycle`` and ``unconverged``, with the class legend above the panels.
-    With more than six noise levels only every k-th bar is labelled, so the
+    With more than six damage levels only every k-th bar is labelled, so the
     labels do not overlap.
 
     Args:

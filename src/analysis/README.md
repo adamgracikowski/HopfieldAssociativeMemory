@@ -58,7 +58,7 @@ uv run hopfield-analysis recovery ../../data/experiments/08-large-recovery/resul
 
 - `recovery`: the fraction of recovered runs (`--metric recovered`, the default) or of runs whose final state is nearest their target (`--metric nearest-target`) against the damage level, one panel per dataset (at most three in a row), one line per learning rule and update mode, with the 95% Wilson intervals from `summary.json`. The axis names the damage of the experiment's inputs from `metadata.json`: flipped pixels (`source = "pattern"`) or covered rows (`source = "occlusion"`).
 - `load`: the same fractions against the number of patterns `p` of the prefixes of a dataset (`{ name, patterns }` entries of `datasets`, and the whole dataset if listed), one row of panels per dataset in the registry and one column per learning rule, one line per damage level (`--levels 0,0.2`, all by default) of one update mode (`--mode`, `synchronous` by default).
-- `classes`: the fractions of the final state classes (pattern, negation, spurious state, cycle, step limit) as stacked bars per damage level, one row of panels per dataset and one column per learning rule and update mode; with more than six noise levels only every k-th bar is labelled.
+- `classes`: the fractions of the final state classes (pattern, negation, spurious state, cycle, step limit) as stacked bars per damage level, one row of panels per dataset and one column per learning rule and update mode; with more than six damage levels only every k-th bar is labelled.
 
 Stability of the stored patterns of an experiment (`unstable` and `fields` need `stability_fields = true`, which writes `stability.parquet`):
 

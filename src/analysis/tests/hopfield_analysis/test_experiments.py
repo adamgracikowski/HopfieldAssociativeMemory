@@ -287,8 +287,10 @@ def test_plot_load_has_a_line_per_level_and_a_point_per_prefix():
 
     one = plot_load(summary, sizes, levels=[0.3])
     assert len(one.get_axes()[0].containers) == 1
-    with pytest.raises(ValueError, match="no cells"):
-        plot_load(summary, sizes, levels=[0.5])
+    with pytest.raises(ValueError, match="damage levels not in the experiment: 0,25"):
+        plot_load(summary, sizes, levels=[0.3, 0.25])
+    with pytest.raises(ValueError, match="no cells with mode `parallel`"):
+        plot_load(summary, sizes, mode="parallel")
 
 
 def test_cli_draws_the_load_and_the_occlusion_recovery(tmp_path):

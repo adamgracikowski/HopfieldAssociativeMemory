@@ -60,15 +60,17 @@ pub struct TrialResult {
 }
 
 impl TrialResult {
-    /// Whether the stored pattern closest to the final state (the largest
-    /// `|m|`, the first one on ties) is the target itself and not its
-    /// negation; `None` for a random initial state. Unlike
+    /// Whether the target is among the stored patterns closest to the final
+    /// state, not as its negation: its overlap `m` is positive and at least
+    /// the largest `|m|` of all patterns. Ties count, so the result does not
+    /// depend on the order of the patterns ([`nearest`](Self::nearest) keeps
+    /// the first one). Both overlaps come from the same computation, so they
+    /// are compared exactly. `None` for a random initial state. Unlike
     /// [`recovered`](Self::recovered) it holds for a run that ends near an
     /// unstable target, in any final class.
     pub fn nearest_target(&self) -> Option<bool> {
-        self.trial
-            .target
-            .map(|mu| self.nearest.pattern == mu && self.nearest.overlap > 0.0)
+        self.final_overlap
+            .map(|m| m > 0.0 && m >= self.nearest.overlap.abs())
     }
 }
 
@@ -179,6 +181,24 @@ mod tests {
             }
         );
         assert_eq!(result.nearest_target(), Some(false));
+    }
+
+    /// A final state with overlap `0.5` with both patterns: `Nearest::of`
+    /// keeps pattern 0, but target 1 ties with it and counts as nearest.
+    #[test]
+    fn a_target_tied_for_the_largest_overlap_is_nearest() {
+        let mut result = run(array![[1, 1]], 0);
+        result.trial.target = Some(1);
+        result.final_overlap = Some(0.5);
+        result.nearest = Nearest {
+            pattern: 0,
+            overlap: -0.5,
+        };
+        assert_eq!(result.nearest_target(), Some(true));
+        result.final_overlap = Some(0.25);
+        assert_eq!(result.nearest_target(), Some(false));
+        result.final_overlap = None;
+        assert_eq!(result.nearest_target(), None);
     }
 
     /// `(1, 1)` has `h = (0.5, 0.5)`: a fixed point equal to the target.

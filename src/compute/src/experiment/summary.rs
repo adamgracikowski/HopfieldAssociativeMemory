@@ -171,9 +171,9 @@ pub struct CellSummary {
     /// Fraction of runs that ended in their target; `None` for random
     /// initial states.
     pub recovered: Option<Proportion>,
-    /// Fraction of runs whose final state is closest to their target (see
-    /// [`TrialResult::nearest_target`]), in any final class; `None` for
-    /// random initial states.
+    /// Fraction of runs whose target is among the patterns closest to the
+    /// final state (see [`TrialResult::nearest_target`]), in any final
+    /// class; `None` for random initial states.
     pub nearest_target: Option<Proportion>,
     /// Applied steps.
     pub steps: Moments,
@@ -285,12 +285,15 @@ mod tests {
         assert_eq!(Moments::of([]), None);
     }
 
-    /// Four runs of target 0 whose final states have the nearest patterns
-    /// `(0, m = 1)`, `(1, m = 0.6)`, `(0, m = -0.8)` (the negated target)
-    /// and `(0, m = 0.4)`: two of them, the first and the last, end nearest
-    /// the target, only the first one in it. The final distances `0, 3, 10,
-    /// 6` have mean 4.75, squared deviations `22.5625 + 3.0625 + 27.5625 +
-    /// 1.5625 = 54.75`, sample variance `18.25` and deviation `4.272002`.
+    /// Four runs of target 1 (`N = 49`) with the final overlap `m` with the
+    /// target and the nearest pattern: `m = 1`, nearest `(1, 1)` (in the
+    /// target); `m = 41/49`, nearest `(0, 45/49)` (another pattern closer);
+    /// `m = -45/49`, nearest `(1, -45/49)` (the negated target); `m =
+    /// 39/49`, nearest `(0, 39/49)` (a tie with pattern 0). The first and
+    /// the last end nearest the target, only the first one in it. The final
+    /// distances `0, 4, 47, 5` have mean 14, squared deviations `196 + 100 +
+    /// 1089 + 81 = 1466`, sample variance `488.667` and deviation
+    /// `22.105806`.
     #[test]
     fn summarizes_the_nearest_target_and_the_final_distance() {
         use crate::dynamics::Termination;
@@ -298,11 +301,11 @@ mod tests {
         use crate::run::Nearest;
         use crate::seed::Seed;
 
-        let result = |pattern, overlap, distance| TrialResult {
+        let result = |pattern, overlap: f64, m: f64, distance| TrialResult {
             trial: Trial {
                 cell: 0,
                 trial: 0,
-                target: Some(0),
+                target: Some(1),
                 damage: Some(Damage::Flip { pixels: 5 }),
                 seed: Seed(0),
             },
@@ -318,14 +321,17 @@ mod tests {
             recovered: Some(distance == 0),
             initial_distance: Some(5),
             final_distance: Some(distance),
-            final_overlap: Some(1.0 - 2.0 * distance as f64 / 49.0),
-            nearest: Nearest { pattern, overlap },
+            final_overlap: Some(m / 49.0),
+            nearest: Nearest {
+                pattern,
+                overlap: overlap / 49.0,
+            },
         };
         let results = [
-            result(0, 1.0, 0),
-            result(1, 0.6, 3),
-            result(0, -0.8, 10),
-            result(0, 0.4, 6),
+            result(1, 49.0, 49.0, 0),
+            result(0, 45.0, 41.0, 4),
+            result(1, -45.0, -45.0, 47),
+            result(0, 39.0, 39.0, 5),
         ];
         let cell = Cell {
             dataset: 0,
@@ -337,9 +343,9 @@ mod tests {
         assert_eq!(summary.recovered, Some(Proportion::wilson(1, 4)));
         assert_eq!(summary.nearest_target, Some(Proportion::wilson(2, 4)));
         let distance = summary.final_distance.unwrap();
-        assert_eq!(distance.mean, 4.75);
+        assert_eq!(distance.mean, 14.0);
         assert!(
-            (distance.std.unwrap() - 4.272002).abs() < 1e-6,
+            (distance.std.unwrap() - 22.105806).abs() < 1e-6,
             "{distance:?}"
         );
     }
