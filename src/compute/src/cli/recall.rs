@@ -42,7 +42,11 @@ impl RecallArgs {
         let dynamics = &config.dynamics;
         println!(
             "dataset      {} ({}x{}, p = {}, N = {})",
-            dataset.name, dataset.width, dataset.height, dataset.patterns, dataset.neurons
+            dataset.label(),
+            dataset.width,
+            dataset.height,
+            dataset.patterns,
+            dataset.neurons
         );
         println!(
             "learning     {}, {} backend, {} epochs",
@@ -91,6 +95,9 @@ fn describe(input: &Input) -> String {
     match input {
         Input::Pattern { index, flips } => {
             format!("pattern {index} with {flips} flipped pixels")
+        }
+        Input::Occlusion { index, rows } => {
+            format!("pattern {index} with {rows} covered rows")
         }
         Input::Random {} => "random state".to_owned(),
         Input::File { path, index } => format!("pattern {index} of `{}`", path.display()),

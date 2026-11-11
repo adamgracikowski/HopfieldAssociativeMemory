@@ -143,6 +143,25 @@ impl PatternSet {
         matrix
     }
 
+    /// The set of the first `patterns` patterns, or an error unless `1 <=
+    /// patterns <= p`.
+    pub fn prefix(&self, patterns: usize) -> Result<Self> {
+        if patterns == 0 || patterns > self.len() {
+            return Err(Error::InvalidArgument {
+                message: format!(
+                    "cannot take the first {patterns} of {} patterns",
+                    self.len()
+                ),
+            });
+        }
+        let rows: Vec<usize> = (0..patterns).collect();
+        Ok(Self {
+            width: self.width,
+            height: self.height,
+            data: self.data.select(Axis(0), &rows),
+        })
+    }
+
     /// Consumes the set and returns the `p x N` matrix.
     pub fn into_inner(self) -> Array2<i8> {
         self.data
@@ -174,6 +193,19 @@ mod tests {
         assert!(!set.is_empty());
         assert_eq!(set.pattern(1).values(), array![-1, -1]);
         assert_eq!(set.iter().count(), 3);
+    }
+
+    #[test]
+    fn takes_a_prefix() {
+        let set = PatternSet::new(2, 1, array![[1, -1], [-1, -1], [1, 1]]).unwrap();
+        let prefix = set.prefix(2).unwrap();
+        assert_eq!(prefix.patterns(), array![[1, -1], [-1, -1]]);
+        assert_eq!((prefix.width(), prefix.height()), (2, 1));
+        assert_eq!(set.prefix(3).unwrap(), set);
+        for patterns in [0, 4] {
+            let error = set.prefix(patterns).unwrap_err();
+            assert!(error.to_string().contains("of 3 patterns"), "{error}");
+        }
     }
 
     /// Rows of a 5x5 set: `a` is all ones, `b` has -1 at pixels 0-9, `c` has

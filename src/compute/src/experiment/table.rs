@@ -15,8 +15,8 @@ use super::{Cell, ExperimentRun, TrialResult};
 /// | Column | Type | Content |
 /// |---|---|---|
 /// | `dataset`, `learning`, `mode` | string | grid cell |
-/// | `noise` | float64, nullable | fraction of flipped pixels |
-/// | `flips` | uint32 | flipped pixels |
+/// | `noise` | float64, nullable | damage level: fraction of flipped pixels or of covered rows |
+/// | `flips` | uint32 | damaged pixels: flipped, or covered (rows times width) |
 /// | `target` | uint32, nullable | pattern the input is made from |
 /// | `trial` | uint32 | trial number in the cell |
 /// | `seed` | uint64 | seed of the run, for `recall` |
@@ -39,6 +39,7 @@ impl TrialTable {
     /// The table of `run`.
     pub fn new<'a>(run: &'a ExperimentRun) -> Self {
         let results: &'a [TrialResult] = &run.results;
+        let labels: Vec<String> = run.datasets.iter().map(|info| info.label()).collect();
         let cell = |result: &TrialResult| -> Cell { run.cells[result.trial.cell] };
         let strings = |value: &dyn Fn(&'a TrialResult) -> &'a str| -> ArrayRef {
             Arc::new(StringArray::from_iter_values(results.iter().map(value)))
@@ -60,7 +61,9 @@ impl TrialTable {
         let columns: Vec<(&str, ArrayRef, bool)> = vec![
             (
                 "dataset",
-                strings(&|r| &run.datasets[cell(r).dataset].name),
+                Arc::new(StringArray::from_iter_values(
+                    results.iter().map(|r| labels[cell(r).dataset].as_str()),
+                )),
                 false,
             ),
             (
@@ -70,7 +73,7 @@ impl TrialTable {
             ),
             ("mode", strings(&|r| cell(r).mode.into()), false),
             ("noise", floats(&|r| cell(r).noise), true),
-            ("flips", counts(&|r| r.trial.flips), false),
+            ("flips", counts(&|r| r.trial.damaged_pixels()), false),
             ("target", optional_counts(&|r| r.trial.target), true),
             ("trial", counts(&|r| r.trial.trial), false),
             (

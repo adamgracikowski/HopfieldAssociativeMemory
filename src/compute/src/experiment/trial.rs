@@ -1,6 +1,6 @@
 //! A single trial of an experiment.
 
-use super::FinalClass;
+use super::{Damage, FinalClass};
 use crate::dynamics::{Dynamics, NoHistory, Termination};
 use crate::run::{Input, Nearest};
 use crate::seed::Seed;
@@ -14,8 +14,8 @@ use crate::{PatternSet, Result};
 /// So `recall` repeats the trial with this seed, the experiment's dataset,
 /// `registry`, `backend` and `[learning]` table of the rule, `[dynamics]`
 /// with the cell's `mode` and the experiment's `zero_field`, `order` and
-/// `max_steps`, and the input `pattern` with `index = target` and `flips`
-/// (or `random`).
+/// `max_steps`, and the [input](Damage::input) of its damage with `index =
+/// target` (or `random`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Trial {
     /// Index of the grid cell.
@@ -25,8 +25,8 @@ pub struct Trial {
     /// Stored pattern the initial state is made from; `None` for a random
     /// state.
     pub target: Option<usize>,
-    /// Number of flipped pixels of the target.
-    pub flips: usize,
+    /// Damage of the target; `None` for a random state.
+    pub damage: Option<Damage>,
     /// Seed of the trial.
     pub seed: Seed,
 }
@@ -59,16 +59,34 @@ pub struct TrialResult {
     pub nearest: Nearest,
 }
 
+impl TrialResult {
+    /// Whether the target is among the stored patterns closest to the final
+    /// state, not as its negation: its overlap `m` is positive and at least
+    /// the largest `|m|` of all patterns. Ties count, so the result does not
+    /// depend on the order of the patterns ([`nearest`](Self::nearest) keeps
+    /// the first one). Both overlaps come from the same computation, so they
+    /// are compared exactly. `None` for a random initial state. Unlike
+    /// [`recovered`](Self::recovered) it holds for a run that ends near an
+    /// unstable target, in any final class.
+    pub fn nearest_target(&self) -> Option<bool> {
+        self.final_overlap
+            .map(|m| m > 0.0 && m >= self.nearest.overlap.abs())
+    }
+}
+
 impl Trial {
     /// The initial state settings of this trial.
     pub fn input(&self) -> Input {
-        match self.target {
-            Some(index) => Input::Pattern {
-                index,
-                flips: self.flips,
-            },
-            None => Input::Random {},
+        match (self.target, self.damage) {
+            (Some(index), Some(damage)) => damage.input(index),
+            _ => Input::Random {},
         }
+    }
+
+    /// Number of damaged pixels of the target (see [`Damage::pixels`]); 0
+    /// for a random state.
+    pub fn damaged_pixels(&self) -> usize {
+        self.damage.map_or(0, |damage| damage.pixels())
     }
 
     /// Runs the network with `weights`, which stores `set`, under
@@ -123,7 +141,7 @@ mod tests {
             cell: 0,
             trial: 0,
             target: Some(0),
-            flips,
+            damage: Some(Damage::Flip { pixels: flips }),
             seed: Seed(0),
         };
         let dynamics = Dynamics {
@@ -137,7 +155,7 @@ mod tests {
     /// `h = (0.5, -0.5)` gives `(1, -1)`, then `h = (-0.5, 0.5)` gives
     /// `(-1, 1)` again, a cycle of length 2 found after one step whose
     /// final state equals the target. It is not a fixed point, so the run
-    /// does not count as recovered.
+    /// does not count as recovered, but the target is the nearest pattern.
     #[test]
     fn a_two_cycle_through_the_target_is_not_recovered() {
         let result = run(array![[1, -1]], 2);
@@ -145,6 +163,42 @@ mod tests {
         assert_eq!(result.class, FinalClass::Cycle);
         assert_eq!(result.final_distance, Some(0));
         assert_eq!(result.recovered, Some(false));
+        assert_eq!(result.nearest_target(), Some(true));
+    }
+
+    /// Target `(1, 1)` with both pixels flipped starts at `(-1, -1)`:
+    /// `h = (-0.5, -0.5)` keeps it, a fixed point equal to the negated
+    /// target with `m = -1`, which is not the target.
+    #[test]
+    fn the_negated_target_is_not_the_nearest_target() {
+        let result = run(array![[1, 1]], 2);
+        assert_eq!(result.class, FinalClass::Negation);
+        assert_eq!(
+            result.nearest,
+            Nearest {
+                pattern: 0,
+                overlap: -1.0
+            }
+        );
+        assert_eq!(result.nearest_target(), Some(false));
+    }
+
+    /// A final state with overlap `0.5` with both patterns: `Nearest::of`
+    /// keeps pattern 0, but target 1 ties with it and counts as nearest.
+    #[test]
+    fn a_target_tied_for_the_largest_overlap_is_nearest() {
+        let mut result = run(array![[1, 1]], 0);
+        result.trial.target = Some(1);
+        result.final_overlap = Some(0.5);
+        result.nearest = Nearest {
+            pattern: 0,
+            overlap: -0.5,
+        };
+        assert_eq!(result.nearest_target(), Some(true));
+        result.final_overlap = Some(0.25);
+        assert_eq!(result.nearest_target(), Some(false));
+        result.final_overlap = None;
+        assert_eq!(result.nearest_target(), None);
     }
 
     /// `(1, 1)` has `h = (0.5, 0.5)`: a fixed point equal to the target.
@@ -154,5 +208,6 @@ mod tests {
         assert_eq!(result.termination, Termination::FixedPoint);
         assert_eq!(result.class, FinalClass::Pattern);
         assert_eq!(result.recovered, Some(true));
+        assert_eq!(result.nearest_target(), Some(true));
     }
 }

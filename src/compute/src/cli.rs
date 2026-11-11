@@ -3,6 +3,7 @@
 mod capacity;
 mod convert_images;
 mod experiment;
+mod generate;
 mod inspect;
 mod recall;
 mod train;
@@ -13,6 +14,7 @@ use compute::build_info;
 use capacity::CapacityArgs;
 use convert_images::ConvertImagesArgs;
 use experiment::ExperimentArgs;
+use generate::GenerateArgs;
 use inspect::InspectArgs;
 use recall::RecallArgs;
 use train::TrainArgs;
@@ -31,6 +33,7 @@ impl Cli {
         match self.command {
             Command::Inspect(args) => args.run(),
             Command::ConvertImages(args) => args.run(),
+            Command::Generate(args) => args.run(),
             Command::Train(args) => args.run(),
             Command::Recall(args) => args.run(),
             Command::Experiment(args) => args.run(),
@@ -47,6 +50,10 @@ enum Command {
     /// Convert photographs to bipolar bitmap datasets saved as `.npy`.
     ConvertImages(ConvertImagesArgs),
 
+    /// Generate datasets of groups of similar patterns: variants of stored
+    /// pictures with flipped pixels, saved as `.npy`.
+    Generate(GenerateArgs),
+
     /// Train a network on a dataset and save its weights and the stability
     /// of the patterns.
     Train(TrainArgs),
@@ -55,7 +62,7 @@ enum Command {
     /// state.
     Recall(RecallArgs),
 
-    /// Run a grid of datasets, learning rules, update modes and noise levels
+    /// Run a grid of datasets, learning rules, update modes and damage levels
     /// with many trials and save the trial table and the cell summaries.
     Experiment(ExperimentArgs),
 

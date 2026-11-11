@@ -35,7 +35,11 @@ impl TrainArgs {
         let training = &run.trained;
         println!(
             "dataset      {} ({}x{}, p = {}, N = {})",
-            dataset.name, dataset.width, dataset.height, dataset.patterns, dataset.neurons
+            dataset.label(),
+            dataset.width,
+            dataset.height,
+            dataset.patterns,
+            dataset.neurons
         );
         println!(
             "learning     {}, {} backend",

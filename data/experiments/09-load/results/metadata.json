@@ -1,0 +1,747 @@
+{
+  "command": "experiment",
+  "created": "2026-11-11T22:36:18Z",
+  "build": {
+    "version": "0.1.0",
+    "commit": "dbd2afe381f00a9fae1036fe28496ca7ceaad381",
+    "dirty": false
+  },
+  "config": {
+    "seed": 20261110,
+    "datasets": [
+      {
+        "name": "large-25x25.plus",
+        "patterns": 3
+      },
+      {
+        "name": "large-25x25.plus",
+        "patterns": 6
+      },
+      {
+        "name": "large-25x25.plus",
+        "patterns": 9
+      },
+      {
+        "name": "large-25x25.plus",
+        "patterns": 12
+      },
+      "large-25x25.plus",
+      {
+        "name": "letters-14x20",
+        "patterns": 2
+      },
+      {
+        "name": "letters-14x20",
+        "patterns": 5
+      },
+      {
+        "name": "letters-14x20",
+        "patterns": 10
+      },
+      {
+        "name": "letters-14x20",
+        "patterns": 15
+      },
+      {
+        "name": "letters-14x20",
+        "patterns": 20
+      },
+      "letters-14x20"
+    ],
+    "backend": "auto",
+    "trials": 100,
+    "learning": [
+      {
+        "rule": "hebb"
+      },
+      {
+        "rule": "oja",
+        "variant": "subspace",
+        "eta": 0.5,
+        "max_epochs": 100000,
+        "tolerance": 1e-6
+      }
+    ],
+    "dynamics": {
+      "modes": [
+        "synchronous",
+        "asynchronous"
+      ],
+      "zero_field": "keep",
+      "order": "permutation",
+      "max_steps": 1000
+    },
+    "input": {
+      "source": "pattern",
+      "noise": [
+        0.0,
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3,
+        0.35,
+        0.4,
+        0.45,
+        0.5
+      ]
+    },
+    "stability_fields": false
+  },
+  "datasets": [
+    {
+      "name": "large-25x25.plus",
+      "prefix": 3,
+      "registry": "../../datasets/datasets.toml",
+      "file": "large-25x25.plus.csv",
+      "description": "The six pictures of large-25x25 followed by nine more.",
+      "width": 25,
+      "height": 25,
+      "patterns": 3,
+      "neurons": 625
+    },
+    {
+      "name": "large-25x25.plus",
+      "prefix": 6,
+      "registry": "../../datasets/datasets.toml",
+      "file": "large-25x25.plus.csv",
+      "description": "The six pictures of large-25x25 followed by nine more.",
+      "width": 25,
+      "height": 25,
+      "patterns": 6,
+      "neurons": 625
+    },
+    {
+      "name": "large-25x25.plus",
+      "prefix": 9,
+      "registry": "../../datasets/datasets.toml",
+      "file": "large-25x25.plus.csv",
+      "description": "The six pictures of large-25x25 followed by nine more.",
+      "width": 25,
+      "height": 25,
+      "patterns": 9,
+      "neurons": 625
+    },
+    {
+      "name": "large-25x25.plus",
+      "prefix": 12,
+      "registry": "../../datasets/datasets.toml",
+      "file": "large-25x25.plus.csv",
+      "description": "The six pictures of large-25x25 followed by nine more.",
+      "width": 25,
+      "height": 25,
+      "patterns": 12,
+      "neurons": 625
+    },
+    {
+      "name": "large-25x25.plus",
+      "registry": "../../datasets/datasets.toml",
+      "file": "large-25x25.plus.csv",
+      "description": "The six pictures of large-25x25 followed by nine more.",
+      "width": 25,
+      "height": 25,
+      "patterns": 15,
+      "neurons": 625
+    },
+    {
+      "name": "letters-14x20",
+      "prefix": 2,
+      "registry": "../../datasets/datasets.toml",
+      "file": "letters-14x20.csv",
+      "description": "Lowercase letters a to z.",
+      "width": 14,
+      "height": 20,
+      "patterns": 2,
+      "neurons": 280
+    },
+    {
+      "name": "letters-14x20",
+      "prefix": 5,
+      "registry": "../../datasets/datasets.toml",
+      "file": "letters-14x20.csv",
+      "description": "Lowercase letters a to z.",
+      "width": 14,
+      "height": 20,
+      "patterns": 5,
+      "neurons": 280
+    },
+    {
+      "name": "letters-14x20",
+      "prefix": 10,
+      "registry": "../../datasets/datasets.toml",
+      "file": "letters-14x20.csv",
+      "description": "Lowercase letters a to z.",
+      "width": 14,
+      "height": 20,
+      "patterns": 10,
+      "neurons": 280
+    },
+    {
+      "name": "letters-14x20",
+      "prefix": 15,
+      "registry": "../../datasets/datasets.toml",
+      "file": "letters-14x20.csv",
+      "description": "Lowercase letters a to z.",
+      "width": 14,
+      "height": 20,
+      "patterns": 15,
+      "neurons": 280
+    },
+    {
+      "name": "letters-14x20",
+      "prefix": 20,
+      "registry": "../../datasets/datasets.toml",
+      "file": "letters-14x20.csv",
+      "description": "Lowercase letters a to z.",
+      "width": 14,
+      "height": 20,
+      "patterns": 20,
+      "neurons": 280
+    },
+    {
+      "name": "letters-14x20",
+      "registry": "../../datasets/datasets.toml",
+      "file": "letters-14x20.csv",
+      "description": "Lowercase letters a to z.",
+      "width": 14,
+      "height": 20,
+      "patterns": 26,
+      "neurons": 280
+    }
+  ],
+  "trainings": [
+    {
+      "dataset": "large-25x25.plus:3",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 3,
+        "unstable_neurons": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus:3",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 38,
+      "converged": true,
+      "stability": {
+        "stable": 3,
+        "unstable_neurons": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus:6",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 5,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          30,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus:6",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 176,
+      "converged": true,
+      "stability": {
+        "stable": 6,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus:9",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 2,
+        "unstable_neurons": [
+          0,
+          67,
+          0,
+          55,
+          62,
+          81,
+          45,
+          69,
+          84
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus:9",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 286,
+      "converged": true,
+      "stability": {
+        "stable": 9,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus:12",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 3,
+        "unstable_neurons": [
+          0,
+          78,
+          0,
+          68,
+          65,
+          83,
+          61,
+          92,
+          95,
+          0,
+          31,
+          75
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus:12",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 399,
+      "converged": true,
+      "stability": {
+        "stable": 12,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 1,
+        "unstable_neurons": [
+          18,
+          100,
+          0,
+          77,
+          93,
+          108,
+          74,
+          103,
+          116,
+          16,
+          56,
+          114,
+          77,
+          22,
+          93
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 538,
+      "converged": true,
+      "stability": {
+        "stable": 15,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "letters-14x20:2",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 280,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 2,
+        "unstable_neurons": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "letters-14x20:2",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 280,
+      "epochs": 159,
+      "converged": true,
+      "stability": {
+        "stable": 2,
+        "unstable_neurons": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "letters-14x20:5",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 280,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          18,
+          13,
+          14,
+          13,
+          10
+        ]
+      }
+    },
+    {
+      "dataset": "letters-14x20:5",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 280,
+      "epochs": 1277,
+      "converged": true,
+      "stability": {
+        "stable": 5,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "letters-14x20:10",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 280,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          15,
+          5,
+          12,
+          14,
+          13,
+          21,
+          23,
+          12,
+          19,
+          27
+        ]
+      }
+    },
+    {
+      "dataset": "letters-14x20:10",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 280,
+      "epochs": 5233,
+      "converged": true,
+      "stability": {
+        "stable": 10,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "letters-14x20:15",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 280,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          18,
+          13,
+          22,
+          20,
+          15,
+          17,
+          28,
+          15,
+          13,
+          20,
+          27,
+          15,
+          34,
+          7,
+          9
+        ]
+      }
+    },
+    {
+      "dataset": "letters-14x20:15",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 280,
+      "epochs": 43315,
+      "converged": true,
+      "stability": {
+        "stable": 15,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "letters-14x20:20",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 280,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          21,
+          11,
+          19,
+          20,
+          15,
+          18,
+          29,
+          16,
+          14,
+          22,
+          32,
+          16,
+          31,
+          11,
+          11,
+          13,
+          22,
+          11,
+          22,
+          19
+        ]
+      }
+    },
+    {
+      "dataset": "letters-14x20:20",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 280,
+      "epochs": 51614,
+      "converged": true,
+      "stability": {
+        "stable": 20,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "letters-14x20",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 280,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          22,
+          15,
+          12,
+          23,
+          17,
+          18,
+          28,
+          22,
+          14,
+          21,
+          28,
+          15,
+          32,
+          15,
+          15,
+          16,
+          25,
+          10,
+          23,
+          16,
+          16,
+          31,
+          46,
+          37,
+          41,
+          32
+        ]
+      }
+    },
+    {
+      "dataset": "letters-14x20",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 280,
+      "epochs": 70371,
+      "converged": true,
+      "stability": {
+        "stable": 26,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  ]
+}

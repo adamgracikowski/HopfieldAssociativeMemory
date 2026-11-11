@@ -7,8 +7,12 @@ translation is shown as it is.
 
 NOISE = "poziom szumu (odsetek odwróconych pikseli)"
 NOISE_SHORT = "poziom szumu"
+OCCLUSION = "poziom zasłonięcia (odsetek zasłoniętych wierszy)"
+OCCLUSION_SHORT = "poziom zasłonięcia"
 RANDOM_INPUT = "losowe"
 RECOVERED = "odsetek odzyskanych"
+NEAREST_TARGET = "odsetek najbliżej celu"
+PATTERN_COUNT = "liczba wzorców $p$"
 FRACTION = "odsetek przebiegów"
 FRAME = "klatka"
 CHANGES = "zmiany"

@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use super::{Cell, ExperimentDynamics, ExperimentInput};
+use super::{Cell, Damage, DatasetEntry, ExperimentDynamics, ExperimentInput};
 use crate::paths::directory_of;
 use crate::patterns::registry::Registry;
 use crate::run::Learning;
@@ -17,7 +17,7 @@ use crate::{Error, Result};
 ///
 /// ```toml
 /// seed = 7
-/// datasets = ["small-7x7", "animals-14x9"]
+/// datasets = ["small-7x7", { name = "animals-14x9", patterns = 3 }]
 /// backend = "auto"         # optional, `auto` by default
 /// trials = 100
 /// stability_fields = false # optional, writes stability.parquet when true
@@ -43,8 +43,9 @@ use crate::{Error, Result};
 pub struct ExperimentConfig {
     /// Master seed; every trial derives its own seed from it.
     pub seed: u64,
-    /// Dataset names in the registry, one grid axis.
-    pub datasets: Vec<String>,
+    /// Datasets in the registry, whole or their first patterns (see
+    /// [`DatasetEntry`]), one grid axis.
+    pub datasets: Vec<DatasetEntry>,
     /// Dataset registry file.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub registry: Option<PathBuf>,
@@ -91,20 +92,28 @@ impl ExperimentConfig {
         Ok(config)
     }
 
-    /// Checks that every axis is non-empty and has no repeated values, that
-    /// noise levels lie in `[0, 1]`, that there is at least one trial and
+    /// Checks that every axis is non-empty and has no repeated values (the
+    /// datasets by their labels), that prefixes have at least one pattern,
+    /// that damage levels lie in `[0, 1]`, that there is at least one trial and
     /// one step, and that the learning rules have different names (their
     /// [`Display`](std::fmt::Display) identifies them in the results).
     pub fn validate(&self) -> Result<()> {
         let labels = self.learning_labels();
-        check_axis("datasets", &self.datasets).map_err(|m| self.invalid(m))?;
+        let datasets: Vec<String> = self.datasets.iter().map(ToString::to_string).collect();
+        check_axis("datasets", &datasets).map_err(|m| self.invalid(m))?;
+        if let Some(entry) = self.datasets.iter().find(|entry| entry.prefix() == Some(0)) {
+            return Err(self.invalid(format!(
+                "the prefix of `{}` needs at least 1 pattern",
+                entry.name()
+            )));
+        }
         check_axis("learning", &labels).map_err(|m| self.invalid(m))?;
         check_axis("dynamics.modes", &self.dynamics.modes).map_err(|m| self.invalid(m))?;
-        if let ExperimentInput::Pattern { noise } = &self.input {
-            check_axis("input.noise", noise).map_err(|m| self.invalid(m))?;
-            if let Some(level) = noise.iter().find(|level| !(0.0..=1.0).contains(*level)) {
+        if let Some((name, levels)) = self.input.levels() {
+            check_axis(&format!("input.{name}"), levels).map_err(|m| self.invalid(m))?;
+            if let Some(level) = levels.iter().find(|level| !(0.0..=1.0).contains(*level)) {
                 return Err(self.invalid(format!(
-                    "noise level {level} is not a fraction between 0 and 1"
+                    "{name} level {level} is not a fraction between 0 and 1"
                 )));
             }
         }
@@ -117,23 +126,33 @@ impl ExperimentConfig {
         Ok(())
     }
 
-    /// Checks that the noise levels give different numbers of flipped
-    /// pixels on dataset `name` of `neurons` neurons. Two levels with the
-    /// same number would give identical cells, because a trial's seed
-    /// depends on the number of flipped pixels, not on the level.
-    pub fn check_noise_levels(&self, name: &str, neurons: usize) -> Result<()> {
-        let levels: Vec<f64> = self.noise_levels().into_iter().flatten().collect();
+    /// Checks that the damage levels give different damage on dataset
+    /// `name` with `width x height` bitmaps: different numbers of flipped
+    /// pixels, or of covered rows. Two levels with the same damage would
+    /// give identical cells, because a trial's seed depends on the number of
+    /// damaged pixels, not on the level.
+    pub fn check_damage_levels(&self, name: &str, width: usize, height: usize) -> Result<()> {
+        let Some((kind, levels)) = self.input.levels() else {
+            return Ok(());
+        };
+        let damage = |level| self.input.damage(level, width, height);
         for (i, &level) in levels.iter().enumerate() {
-            let flips = ExperimentInput::flips(level, neurons);
-            if let Some(&other) = levels[..i]
+            let Some(&other) = levels[..i]
                 .iter()
-                .find(|&&other| ExperimentInput::flips(other, neurons) == flips)
-            {
-                return Err(self.invalid(format!(
-                    "noise levels {other} and {level} both flip {flips} pixels of \
-                     `{name}` (N = {neurons})"
-                )));
-            }
+                .find(|&&other| damage(other) == damage(level))
+            else {
+                continue;
+            };
+            let what = match damage(level) {
+                Some(Damage::Occlusion { rows, .. }) => {
+                    format!("cover {rows} of the {height} rows of `{name}`")
+                }
+                Some(Damage::Flip { pixels }) => {
+                    format!("flip {pixels} pixels of `{name}` (N = {})", width * height)
+                }
+                None => unreachable!("random inputs have no levels"),
+            };
+            return Err(self.invalid(format!("{kind} levels {other} and {level} both {what}")));
         }
         Ok(())
     }
@@ -158,19 +177,19 @@ impl ExperimentConfig {
         self.learning.iter().map(ToString::to_string).collect()
     }
 
-    /// Noise levels of the grid: the configured ones, or a single `None`
-    /// for random initial states.
-    pub fn noise_levels(&self) -> Vec<Option<f64>> {
-        match &self.input {
-            ExperimentInput::Pattern { noise } => noise.iter().copied().map(Some).collect(),
-            ExperimentInput::Random {} => vec![None],
+    /// Damage levels of the grid (noise or occlusion): the configured ones,
+    /// or a single `None` for random initial states.
+    pub fn damage_levels(&self) -> Vec<Option<f64>> {
+        match self.input.levels() {
+            Some((_, levels)) => levels.iter().copied().map(Some).collect(),
+            None => vec![None],
         }
     }
 
     /// Every cell of the grid, ordered by dataset, learning rule, mode and
-    /// noise level (the last axis changes fastest).
+    /// damage level (the last axis changes fastest).
     pub fn cells(&self) -> Vec<Cell> {
-        let noise_levels = self.noise_levels();
+        let noise_levels = self.damage_levels();
         let mut cells = Vec::new();
         for dataset in 0..self.datasets.len() {
             for learning in 0..self.learning.len() {
@@ -252,7 +271,10 @@ mod tests {
     fn parses_an_experiment_with_defaults() {
         let config = parse(CONFIG).unwrap();
         assert_eq!(config.seed, 7);
-        assert_eq!(config.datasets, ["small-7x7", "animals-14x9"]);
+        assert_eq!(
+            config.datasets,
+            [DatasetEntry::from("small-7x7"), "animals-14x9".into()]
+        );
         assert_eq!(config.backend, Backend::Auto);
         assert_eq!(config.trials, 20);
         assert_eq!(
@@ -266,7 +288,7 @@ mod tests {
         );
         assert_eq!(config.dynamics.zero_field, ZeroField::Keep);
         assert_eq!(config.dynamics.max_steps, 1000);
-        assert_eq!(config.noise_levels(), [Some(0.0), Some(0.1), Some(0.2)]);
+        assert_eq!(config.damage_levels(), [Some(0.0), Some(0.1), Some(0.2)]);
         assert_eq!(config.directory(), Path::new("data/experiments/00-example"));
         let json = serde_json::to_value(&config).unwrap();
         assert_eq!(json["dynamics"]["order"], "permutation");
@@ -299,7 +321,7 @@ mod tests {
             "source = \"random\"",
         ))
         .unwrap();
-        assert_eq!(random.noise_levels(), [None]);
+        assert_eq!(random.damage_levels(), [None]);
         assert_eq!(random.cells().len(), 8);
     }
 
@@ -341,6 +363,26 @@ mod tests {
                 "noise = [-0.1]",
                 "noise level -0.1",
             ),
+            (
+                "source = \"pattern\"\n        noise = [0.0, 0.1, 0.2]",
+                "source = \"occlusion\"\n        occlusion = [0.3, 0.3]",
+                "`input.occlusion` lists 0.3",
+            ),
+            (
+                "source = \"pattern\"\n        noise = [0.0, 0.1, 0.2]",
+                "source = \"occlusion\"\n        occlusion = [1.2]",
+                "occlusion level 1.2",
+            ),
+            (
+                "datasets = [\"small-7x7\", \"animals-14x9\"]",
+                "datasets = [\"a\", { name = \"a\", patterns = 0 }]",
+                "the prefix of `a` needs at least 1 pattern",
+            ),
+            (
+                "datasets = [\"small-7x7\", \"animals-14x9\"]",
+                "datasets = [{ name = \"a\", patterns = 2 }, { name = \"a\", patterns = 2 }]",
+                "`datasets` lists \"a:2\" twice",
+            ),
             ("trials = 20", "trials = 0", "`trials` must be"),
             (
                 "modes = [\"synchronous\", \"asynchronous\"]",
@@ -359,17 +401,39 @@ mod tests {
     #[test]
     fn rejects_noise_levels_with_the_same_flips() {
         let config = parse(&CONFIG.replace("[0.0, 0.1, 0.2]", "[0.0, 0.1, 0.11]")).unwrap();
-        let error = config.check_noise_levels("small-7x7", 49).unwrap_err();
+        let error = config.check_damage_levels("small-7x7", 7, 7).unwrap_err();
         assert!(
             error
                 .to_string()
                 .contains("noise levels 0.1 and 0.11 both flip 5 pixels of `small-7x7` (N = 49)"),
             "{error}"
         );
-        config.check_noise_levels("animals-14x9", 126).unwrap();
+        config.check_damage_levels("animals-14x9", 14, 9).unwrap();
         parse(CONFIG)
             .unwrap()
-            .check_noise_levels("small-7x7", 49)
+            .check_damage_levels("small-7x7", 7, 7)
+            .unwrap();
+    }
+
+    /// Of 7 rows `0.1 * 7 = 0.7` and `0.2 * 7 = 1.4` both round to 1 covered
+    /// row; of 12 rows they give 1 and 2.
+    #[test]
+    fn rejects_occlusion_levels_with_the_same_rows() {
+        let config = parse(&CONFIG.replace(
+            "source = \"pattern\"\n        noise = [0.0, 0.1, 0.2]",
+            "source = \"occlusion\"\n        occlusion = [0.0, 0.1, 0.2]",
+        ))
+        .unwrap();
+        assert_eq!(config.damage_levels(), [Some(0.0), Some(0.1), Some(0.2)]);
+        let error = config.check_damage_levels("small-7x7", 7, 7).unwrap_err();
+        assert!(
+            error
+                .to_string()
+                .contains("occlusion levels 0.1 and 0.2 both cover 1 of the 7 rows of `small-7x7`"),
+            "{error}"
+        );
+        config
+            .check_damage_levels("letters-abc-8x12", 8, 12)
             .unwrap();
     }
 

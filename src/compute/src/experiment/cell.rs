@@ -14,17 +14,18 @@ pub struct Cell {
     pub learning: usize,
     /// Update mode.
     pub mode: Mode,
-    /// Fraction of flipped pixels; `None` for random initial states.
+    /// Damage level: the fraction of flipped pixels, or of covered rows;
+    /// `None` for random initial states.
     pub noise: Option<f64>,
 }
 
 impl Cell {
     /// Whether every trial of the cell gives the same runs: synchronous
-    /// updates of undamaged stored patterns (`flips = 0` pixels flipped)
-    /// draw no random numbers, so the cell runs a single trial and its
-    /// fractions are exact.
-    pub fn is_deterministic(&self, flips: usize) -> bool {
-        self.mode == Mode::Synchronous && self.noise.is_some() && flips == 0
+    /// updates of undamaged stored patterns (`pixels = 0` pixels flipped or
+    /// covered) do not depend on random numbers, so the cell runs a single
+    /// trial and its fractions are exact.
+    pub fn is_deterministic(&self, pixels: usize) -> bool {
+        self.mode == Mode::Synchronous && self.noise.is_some() && pixels == 0
     }
 }
 

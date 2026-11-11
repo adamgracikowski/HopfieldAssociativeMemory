@@ -154,9 +154,11 @@ pub struct CellSummary {
     pub learning: String,
     /// Update mode.
     pub mode: Mode,
-    /// Fraction of flipped pixels; `None` for random initial states.
+    /// Damage level: the fraction of flipped pixels, or of covered rows;
+    /// `None` for random initial states.
     pub noise: Option<f64>,
-    /// Number of flipped pixels; `None` for random initial states.
+    /// Number of damaged pixels (see [`Damage::pixels`](super::Damage::pixels));
+    /// `None` for random initial states.
     pub flips: Option<usize>,
     /// Number of runs: trials times targets.
     pub runs: usize,
@@ -169,6 +171,10 @@ pub struct CellSummary {
     /// Fraction of runs that ended in their target; `None` for random
     /// initial states.
     pub recovered: Option<Proportion>,
+    /// Fraction of runs whose target is among the patterns closest to the
+    /// final state (see [`TrialResult::nearest_target`]), in any final
+    /// class; `None` for random initial states.
+    pub nearest_target: Option<Proportion>,
     /// Applied steps.
     pub steps: Moments,
     /// Energy of the final state.
@@ -176,32 +182,43 @@ pub struct CellSummary {
     /// Overlap of the final state with the target; `None` for random
     /// initial states.
     pub final_overlap: Option<Moments>,
+    /// Hamming distance of the final state to the target; `None` for random
+    /// initial states.
+    pub final_distance: Option<Moments>,
 }
 
 impl CellSummary {
     /// Aggregates `results`, all from cell `cell`, which are not empty.
     pub fn new(dataset: String, learning: String, cell: Cell, results: &[TrialResult]) -> Self {
         let first = results.first().expect("a cell has at least one run");
-        let deterministic = cell.is_deterministic(first.trial.flips);
-        let recovered: Vec<bool> = results.iter().filter_map(|r| r.recovered).collect();
+        let deterministic = cell.is_deterministic(first.trial.damaged_pixels());
+        let share = |flags: Vec<bool>| {
+            (!flags.is_empty()).then(|| {
+                let count = flags.iter().filter(|&&flag| flag).count();
+                Proportion::of(count, flags.len(), deterministic)
+            })
+        };
         Self {
             dataset,
             learning,
             mode: cell.mode,
             noise: cell.noise,
-            flips: cell.noise.map(|_| first.trial.flips),
+            flips: cell.noise.map(|_| first.trial.damaged_pixels()),
             runs: results.len(),
             deterministic,
             classes: Classes::of(results, deterministic),
-            recovered: (!recovered.is_empty()).then(|| {
-                let count = recovered.iter().filter(|&&r| r).count();
-                Proportion::of(count, recovered.len(), deterministic)
-            }),
+            recovered: share(results.iter().filter_map(|r| r.recovered).collect()),
+            nearest_target: share(results.iter().filter_map(|r| r.nearest_target()).collect()),
             steps: Moments::of(results.iter().map(|r| r.steps as f64))
                 .expect("a cell has at least one run"),
             energy: Moments::of(results.iter().map(|r| r.energy))
                 .expect("a cell has at least one run"),
             final_overlap: Moments::of(results.iter().filter_map(|r| r.final_overlap)),
+            final_distance: Moments::of(
+                results
+                    .iter()
+                    .filter_map(|r| r.final_distance.map(|d| d as f64)),
+            ),
         }
     }
 }
@@ -266,6 +283,71 @@ mod tests {
             })
         );
         assert_eq!(Moments::of([]), None);
+    }
+
+    /// Four runs of target 1 (`N = 49`) with the final overlap `m` with the
+    /// target and the nearest pattern: `m = 1`, nearest `(1, 1)` (in the
+    /// target); `m = 41/49`, nearest `(0, 45/49)` (another pattern closer);
+    /// `m = -45/49`, nearest `(1, -45/49)` (the negated target); `m =
+    /// 39/49`, nearest `(0, 39/49)` (a tie with pattern 0). The first and
+    /// the last end nearest the target, only the first one in it. The final
+    /// distances `0, 4, 47, 5` have mean 14, squared deviations `196 + 100 +
+    /// 1089 + 81 = 1466`, sample variance `488.667` and deviation
+    /// `22.105806`.
+    #[test]
+    fn summarizes_the_nearest_target_and_the_final_distance() {
+        use crate::dynamics::Termination;
+        use crate::experiment::{Damage, Trial};
+        use crate::run::Nearest;
+        use crate::seed::Seed;
+
+        let result = |pattern, overlap: f64, m: f64, distance| TrialResult {
+            trial: Trial {
+                cell: 0,
+                trial: 0,
+                target: Some(1),
+                damage: Some(Damage::Flip { pixels: 5 }),
+                seed: Seed(0),
+            },
+            steps: 1,
+            changes: 1,
+            termination: Termination::FixedPoint,
+            energy: -1.0,
+            class: if distance == 0 {
+                FinalClass::Pattern
+            } else {
+                FinalClass::Spurious
+            },
+            recovered: Some(distance == 0),
+            initial_distance: Some(5),
+            final_distance: Some(distance),
+            final_overlap: Some(m / 49.0),
+            nearest: Nearest {
+                pattern,
+                overlap: overlap / 49.0,
+            },
+        };
+        let results = [
+            result(1, 49.0, 49.0, 0),
+            result(0, 45.0, 41.0, 4),
+            result(1, -45.0, -45.0, 47),
+            result(0, 39.0, 39.0, 5),
+        ];
+        let cell = Cell {
+            dataset: 0,
+            learning: 0,
+            mode: Mode::Asynchronous,
+            noise: Some(0.1),
+        };
+        let summary = CellSummary::new("set".to_owned(), "hebb".to_owned(), cell, &results);
+        assert_eq!(summary.recovered, Some(Proportion::wilson(1, 4)));
+        assert_eq!(summary.nearest_target, Some(Proportion::wilson(2, 4)));
+        let distance = summary.final_distance.unwrap();
+        assert_eq!(distance.mean, 14.0);
+        assert!(
+            (distance.std.unwrap() - 22.105806).abs() < 1e-6,
+            "{distance:?}"
+        );
     }
 
     #[test]

@@ -80,7 +80,11 @@ def test_reports_registry_summary_and_metadata_errors(tmp_path, capsys):
     assert "No such file or directory: `" in capsys.readouterr().err
     (tmp_path / "summary.json").write_text('{"cells": []}', encoding="utf-8")
     assert main(["recovery", str(tmp_path), "--out", out]) == 1
-    assert "no recovery fractions" in capsys.readouterr().err
+    assert "No such file or directory: `" in capsys.readouterr().err
+    metadata = '{"config": {"input": {"source": "random"}}}'
+    (tmp_path / "metadata.json").write_text(metadata, encoding="utf-8")
+    assert main(["recovery", str(tmp_path), "--out", out]) == 1
+    assert "no damaged inputs (source `random`)" in capsys.readouterr().err
     assert main(["classes", str(tmp_path), "--out", out]) == 1
     assert len(capsys.readouterr().err.strip().splitlines()) == 1
 

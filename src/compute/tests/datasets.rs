@@ -7,7 +7,7 @@ use compute::patterns::npy::write_npy;
 use compute::patterns::registry::Registry;
 
 /// Name, number of patterns `p`, width and height.
-const EXPECTED: [(&str, usize, usize, usize); 10] = [
+const EXPECTED: [(&str, usize, usize, usize); 14] = [
     ("small-7x7", 5, 7, 7),
     ("letters-abc-8x12", 3, 8, 12),
     ("animals-14x9", 6, 14, 9),
@@ -18,6 +18,10 @@ const EXPECTED: [(&str, usize, usize, usize); 10] = [
     ("large-25x50", 6, 25, 50),
     ("cats-300x200-median", 12, 300, 200),
     ("cats-300x200-dither", 12, 300, 200),
+    ("groups-25x25-d02", 15, 25, 25),
+    ("groups-25x25-d05", 15, 25, 25),
+    ("groups-25x25-d10", 15, 25, 25),
+    ("groups-25x25-d20", 15, 25, 25),
 ];
 
 fn registry() -> Registry {

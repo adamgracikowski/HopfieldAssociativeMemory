@@ -177,6 +177,88 @@ fn convert_images_writes_datasets_and_previews() {
     assert_eq!(provenance["sources"][0]["file"], "a.png");
 }
 
+/// Two prototypes of `small-7x7` with three variants each, `round(0.1 *
+/// 49) = 5` flipped pixels; generating again writes identical files.
+#[test]
+fn generate_writes_datasets_and_provenance() {
+    let dir = tempfile::tempdir().unwrap();
+    let registry = std::path::absolute("../../data/datasets/datasets.toml").unwrap();
+    let config = dir.path().join("generated").join("config.toml");
+    std::fs::create_dir_all(config.parent().unwrap()).unwrap();
+    std::fs::write(
+        &config,
+        format!(
+            "seed = 3\ndataset = \"small-7x7\"\nregistry = '{}'\nprototypes = [0, 2]\n\
+             variants = 3\n[[outputs]]\nflip = 0.1\nfile = \"../out/groups-d10.npy\"\n",
+            registry.display()
+        ),
+    )
+    .unwrap();
+    let generate = || {
+        compute()
+            .arg("generate")
+            .arg("--config")
+            .arg(&config)
+            .assert()
+            .success()
+            .stdout(contains("dataset      groups-d10"))
+            .stdout(contains(
+                "description  2 prototypes of small-7x7 x 3 variants, 5 flipped pixels each",
+            ))
+    };
+    generate();
+    let out = dir.path().join("out");
+    let set = read_npy(&out.join("groups-d10.npy")).unwrap();
+    assert_eq!((set.len(), set.width(), set.height()), (6, 7, 7));
+    let provenance = read_json(&out.join("groups-d10.json"));
+    assert_eq!(provenance["command"], "generate");
+    assert_eq!(provenance["build"]["commit"], build_info::GIT_COMMIT);
+    assert_eq!(provenance["config"], "../generated/config.toml");
+    assert_eq!(provenance["dataset"], "small-7x7");
+    assert_eq!(provenance["prototypes"][1], 2);
+    assert_eq!(provenance["flips"], 5);
+
+    let files = |name: &str| std::fs::read(out.join(name)).unwrap();
+    let (npy, json) = (files("groups-d10.npy"), files("groups-d10.json"));
+    generate();
+    assert_eq!(files("groups-d10.npy"), npy);
+    assert_eq!(files("groups-d10.json"), json);
+}
+
+/// The committed grouped datasets are what the current code generates from
+/// their configuration; only the `.npy` files are compared, because the
+/// provenance records the build.
+#[test]
+fn generated_datasets_match_the_committed_files() {
+    let source = Path::new("../../data/generated/groups-25x25/config.toml");
+    let datasets = Path::new("../../data/datasets");
+    let registry = std::path::absolute(datasets.join("datasets.toml")).unwrap();
+    let dir = tempfile::tempdir().unwrap();
+    let text = std::fs::read_to_string(source)
+        .unwrap()
+        .replace("file = \"../../datasets/", "file = \"");
+    let config = dir.path().join("config.toml");
+    std::fs::write(
+        &config,
+        format!("registry = '{}'\n{text}", registry.display()),
+    )
+    .unwrap();
+    compute()
+        .arg("generate")
+        .arg("--config")
+        .arg(&config)
+        .assert()
+        .success();
+    for d in ["02", "05", "10", "20"] {
+        let name = format!("groups-25x25-d{d}.npy");
+        assert_eq!(
+            std::fs::read(dir.path().join(&name)).unwrap(),
+            std::fs::read(datasets.join(&name)).unwrap(),
+            "{name} differs from the committed file; regenerate it"
+        );
+    }
+}
+
 #[test]
 fn convert_images_reports_a_missing_image() {
     let dir = tempfile::tempdir().unwrap();
@@ -615,6 +697,51 @@ fn experiment_writes_tables_and_metadata() {
     assert!(!out.join("stability.parquet").exists());
 }
 
+/// Covering `round(0.3 * 7) = 2` rows of the 7 x 7 patterns damages 14
+/// pixels; the experiment and a `recall` of one of its trials both accept
+/// `source = "occlusion"`, and the invalid levels are reported.
+#[test]
+fn experiment_and_recall_cover_rows() {
+    let dir = tempfile::tempdir().unwrap();
+    let text = EXPERIMENT.replace(
+        "source = \"pattern\"\nnoise = [0.0, 0.2]",
+        "source = \"occlusion\"\nocclusion = [0.0, 0.3]",
+    );
+    let config = experiment_config(dir.path(), &text);
+    let out = dir.path().join("run");
+    experiment(&config)
+        .arg("--out")
+        .arg(&out)
+        .assert()
+        .success()
+        .stdout(contains("grid         4 cells, 65 runs"));
+    let cells = read_json(&out.join("summary.json"))["cells"].clone();
+    assert_eq!(cells[1]["noise"], 0.3);
+    assert_eq!(cells[1]["flips"], 14);
+    let metadata = read_json(&out.join("metadata.json"));
+    assert_eq!(metadata["config"]["input"]["source"], "occlusion");
+    assert_eq!(metadata["config"]["input"]["occlusion"][1], 0.3);
+
+    let recall_config = run_config(
+        dir.path(),
+        &RECALL.replace(
+            "source = \"pattern\"\nindex = 1\nflips = 6",
+            "source = \"occlusion\"\nindex = 1\nrows = 2",
+        ),
+    );
+    recall(&recall_config, &dir.path().join("recall"))
+        .success()
+        .stdout(contains("input        pattern 1 with 2 covered rows"));
+
+    let clash = experiment_config(dir.path(), &text.replace("[0.0, 0.3]", "[0.1, 0.2]"));
+    experiment(&clash)
+        .arg("--out")
+        .arg(dir.path().join("clash"))
+        .assert()
+        .failure()
+        .stderr(contains("both cover 1 of the 7 rows"));
+}
+
 /// With `stability_fields` the experiment writes one row per pattern and
 /// neuron of every training: 5 x 49 for `small-7x7` and one rule. Its
 /// negative fields agree with the unstable neurons in the metadata.
@@ -920,10 +1047,12 @@ fn single_neuron_stability_matches_the_committed_results() {
 fn analysis_fixtures_match_the_current_output() {
     let fixtures = Path::new("../analysis/tests/fixtures");
     let dir = tempfile::tempdir().unwrap();
-    for (command, files) in [
-        ("recall", &["history.npy", "frames.json"][..]),
-        ("train", &["weights.npy"][..]),
+    let tables = &["trials.parquet", "summary.json", "datasets.json"][..];
+    for (fixture, command, files) in [
+        ("recall", "recall", &["history.npy", "frames.json"][..]),
+        ("train", "train", &["weights.npy"][..]),
         (
+            "experiment",
             "experiment",
             &[
                 "trials.parquet",
@@ -932,21 +1061,26 @@ fn analysis_fixtures_match_the_current_output() {
                 "stability.parquet",
             ][..],
         ),
-        ("capacity", &["capacity.parquet", "summary.json"][..]),
+        ("occlusion", "experiment", tables),
+        (
+            "capacity",
+            "capacity",
+            &["capacity.parquet", "summary.json"][..],
+        ),
     ] {
-        let out = dir.path().join(command);
+        let out = dir.path().join(fixture);
         compute()
             .arg(command)
             .arg("--config")
-            .arg(fixtures.join(format!("{command}.toml")))
+            .arg(fixtures.join(format!("{fixture}.toml")))
             .arg("--out")
             .arg(&out)
             .assert()
             .success();
         for file in files {
             assert!(
-                same_file(&out, &fixtures.join(command), file),
-                "{command}/{file} differs from the fixture; regenerate it"
+                same_file(&out, &fixtures.join(fixture), file),
+                "{fixture}/{file} differs from the fixture; regenerate it"
             );
         }
     }

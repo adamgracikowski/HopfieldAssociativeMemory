@@ -1,9 +1,11 @@
-//! Experiments: a grid of datasets, learning rules, update modes and noise
+//! Experiments: a grid of datasets, learning rules, update modes and damage
 //! levels, with many trials in every cell.
 
 pub mod cell;
 pub mod class;
 pub mod config;
+pub mod damage;
+pub mod dataset;
 pub mod dynamics;
 pub mod fields;
 pub mod input;
@@ -17,6 +19,8 @@ pub mod trial;
 pub use cell::Cell;
 pub use class::FinalClass;
 pub use config::ExperimentConfig;
+pub use damage::Damage;
+pub use dataset::{DatasetEntry, DatasetPrefix};
 pub use dynamics::ExperimentDynamics;
 pub use fields::FieldTable;
 pub use input::ExperimentInput;

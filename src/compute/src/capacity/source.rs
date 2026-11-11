@@ -2,8 +2,6 @@
 
 use std::fmt;
 
-use ndarray::Axis;
-
 use crate::patterns::Pattern;
 use crate::seed::Seed;
 use crate::{PatternSet, Result};
@@ -78,12 +76,7 @@ impl Task {
             PatternSource::Prefix { index } => {
                 let set = &datasets[index];
                 assert!(self.patterns <= set.len(), "prefix longer than the dataset");
-                let rows: Vec<usize> = (0..self.patterns).collect();
-                PatternSet::new(
-                    set.width(),
-                    set.height(),
-                    set.patterns().select(Axis(0), &rows),
-                )
+                set.prefix(self.patterns)
             }
             PatternSource::Random { neurons } => {
                 let seed = self.seed.expect("a random task has a seed");

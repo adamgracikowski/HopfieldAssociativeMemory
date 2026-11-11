@@ -53,10 +53,12 @@ An experiment (the results directory of `compute experiment`):
 ```bash
 uv run hopfield-analysis recovery ../../data/experiments/00-example/results --out ../../data/experiments/00-example/plots/recovery
 uv run hopfield-analysis classes ../../data/experiments/00-example/results --out ../../data/experiments/00-example/plots/classes
+uv run hopfield-analysis recovery ../../data/experiments/08-large-recovery/results --metric nearest-target --out ../../data/experiments/08-large-recovery/plots/nearest
 ```
 
-- `recovery`: the fraction of recovered runs against the noise level, one panel per dataset (at most three in a row), one line per learning rule and update mode, with the 95% Wilson intervals from `summary.json`.
-- `classes`: the fractions of the final state classes (pattern, negation, spurious state, cycle, step limit) as stacked bars per noise level, one row of panels per dataset and one column per learning rule and update mode; with more than six noise levels only every k-th bar is labelled.
+- `recovery`: the fraction of recovered runs (`--metric recovered`, the default) or of runs whose final state is nearest their target (`--metric nearest-target`) against the damage level, one panel per dataset (at most three in a row), one line per learning rule and update mode, with the 95% Wilson intervals from `summary.json`. The axis names the damage of the experiment's inputs from `metadata.json`: flipped pixels (`source = "pattern"`) or covered rows (`source = "occlusion"`).
+- `load`: the same fractions against the number of patterns `p` of the prefixes of a dataset (`{ name, patterns }` entries of `datasets`, and the whole dataset if listed), one row of panels per dataset in the registry and one column per learning rule, one line per damage level (`--levels 0,0.2`, all by default) of one update mode (`--mode`, `synchronous` by default).
+- `classes`: the fractions of the final state classes (pattern, negation, spurious state, cycle, step limit) as stacked bars per damage level, one row of panels per dataset and one column per learning rule and update mode; with more than six damage levels only every k-th bar is labelled.
 
 Stability of the stored patterns of an experiment (`unstable` and `fields` need `stability_fields = true`, which writes `stability.parquet`):
 
@@ -82,7 +84,7 @@ uv run hopfield-analysis capacity <results> --out <out>
 
 A missing or invalid input ends with a one-line error message and exit code 1.
 
-The module `hopfield_analysis.experiments` reads the results of an experiment: `load_trials` (`trials.parquet` as a polars DataFrame, one row per run), `load_summary` (the cells of `summary.json` as a flat DataFrame, nested fields joined with `_`, e.g. `recovered_fraction`) and `load_metadata`. `hopfield_analysis.stability` reads `stability.parquet` (`load_fields`), `datasets.json` (`load_datasets`) and the stability of every training from `metadata.json` (`load_stability`); `hopfield_analysis.capacity` reads `capacity.parquet` (`load_capacity`) and `summary.json` of a capacity run (`load_capacity_summary`). `hopfield_analysis.recall.Recall.load` reads a recall run, `hopfield_analysis.datasets.Registry` the dataset registry and `hopfield_analysis.weights.load_weights` the weights of a train run.
+The module `hopfield_analysis.experiments` reads the results of an experiment: `load_trials` (`trials.parquet` as a polars DataFrame, one row per run), `load_summary` (the cells of `summary.json` as a flat DataFrame, nested fields joined with `_`, e.g. `recovered_fraction` or `nearest_target_fraction`) and `load_metadata`, with `damage` (the kind of damage of the inputs, from the metadata) and `dataset_sizes` (label, registry name and `p` of every dataset). `hopfield_analysis.stability` reads `stability.parquet` (`load_fields`), `datasets.json` (`load_datasets`) and the stability of every training from `metadata.json` (`load_stability`); `hopfield_analysis.capacity` reads `capacity.parquet` (`load_capacity`) and `summary.json` of a capacity run (`load_capacity_summary`). `hopfield_analysis.recall.Recall.load` reads a recall run, `hopfield_analysis.datasets.Registry` the dataset registry and `hopfield_analysis.weights.load_weights` the weights of a train run.
 
 ## Checks
 
