@@ -1,0 +1,393 @@
+{
+  "command": "experiment",
+  "created": "2026-11-11T21:28:17Z",
+  "build": {
+    "version": "0.1.0",
+    "commit": "1648145dcc2d8b70c18c5c28377d8cd5de8fad42",
+    "dirty": false
+  },
+  "config": {
+    "seed": 20261110,
+    "datasets": [
+      "groups-25x25-d02",
+      "groups-25x25-d05",
+      "groups-25x25-d10",
+      "groups-25x25-d20",
+      "large-25x25.plus"
+    ],
+    "backend": "auto",
+    "trials": 100,
+    "learning": [
+      {
+        "rule": "hebb"
+      },
+      {
+        "rule": "oja",
+        "variant": "subspace",
+        "eta": 0.5,
+        "max_epochs": 100000,
+        "tolerance": 1e-6
+      }
+    ],
+    "dynamics": {
+      "modes": [
+        "synchronous",
+        "asynchronous"
+      ],
+      "zero_field": "keep",
+      "order": "permutation",
+      "max_steps": 1000
+    },
+    "input": {
+      "source": "pattern",
+      "noise": [
+        0.0,
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3,
+        0.35,
+        0.4,
+        0.45,
+        0.5
+      ]
+    },
+    "stability_fields": false
+  },
+  "datasets": [
+    {
+      "name": "groups-25x25-d02",
+      "registry": "../../datasets/datasets.toml",
+      "file": "groups-25x25-d02.npy",
+      "description": "Three groups of five variants of the large-25x25 pictures 0, 2 and 4, each with 2% of the pixels flipped (generated: data/generated/groups-25x25/config.toml).",
+      "width": 25,
+      "height": 25,
+      "patterns": 15,
+      "neurons": 625
+    },
+    {
+      "name": "groups-25x25-d05",
+      "registry": "../../datasets/datasets.toml",
+      "file": "groups-25x25-d05.npy",
+      "description": "Three groups of five variants of the large-25x25 pictures 0, 2 and 4, each with 5% of the pixels flipped (generated: data/generated/groups-25x25/config.toml).",
+      "width": 25,
+      "height": 25,
+      "patterns": 15,
+      "neurons": 625
+    },
+    {
+      "name": "groups-25x25-d10",
+      "registry": "../../datasets/datasets.toml",
+      "file": "groups-25x25-d10.npy",
+      "description": "Three groups of five variants of the large-25x25 pictures 0, 2 and 4, each with 10% of the pixels flipped (generated: data/generated/groups-25x25/config.toml).",
+      "width": 25,
+      "height": 25,
+      "patterns": 15,
+      "neurons": 625
+    },
+    {
+      "name": "groups-25x25-d20",
+      "registry": "../../datasets/datasets.toml",
+      "file": "groups-25x25-d20.npy",
+      "description": "Three groups of five variants of the large-25x25 pictures 0, 2 and 4, each with 20% of the pixels flipped (generated: data/generated/groups-25x25/config.toml).",
+      "width": 25,
+      "height": 25,
+      "patterns": 15,
+      "neurons": 625
+    },
+    {
+      "name": "large-25x25.plus",
+      "registry": "../../datasets/datasets.toml",
+      "file": "large-25x25.plus.csv",
+      "description": "The six pictures of large-25x25 followed by nine more.",
+      "width": 25,
+      "height": 25,
+      "patterns": 15,
+      "neurons": 625
+    }
+  ],
+  "trainings": [
+    {
+      "dataset": "groups-25x25-d02",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          12,
+          12,
+          14,
+          12,
+          14,
+          12,
+          12,
+          12,
+          14,
+          14,
+          13,
+          13,
+          13,
+          13,
+          13
+        ]
+      }
+    },
+    {
+      "dataset": "groups-25x25-d02",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 3746,
+      "converged": true,
+      "stability": {
+        "stable": 15,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "groups-25x25-d05",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          29,
+          33,
+          31,
+          29,
+          29,
+          31,
+          29,
+          33,
+          29,
+          31,
+          30,
+          30,
+          28,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "dataset": "groups-25x25-d05",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 1550,
+      "converged": true,
+      "stability": {
+        "stable": 15,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "groups-25x25-d10",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          58,
+          56,
+          45,
+          54,
+          53,
+          62,
+          62,
+          62,
+          62,
+          62,
+          53,
+          46,
+          54,
+          51,
+          53
+        ]
+      }
+    },
+    {
+      "dataset": "groups-25x25-d10",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 741,
+      "converged": true,
+      "stability": {
+        "stable": 15,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "groups-25x25-d20",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 0,
+        "unstable_neurons": [
+          57,
+          50,
+          55,
+          53,
+          47,
+          63,
+          51,
+          53,
+          45,
+          57,
+          53,
+          53,
+          55,
+          62,
+          48
+        ]
+      }
+    },
+    {
+      "dataset": "groups-25x25-d20",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 374,
+      "converged": true,
+      "stability": {
+        "stable": 15,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 1,
+        "unstable_neurons": [
+          18,
+          100,
+          0,
+          77,
+          93,
+          108,
+          74,
+          103,
+          116,
+          16,
+          56,
+          114,
+          77,
+          22,
+          93
+        ]
+      }
+    },
+    {
+      "dataset": "large-25x25.plus",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 625,
+      "epochs": 538,
+      "converged": true,
+      "stability": {
+        "stable": 15,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  ]
+}

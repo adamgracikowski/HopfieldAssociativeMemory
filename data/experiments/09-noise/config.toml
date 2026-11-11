@@ -1,0 +1,32 @@
+# Recovery of stored patterns from inputs with randomly flipped pixels:
+# every CSV dataset, both learning rules and update modes, noise from 0 to
+# 0.5 in steps of 0.05.
+#
+# Run from src/compute:
+#   cargo run --release -- experiment --config ../../data/experiments/09-noise/config.toml
+
+seed = 20261110
+datasets = [
+    "small-7x7",
+    "letters-abc-8x12",
+    "animals-14x9",
+    "letters-14x20",
+    "OCRA-12x30-cut",
+    "large-25x25",
+    "large-25x25.plus",
+    "large-25x50",
+]
+trials = 100
+
+[[learning]]
+rule = "hebb"
+
+[[learning]]
+rule = "oja"
+
+[dynamics]
+modes = ["synchronous", "asynchronous"]
+
+[input]
+source = "pattern"
+noise = [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
