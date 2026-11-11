@@ -42,7 +42,11 @@ impl RecallArgs {
         let dynamics = &config.dynamics;
         println!(
             "dataset      {} ({}x{}, p = {}, N = {})",
-            dataset.name, dataset.width, dataset.height, dataset.patterns, dataset.neurons
+            dataset.label(),
+            dataset.width,
+            dataset.height,
+            dataset.patterns,
+            dataset.neurons
         );
         println!(
             "learning     {}, {} backend, {} epochs",

@@ -39,6 +39,7 @@ impl TrialTable {
     /// The table of `run`.
     pub fn new<'a>(run: &'a ExperimentRun) -> Self {
         let results: &'a [TrialResult] = &run.results;
+        let labels: Vec<String> = run.datasets.iter().map(|info| info.label()).collect();
         let cell = |result: &TrialResult| -> Cell { run.cells[result.trial.cell] };
         let strings = |value: &dyn Fn(&'a TrialResult) -> &'a str| -> ArrayRef {
             Arc::new(StringArray::from_iter_values(results.iter().map(value)))
@@ -60,7 +61,9 @@ impl TrialTable {
         let columns: Vec<(&str, ArrayRef, bool)> = vec![
             (
                 "dataset",
-                strings(&|r| &run.datasets[cell(r).dataset].name),
+                Arc::new(StringArray::from_iter_values(
+                    results.iter().map(|r| labels[cell(r).dataset].as_str()),
+                )),
                 false,
             ),
             (

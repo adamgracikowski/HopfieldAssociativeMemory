@@ -73,6 +73,7 @@ The configuration (relative paths are resolved against its directory):
 
 ```toml
 dataset = "small-7x7"     # name in the dataset registry
+patterns = 3              # optional: only the first 3 patterns
 # registry = "../../datasets/datasets.toml"  # by default found from this file's directory upwards
 seed = 42                 # required by `recall`
 backend = "auto"          # `auto` (dense up to N = 5792), `dense` or `factored`
@@ -129,7 +130,8 @@ The results go to `results/` next to the configuration, or to `--out <dir>`; the
 
 ```toml
 seed = 7                  # master seed, required
-datasets = ["small-7x7", "animals-14x9"]  # grid axis
+datasets = ["small-7x7", { name = "animals-14x9", patterns = 3 }]  # grid axis; a table
+                                          # stores only the first patterns
 # registry = "../../datasets/datasets.toml"  # by default found from this file's directory upwards
 backend = "auto"          # as in a run configuration
 trials = 100              # trials per cell
@@ -154,9 +156,9 @@ noise = [0.0, 0.1, 0.2]   # grid axis: fractions of flipped pixels, round(noise 
 # source = "random"       # in every trial one random state
 ```
 
-Axes must not be empty or repeat a value, and the rule names (`hebb`, `oja (subspace)`, `oja (single-neuron)`) must differ. Two noise levels must not give the same number of flipped pixels on any dataset (e.g. `0.1` and `0.11` on `N = 49` both flip 5), and two occlusion levels not the same number of covered rows (e.g. `0.1` and `0.2` of 7 rows both cover 1), because they would give identical cells. Every (dataset, rule) pair is trained once; its stability check uses `zero_field`. A synchronous cell without damaged pixels does not depend on random numbers, so it runs a single trial and its fractions are exact (`deterministic` in the summary).
+Axes must not be empty or repeat a value, and the rule names (`hebb`, `oja (subspace)`, `oja (single-neuron)`) must differ. Two noise levels must not give the same number of flipped pixels on any dataset (e.g. `0.1` and `0.11` on `N = 49` both flip 5), and two occlusion levels not the same number of covered rows (e.g. `0.1` and `0.2` of 7 rows both cover 1), because they would give identical cells. A prefix (`{ name, patterns }`, from 1 to the size of the set) appears in the results as `name:p`, e.g. `animals-14x9:3`, and its seeds use the registry name, so a target gets the same damaged input in every prefix of a dataset. Every (dataset, rule) pair is trained once; its stability check uses `zero_field`. A synchronous cell without damaged pixels does not depend on random numbers, so it runs a single trial and its fractions are exact (`deterministic` in the summary).
 
-Every run draws from its own seed: the first 8 bytes of the SHA-1 of `seed/dataset/source/pixels/target/trial`, where `pixels` is the number of damaged pixels (`-` for the pixels and target of a random input). It does not depend on the rule or the mode, so all of them start from the same initial states, and the results do not depend on the number of threads. A `recall` run repeats a run with its history when it has this seed, the experiment's `dataset`, `registry` and `backend`, the `[learning]` table of the rule, `[dynamics]` with the cell's `mode` and the experiment's `zero_field`, `order` and `max_steps`, and `[input]` `source = "pattern"`, `index = target`, `flips = flips` (`source = "occlusion"`, `index = target`, `rows = flips / width` for occlusion, or `source = "random"`).
+Every run draws from its own seed: the first 8 bytes of the SHA-1 of `seed/dataset/source/pixels/target/trial`, where `pixels` is the number of damaged pixels (`-` for the pixels and target of a random input). It does not depend on the rule or the mode, so all of them start from the same initial states, and the results do not depend on the number of threads. A `recall` run repeats a run with its history when it has this seed, the experiment's `dataset` (with `patterns = p` for a prefix), `registry` and `backend`, the `[learning]` table of the rule, `[dynamics]` with the cell's `mode` and the experiment's `zero_field`, `order` and `max_steps`, and `[input]` `source = "pattern"`, `index = target`, `flips = flips` (`source = "occlusion"`, `index = target`, `rows = flips / width` for occlusion, or `source = "random"`).
 
 The final state is classified by exact equality: `pattern` (a fixed point equal to a stored pattern), `negation` (equal to a negated pattern), `spurious` (another fixed point), `cycle` (two-cycle) or `unconverged` (step limit). The command writes:
 

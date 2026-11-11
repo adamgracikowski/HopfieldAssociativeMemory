@@ -81,7 +81,9 @@ impl ExperimentRun {
     /// `on_training` and runs the trials of the pair's cells in parallel.
     ///
     /// Every trial draws only from its own [`Seed`], derived from the
-    /// experiment seed, the dataset name, the input source, the number of
+    /// experiment seed, the dataset name in the registry (the same for all
+    /// prefixes of a dataset, so a target gets the same damaged input in
+    /// each of them), the input source, the number of
     /// damaged pixels, the target and the trial number, and the results are
     /// collected in task order, so they do not depend on the number of
     /// threads. The seed does not depend on the rule or the mode: all of
@@ -94,15 +96,17 @@ impl ExperimentRun {
         let loaded = config
             .datasets
             .iter()
-            .map(|name| DatasetInfo::load(&registry, name, config.directory()))
+            .map(|entry| {
+                DatasetInfo::load(&registry, entry.name(), entry.prefix(), config.directory())
+            })
             .collect::<Result<Vec<_>>>()?;
         for (info, _) in &loaded {
-            config.check_damage_levels(&info.name, info.width, info.height)?;
+            config.check_damage_levels(&info.label(), info.width, info.height)?;
         }
         let statistics = loaded
             .iter()
             .map(|(info, set)| {
-                DatasetStatistics::from(&PatternSummary::new(&info.name, &info.description, set))
+                DatasetStatistics::from(&PatternSummary::new(&info.label(), &info.description, set))
             })
             .collect();
         let learning = config.learning_labels();
@@ -115,7 +119,7 @@ impl ExperimentRun {
                 let trained = rule.train(set, config.backend)?;
                 let aligned = Stability::aligned_fields(&trained.weights, set);
                 let training = Training {
-                    dataset: info.name.clone(),
+                    dataset: info.label(),
                     learning: learning[l].clone(),
                     info: TrainingInfo::from(&trained),
                     stability: Stability::from_aligned_fields(
@@ -167,7 +171,7 @@ impl ExperimentRun {
             .map(|results| {
                 let cell = self.cells[results[0].trial.cell];
                 CellSummary::new(
-                    self.datasets[cell.dataset].name.clone(),
+                    self.datasets[cell.dataset].label(),
                     self.learning[cell.learning].clone(),
                     cell,
                     results,
@@ -497,6 +501,85 @@ mod tests {
         let summaries = run.summaries();
         assert_eq!(summaries[1].flips, Some(14));
         assert!(summaries[0].deterministic && !summaries[1].deterministic);
+    }
+
+    /// `small-7x7` has 5 patterns, so its prefix of 5 is the whole set: the
+    /// same 100 runs under the label `small-7x7:5`. The prefix of 3 has
+    /// `6 * 3 * 3 + 2 * 3 = 60` runs whose seeds, and so damaged inputs,
+    /// equal those of the same targets in the whole set; `recall` with
+    /// `patterns = 3` repeats them.
+    #[test]
+    fn prefixes_store_the_first_patterns() {
+        let text = CONFIG.replace(
+            "datasets = [\"small-7x7\"]",
+            "datasets = [\"small-7x7\", { name = \"small-7x7\", patterns = 5 }, \
+             { name = \"small-7x7\", patterns = 3 }]",
+        );
+        let run = execute(&text);
+        let labels: Vec<String> = run.datasets.iter().map(DatasetInfo::label).collect();
+        assert_eq!(labels, ["small-7x7", "small-7x7:5", "small-7x7:3"]);
+        assert_eq!(run.datasets[2].patterns, 3);
+        assert_eq!(run.statistics[2].name, "small-7x7:3");
+        assert_eq!(run.trainings[4].dataset, "small-7x7:3");
+        assert_eq!(run.trainings[4].stability.unstable_neurons.len(), 3);
+        assert_eq!(run.results.len(), 260);
+
+        let (full, rest) = run.results.split_at(100);
+        let (whole, prefix) = rest.split_at(100);
+        for (a, b) in full.iter().zip(whole) {
+            let mut b = b.clone();
+            b.trial.cell -= 8;
+            assert_eq!(a, &b);
+        }
+        let mut seeds = HashMap::new();
+        for result in full {
+            let key = (result.trial.cell, result.trial.trial, result.trial.target);
+            seeds.insert(key, result);
+        }
+        let mut checked = 0;
+        for result in prefix {
+            let cell = run.cells[result.trial.cell];
+            let key = (
+                result.trial.cell - 16,
+                result.trial.trial,
+                result.trial.target,
+            );
+            let same = seeds[&key];
+            assert_eq!(result.trial.seed, same.trial.seed);
+            assert_eq!(result.initial_distance, same.initial_distance);
+            if checked < 3 && result.trial.damaged_pixels() > 0 {
+                checked += 1;
+                let text = format!(
+                    "dataset = \"small-7x7\"\npatterns = 3\nseed = {}\n[learning]\n\
+                     rule = \"{}\"\n[dynamics]\nmode = \"{}\"\n[input]\n\
+                     source = \"pattern\"\nindex = {}\nflips = {}\n",
+                    result.trial.seed,
+                    ["hebb", "oja"][cell.learning],
+                    cell.mode,
+                    result.trial.target.unwrap(),
+                    result.trial.damaged_pixels(),
+                );
+                let config = RunConfig::parse(
+                    &text,
+                    Path::new("../../data/experiments/00-example/recall.toml"),
+                )
+                .unwrap();
+                let summary = RecallRun::execute(&config).unwrap().summary();
+                assert_eq!(summary.energy, result.energy);
+                assert_eq!(summary.nearest, result.nearest);
+            }
+        }
+        assert_eq!(checked, 3);
+
+        let error = ExperimentRun::execute(
+            &config(&CONFIG.replace(
+                "datasets = [\"small-7x7\"]",
+                "datasets = [{ name = \"small-7x7\", patterns = 6 }]",
+            )),
+            |_| {},
+        )
+        .unwrap_err();
+        assert!(error.to_string().contains("which has 5"), "{error}");
     }
 
     /// Random initial states give one run per trial, without a target.

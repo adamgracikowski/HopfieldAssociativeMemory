@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use super::{Cell, Damage, ExperimentDynamics, ExperimentInput};
+use super::{Cell, Damage, DatasetEntry, ExperimentDynamics, ExperimentInput};
 use crate::paths::directory_of;
 use crate::patterns::registry::Registry;
 use crate::run::Learning;
@@ -17,7 +17,7 @@ use crate::{Error, Result};
 ///
 /// ```toml
 /// seed = 7
-/// datasets = ["small-7x7", "animals-14x9"]
+/// datasets = ["small-7x7", { name = "animals-14x9", patterns = 3 }]
 /// backend = "auto"         # optional, `auto` by default
 /// trials = 100
 /// stability_fields = false # optional, writes stability.parquet when true
@@ -43,8 +43,9 @@ use crate::{Error, Result};
 pub struct ExperimentConfig {
     /// Master seed; every trial derives its own seed from it.
     pub seed: u64,
-    /// Dataset names in the registry, one grid axis.
-    pub datasets: Vec<String>,
+    /// Datasets in the registry, whole or their first patterns (see
+    /// [`DatasetEntry`]), one grid axis.
+    pub datasets: Vec<DatasetEntry>,
     /// Dataset registry file.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub registry: Option<PathBuf>,
@@ -91,13 +92,21 @@ impl ExperimentConfig {
         Ok(config)
     }
 
-    /// Checks that every axis is non-empty and has no repeated values, that
-    /// noise levels lie in `[0, 1]`, that there is at least one trial and
+    /// Checks that every axis is non-empty and has no repeated values (the
+    /// datasets by their labels), that prefixes have at least one pattern,
+    /// that damage levels lie in `[0, 1]`, that there is at least one trial and
     /// one step, and that the learning rules have different names (their
     /// [`Display`](std::fmt::Display) identifies them in the results).
     pub fn validate(&self) -> Result<()> {
         let labels = self.learning_labels();
-        check_axis("datasets", &self.datasets).map_err(|m| self.invalid(m))?;
+        let datasets: Vec<String> = self.datasets.iter().map(ToString::to_string).collect();
+        check_axis("datasets", &datasets).map_err(|m| self.invalid(m))?;
+        if let Some(entry) = self.datasets.iter().find(|entry| entry.prefix() == Some(0)) {
+            return Err(self.invalid(format!(
+                "the prefix of `{}` needs at least 1 pattern",
+                entry.name()
+            )));
+        }
         check_axis("learning", &labels).map_err(|m| self.invalid(m))?;
         check_axis("dynamics.modes", &self.dynamics.modes).map_err(|m| self.invalid(m))?;
         if let Some((name, levels)) = self.input.levels() {
@@ -262,7 +271,10 @@ mod tests {
     fn parses_an_experiment_with_defaults() {
         let config = parse(CONFIG).unwrap();
         assert_eq!(config.seed, 7);
-        assert_eq!(config.datasets, ["small-7x7", "animals-14x9"]);
+        assert_eq!(
+            config.datasets,
+            [DatasetEntry::from("small-7x7"), "animals-14x9".into()]
+        );
         assert_eq!(config.backend, Backend::Auto);
         assert_eq!(config.trials, 20);
         assert_eq!(
@@ -360,6 +372,16 @@ mod tests {
                 "source = \"pattern\"\n        noise = [0.0, 0.1, 0.2]",
                 "source = \"occlusion\"\n        occlusion = [1.2]",
                 "occlusion level 1.2",
+            ),
+            (
+                "datasets = [\"small-7x7\", \"animals-14x9\"]",
+                "datasets = [\"a\", { name = \"a\", patterns = 0 }]",
+                "the prefix of `a` needs at least 1 pattern",
+            ),
+            (
+                "datasets = [\"small-7x7\", \"animals-14x9\"]",
+                "datasets = [{ name = \"a\", patterns = 2 }, { name = \"a\", patterns = 2 }]",
+                "`datasets` lists \"a:2\" twice",
             ),
             ("trials = 20", "trials = 0", "`trials` must be"),
             (

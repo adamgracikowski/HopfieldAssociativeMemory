@@ -75,7 +75,7 @@ impl CapacityRun {
         if !config.datasets.is_empty() {
             let registry = config.open_registry()?;
             for name in &config.datasets {
-                let (info, set) = DatasetInfo::load(&registry, name, config.directory())?;
+                let (info, set) = DatasetInfo::load(&registry, name, None, config.directory())?;
                 datasets.push(info);
                 sets.push(set);
             }

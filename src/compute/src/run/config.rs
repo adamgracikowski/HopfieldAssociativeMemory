@@ -15,6 +15,7 @@ use crate::{Error, PatternSet, Result};
 ///
 /// ```toml
 /// dataset = "small-7x7"   # name in the dataset registry
+/// patterns = 3            # optional: only the first 3 patterns
 /// seed = 42               # required by `recall`
 /// backend = "auto"        # optional, `auto` by default
 ///
@@ -41,6 +42,10 @@ use crate::{Error, PatternSet, Result};
 pub struct RunConfig {
     /// Dataset name in the registry.
     pub dataset: String,
+    /// Number of leading patterns of the dataset to store; all of them if
+    /// not given.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub patterns: Option<usize>,
     /// Dataset registry file.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub registry: Option<PathBuf>,
@@ -100,9 +105,15 @@ impl RunConfig {
         Registry::open(self.registry.as_deref(), self.directory())
     }
 
-    /// Loads the dataset from the [registry](Self::open_registry).
+    /// Loads the dataset (its first `patterns` patterns, if given) from the
+    /// [registry](Self::open_registry).
     pub fn load_dataset(&self) -> Result<(DatasetInfo, PatternSet)> {
-        DatasetInfo::load(&self.open_registry()?, &self.dataset, self.directory())
+        DatasetInfo::load(
+            &self.open_registry()?,
+            &self.dataset,
+            self.patterns,
+            self.directory(),
+        )
     }
 
     /// The seed, or an error if the configuration has none.
