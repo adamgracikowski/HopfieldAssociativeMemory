@@ -59,6 +59,19 @@ pub struct TrialResult {
     pub nearest: Nearest,
 }
 
+impl TrialResult {
+    /// Whether the stored pattern closest to the final state (the largest
+    /// `|m|`, the first one on ties) is the target itself and not its
+    /// negation; `None` for a random initial state. Unlike
+    /// [`recovered`](Self::recovered) it holds for a run that ends near an
+    /// unstable target, in any final class.
+    pub fn nearest_target(&self) -> Option<bool> {
+        self.trial
+            .target
+            .map(|mu| self.nearest.pattern == mu && self.nearest.overlap > 0.0)
+    }
+}
+
 impl Trial {
     /// The initial state settings of this trial.
     pub fn input(&self) -> Input {
@@ -137,7 +150,7 @@ mod tests {
     /// `h = (0.5, -0.5)` gives `(1, -1)`, then `h = (-0.5, 0.5)` gives
     /// `(-1, 1)` again, a cycle of length 2 found after one step whose
     /// final state equals the target. It is not a fixed point, so the run
-    /// does not count as recovered.
+    /// does not count as recovered, but the target is the nearest pattern.
     #[test]
     fn a_two_cycle_through_the_target_is_not_recovered() {
         let result = run(array![[1, -1]], 2);
@@ -145,6 +158,24 @@ mod tests {
         assert_eq!(result.class, FinalClass::Cycle);
         assert_eq!(result.final_distance, Some(0));
         assert_eq!(result.recovered, Some(false));
+        assert_eq!(result.nearest_target(), Some(true));
+    }
+
+    /// Target `(1, 1)` with both pixels flipped starts at `(-1, -1)`:
+    /// `h = (-0.5, -0.5)` keeps it, a fixed point equal to the negated
+    /// target with `m = -1`, which is not the target.
+    #[test]
+    fn the_negated_target_is_not_the_nearest_target() {
+        let result = run(array![[1, 1]], 2);
+        assert_eq!(result.class, FinalClass::Negation);
+        assert_eq!(
+            result.nearest,
+            Nearest {
+                pattern: 0,
+                overlap: -1.0
+            }
+        );
+        assert_eq!(result.nearest_target(), Some(false));
     }
 
     /// `(1, 1)` has `h = (0.5, 0.5)`: a fixed point equal to the target.
@@ -154,5 +185,6 @@ mod tests {
         assert_eq!(result.termination, Termination::FixedPoint);
         assert_eq!(result.class, FinalClass::Pattern);
         assert_eq!(result.recovered, Some(true));
+        assert_eq!(result.nearest_target(), Some(true));
     }
 }

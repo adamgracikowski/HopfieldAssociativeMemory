@@ -46,6 +46,12 @@
         "lower": 0.6,
         "upper": 0.6
       },
+      "nearest_target": {
+        "count": 4,
+        "fraction": 0.8,
+        "lower": 0.8,
+        "upper": 0.8
+      },
       "steps": {
         "mean": 1.0,
         "std": 1.7320508075688772
@@ -57,6 +63,10 @@
       "final_overlap": {
         "mean": 0.8775510204081632,
         "std": 0.2120878539880258
+      },
+      "final_distance": {
+        "mean": 3.0,
+        "std": 5.196152422706632
       }
     },
     {
@@ -105,6 +115,12 @@
         "lower": 1.0,
         "upper": 1.0
       },
+      "nearest_target": {
+        "count": 5,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
       "steps": {
         "mean": 0.0,
         "std": 0.0
@@ -115,6 +131,10 @@
       },
       "final_overlap": {
         "mean": 1.0,
+        "std": 0.0
+      },
+      "final_distance": {
+        "mean": 0.0,
         "std": 0.0
       }
     },
@@ -164,6 +184,12 @@
         "lower": 0.3333333333333333,
         "upper": 0.3333333333333333
       },
+      "nearest_target": {
+        "count": 3,
+        "fraction": 0.5,
+        "lower": 0.5,
+        "upper": 0.5
+      },
       "steps": {
         "mean": 2.5,
         "std": 1.9748417658131499
@@ -175,6 +201,10 @@
       "final_overlap": {
         "mean": 0.7301587301587301,
         "std": 0.21787123729236177
+      },
+      "final_distance": {
+        "mean": 17.0,
+        "std": 13.725887949418793
       }
     },
     {
@@ -223,6 +253,12 @@
         "lower": 1.0,
         "upper": 1.0
       },
+      "nearest_target": {
+        "count": 6,
+        "fraction": 1.0,
+        "lower": 1.0,
+        "upper": 1.0
+      },
       "steps": {
         "mean": 0.0,
         "std": 0.0
@@ -233,6 +269,10 @@
       },
       "final_overlap": {
         "mean": 1.0,
+        "std": 0.0
+      },
+      "final_distance": {
+        "mean": 0.0,
         "std": 0.0
       }
     }

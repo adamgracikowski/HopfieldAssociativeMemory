@@ -169,6 +169,10 @@ pub struct CellSummary {
     /// Fraction of runs that ended in their target; `None` for random
     /// initial states.
     pub recovered: Option<Proportion>,
+    /// Fraction of runs whose final state is closest to their target (see
+    /// [`TrialResult::nearest_target`]), in any final class; `None` for
+    /// random initial states.
+    pub nearest_target: Option<Proportion>,
     /// Applied steps.
     pub steps: Moments,
     /// Energy of the final state.
@@ -176,6 +180,9 @@ pub struct CellSummary {
     /// Overlap of the final state with the target; `None` for random
     /// initial states.
     pub final_overlap: Option<Moments>,
+    /// Hamming distance of the final state to the target; `None` for random
+    /// initial states.
+    pub final_distance: Option<Moments>,
 }
 
 impl CellSummary {
@@ -183,7 +190,12 @@ impl CellSummary {
     pub fn new(dataset: String, learning: String, cell: Cell, results: &[TrialResult]) -> Self {
         let first = results.first().expect("a cell has at least one run");
         let deterministic = cell.is_deterministic(first.trial.flips);
-        let recovered: Vec<bool> = results.iter().filter_map(|r| r.recovered).collect();
+        let share = |flags: Vec<bool>| {
+            (!flags.is_empty()).then(|| {
+                let count = flags.iter().filter(|&&flag| flag).count();
+                Proportion::of(count, flags.len(), deterministic)
+            })
+        };
         Self {
             dataset,
             learning,
@@ -193,15 +205,18 @@ impl CellSummary {
             runs: results.len(),
             deterministic,
             classes: Classes::of(results, deterministic),
-            recovered: (!recovered.is_empty()).then(|| {
-                let count = recovered.iter().filter(|&&r| r).count();
-                Proportion::of(count, recovered.len(), deterministic)
-            }),
+            recovered: share(results.iter().filter_map(|r| r.recovered).collect()),
+            nearest_target: share(results.iter().filter_map(|r| r.nearest_target()).collect()),
             steps: Moments::of(results.iter().map(|r| r.steps as f64))
                 .expect("a cell has at least one run"),
             energy: Moments::of(results.iter().map(|r| r.energy))
                 .expect("a cell has at least one run"),
             final_overlap: Moments::of(results.iter().filter_map(|r| r.final_overlap)),
+            final_distance: Moments::of(
+                results
+                    .iter()
+                    .filter_map(|r| r.final_distance.map(|d| d as f64)),
+            ),
         }
     }
 }
@@ -266,6 +281,64 @@ mod tests {
             })
         );
         assert_eq!(Moments::of([]), None);
+    }
+
+    /// Four runs of target 0 whose final states have the nearest patterns
+    /// `(0, m = 1)`, `(1, m = 0.6)`, `(0, m = -0.8)` (the negated target)
+    /// and `(0, m = 0.4)`: two of them, the first and the last, end nearest
+    /// the target, only the first one in it. The final distances `0, 3, 10,
+    /// 6` have mean 4.75, squared deviations `22.5625 + 3.0625 + 27.5625 +
+    /// 1.5625 = 54.75`, sample variance `18.25` and deviation `4.272002`.
+    #[test]
+    fn summarizes_the_nearest_target_and_the_final_distance() {
+        use crate::dynamics::Termination;
+        use crate::run::Nearest;
+        use crate::seed::Seed;
+
+        let result = |pattern, overlap, distance| TrialResult {
+            trial: super::super::Trial {
+                cell: 0,
+                trial: 0,
+                target: Some(0),
+                flips: 5,
+                seed: Seed(0),
+            },
+            steps: 1,
+            changes: 1,
+            termination: Termination::FixedPoint,
+            energy: -1.0,
+            class: if distance == 0 {
+                FinalClass::Pattern
+            } else {
+                FinalClass::Spurious
+            },
+            recovered: Some(distance == 0),
+            initial_distance: Some(5),
+            final_distance: Some(distance),
+            final_overlap: Some(1.0 - 2.0 * distance as f64 / 49.0),
+            nearest: Nearest { pattern, overlap },
+        };
+        let results = [
+            result(0, 1.0, 0),
+            result(1, 0.6, 3),
+            result(0, -0.8, 10),
+            result(0, 0.4, 6),
+        ];
+        let cell = Cell {
+            dataset: 0,
+            learning: 0,
+            mode: Mode::Asynchronous,
+            noise: Some(0.1),
+        };
+        let summary = CellSummary::new("set".to_owned(), "hebb".to_owned(), cell, &results);
+        assert_eq!(summary.recovered, Some(Proportion::wilson(1, 4)));
+        assert_eq!(summary.nearest_target, Some(Proportion::wilson(2, 4)));
+        let distance = summary.final_distance.unwrap();
+        assert_eq!(distance.mean, 4.75);
+        assert!(
+            (distance.std.unwrap() - 4.272002).abs() < 1e-6,
+            "{distance:?}"
+        );
     }
 
     #[test]

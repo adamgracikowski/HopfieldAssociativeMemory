@@ -359,7 +359,14 @@ mod tests {
             assert_eq!(total, summary.runs);
             let recovered = summary.recovered.unwrap();
             assert_eq!(recovered.lower == recovered.upper, deterministic);
+            assert!(recovered.count <= summary.nearest_target.unwrap().count);
             assert!(summary.final_overlap.is_some());
+            assert!(summary.final_distance.is_some());
+        }
+        for result in &run.results {
+            if result.recovered == Some(true) {
+                assert_eq!(result.nearest_target(), Some(true), "{result:?}");
+            }
         }
         assert_eq!(summaries[1].flips, Some(10));
         assert_eq!(summaries[2].mode, Mode::Asynchronous);
@@ -448,5 +455,9 @@ mod tests {
             (None, None, None)
         );
         assert_eq!(summary.final_overlap, None);
+        assert_eq!(
+            (summary.nearest_target, summary.final_distance),
+            (None, None)
+        );
     }
 }
