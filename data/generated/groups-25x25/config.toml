@@ -1,0 +1,29 @@
+# Groups of similar patterns for the comparison with the diverse
+# large-25x25.plus (15 different pictures): three pictures of large-25x25
+# with pairwise |m| <= 0.12 as prototypes, five variants of each, with a
+# fraction `flip` of the pixels flipped (overlap 1 - 2 flip with the
+# prototype), N = 625 and p = 15 in every set.
+#
+# Run from src/compute:
+#   cargo run --release -- generate --config ../../data/generated/groups-25x25/config.toml
+
+seed = 20261110
+dataset = "large-25x25"
+prototypes = [0, 2, 4]
+variants = 5
+
+[[outputs]]
+flip = 0.02
+file = "../../datasets/groups-25x25-d02.npy"
+
+[[outputs]]
+flip = 0.05
+file = "../../datasets/groups-25x25-d05.npy"
+
+[[outputs]]
+flip = 0.1
+file = "../../datasets/groups-25x25-d10.npy"
+
+[[outputs]]
+flip = 0.2
+file = "../../datasets/groups-25x25-d20.npy"

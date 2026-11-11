@@ -60,6 +60,30 @@ file = "../../datasets/cats-300x200-dither.npy"
 
 Patterns follow the order of the source list. Every image must be a plain file name in `images` and match its SHA-1 checksum. Outputs must have distinct file names. Next to every `.npy` file a `.json` file of the same name records its provenance: the build (version, commit, dirty flag), the configuration file relative to the dataset, the bitmap size, the binarization and the source images with their checksums, authors and licenses. It has no timestamp, so converting again with the same code and images gives the same file. `--preview <dir>` also writes every bitmap as a black-and-white PNG to `<dir>/<output file stem>/`.
 
+### `generate`
+
+Generates datasets of groups of similar patterns: every group holds variants of one prototype, a pattern of a registered dataset, with a fraction of the pixels flipped at random.
+
+```bash
+cargo run --release -- generate --config ../../data/generated/groups-25x25/config.toml
+```
+
+The configuration (paths relative to its directory):
+
+```toml
+seed = 20261110           # master seed, required
+dataset = "large-25x25"   # registered dataset with the prototypes
+# registry = "../../datasets/datasets.toml"  # by default found from this file's directory upwards
+prototypes = [0, 2, 4]    # indices of the prototypes, one group each
+variants = 5              # patterns per group
+
+[[outputs]]
+flip = 0.05               # fraction of flipped pixels, round(flip * N) pixels per variant
+file = "../../datasets/groups-25x25-d05.npy"
+```
+
+Every output holds `prototypes.len() * variants` patterns, group by group; the prototypes themselves are not stored. A variant with `k` flipped pixels has overlap exactly `1 - 2k/N` with its prototype, two variants of a group about `(1 - 2k/N)^2`. Variant `v` of prototype `mu` draws from the seed of `seed/<output file stem>/mu/v`. Prototypes must not repeat, `flip` must lie in `[0, 1]` and outputs must have distinct file names. Next to every `.npy` file a `.json` file records its provenance (build, configuration relative to the dataset, seed, source dataset, prototypes, variants, `flip` and flipped pixels, bitmap size), without a timestamp, so generating again gives the same files. The datasets are added to the registry by hand.
+
 ### `train` and `recall`
 
 Both commands read a run configuration (TOML) and write their results to an output directory, which must be empty or not exist yet (`--force` writes into a non-empty one, replacing files of the same name).

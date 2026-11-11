@@ -177,6 +177,54 @@ fn convert_images_writes_datasets_and_previews() {
     assert_eq!(provenance["sources"][0]["file"], "a.png");
 }
 
+/// Two prototypes of `small-7x7` with three variants each, `round(0.1 *
+/// 49) = 5` flipped pixels; generating again writes identical files.
+#[test]
+fn generate_writes_datasets_and_provenance() {
+    let dir = tempfile::tempdir().unwrap();
+    let registry = std::path::absolute("../../data/datasets/datasets.toml").unwrap();
+    let config = dir.path().join("generated").join("config.toml");
+    std::fs::create_dir_all(config.parent().unwrap()).unwrap();
+    std::fs::write(
+        &config,
+        format!(
+            "seed = 3\ndataset = \"small-7x7\"\nregistry = '{}'\nprototypes = [0, 2]\n\
+             variants = 3\n[[outputs]]\nflip = 0.1\nfile = \"../out/groups-d10.npy\"\n",
+            registry.display()
+        ),
+    )
+    .unwrap();
+    let generate = || {
+        compute()
+            .arg("generate")
+            .arg("--config")
+            .arg(&config)
+            .assert()
+            .success()
+            .stdout(contains("dataset      groups-d10"))
+            .stdout(contains(
+                "description  2 prototypes of small-7x7 x 3 variants, 5 flipped pixels each",
+            ))
+    };
+    generate();
+    let out = dir.path().join("out");
+    let set = read_npy(&out.join("groups-d10.npy")).unwrap();
+    assert_eq!((set.len(), set.width(), set.height()), (6, 7, 7));
+    let provenance = read_json(&out.join("groups-d10.json"));
+    assert_eq!(provenance["command"], "generate");
+    assert_eq!(provenance["build"]["commit"], build_info::GIT_COMMIT);
+    assert_eq!(provenance["config"], "../generated/config.toml");
+    assert_eq!(provenance["dataset"], "small-7x7");
+    assert_eq!(provenance["prototypes"][1], 2);
+    assert_eq!(provenance["flips"], 5);
+
+    let files = |name: &str| std::fs::read(out.join(name)).unwrap();
+    let (npy, json) = (files("groups-d10.npy"), files("groups-d10.json"));
+    generate();
+    assert_eq!(files("groups-d10.npy"), npy);
+    assert_eq!(files("groups-d10.json"), json);
+}
+
 #[test]
 fn convert_images_reports_a_missing_image() {
     let dir = tempfile::tempdir().unwrap();

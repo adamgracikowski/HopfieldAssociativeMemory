@@ -9,6 +9,7 @@ pub mod capacity;
 pub mod dynamics;
 pub mod error;
 pub mod experiment;
+pub mod generate;
 pub mod images;
 pub mod learning;
 pub mod paths;
