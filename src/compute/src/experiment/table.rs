@@ -15,8 +15,8 @@ use super::{Cell, ExperimentRun, TrialResult};
 /// | Column | Type | Content |
 /// |---|---|---|
 /// | `dataset`, `learning`, `mode` | string | grid cell |
-/// | `noise` | float64, nullable | fraction of flipped pixels |
-/// | `flips` | uint32 | flipped pixels |
+/// | `noise` | float64, nullable | damage level: fraction of flipped pixels or of covered rows |
+/// | `flips` | uint32 | damaged pixels: flipped, or covered (rows times width) |
 /// | `target` | uint32, nullable | pattern the input is made from |
 /// | `trial` | uint32 | trial number in the cell |
 /// | `seed` | uint64 | seed of the run, for `recall` |
@@ -70,7 +70,7 @@ impl TrialTable {
             ),
             ("mode", strings(&|r| cell(r).mode.into()), false),
             ("noise", floats(&|r| cell(r).noise), true),
-            ("flips", counts(&|r| r.trial.flips), false),
+            ("flips", counts(&|r| r.trial.damaged_pixels()), false),
             ("target", optional_counts(&|r| r.trial.target), true),
             ("trial", counts(&|r| r.trial.trial), false),
             (

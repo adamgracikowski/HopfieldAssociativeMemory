@@ -3,8 +3,9 @@
 use std::fmt;
 
 use image::GrayImage;
+use rand::{Rng, RngExt};
 
-use super::PatternView;
+use super::{Pattern, PatternView};
 use crate::{Error, Result};
 
 /// A bipolar vector of `width * height` pixels shown as a bitmap, row by row.
@@ -45,6 +46,30 @@ impl<'a> Bitmap<'a> {
     /// Bitmap height in pixels.
     pub fn height(&self) -> usize {
         self.height
+    }
+
+    /// Copy with a band of `rows` consecutive full-width rows set to `-1`
+    /// (the background), as if covered. The first row of the band is drawn
+    /// uniformly from the `height - rows + 1` possible positions, so `rows =
+    /// 0` leaves the bitmap unchanged and `rows = height` covers all of it.
+    /// One number is drawn from `rng` in every case.
+    pub fn occluded<R: Rng + ?Sized>(&self, rows: usize, rng: &mut R) -> Result<Pattern> {
+        if rows > self.height {
+            return Err(Error::InvalidArgument {
+                message: format!(
+                    "cannot cover {rows} rows of a bitmap with {} rows",
+                    self.height
+                ),
+            });
+        }
+        let first = rng.random_range(0..=self.height - rows);
+        let mut pixels = self.pixels.values().to_owned();
+        pixels
+            .iter_mut()
+            .skip(first * self.width)
+            .take(rows * self.width)
+            .for_each(|pixel| *pixel = -1);
+        Pattern::new(pixels)
     }
 
     /// The bitmap as a grayscale image: black for `1`, white for `-1`.
@@ -98,6 +123,57 @@ mod tests {
         let image = Bitmap::new(pattern.view(), 3, 2).unwrap().to_image();
         assert_eq!(image.dimensions(), (3, 2));
         assert_eq!(image.as_raw(), &[0, 255, 255, 255, 0, 0]);
+    }
+
+    /// A 2 x 4 bitmap of `1`: covering 2 rows leaves 3 possible bands
+    /// (rows 0-1, 1-2, 2-3); each covers exactly 4 pixels in consecutive
+    /// rows, and enough seeds reach every position.
+    #[test]
+    fn covers_a_band_of_rows() {
+        use rand::SeedableRng;
+        use rand_chacha::ChaCha8Rng;
+        use std::collections::BTreeSet;
+
+        let pattern = Pattern::new(ndarray::Array1::from_elem(8, 1)).unwrap();
+        let bitmap = Bitmap::new(pattern.view(), 2, 4).unwrap();
+        let mut firsts = BTreeSet::new();
+        for seed in 0..50 {
+            let covered = bitmap
+                .occluded(2, &mut ChaCha8Rng::seed_from_u64(seed))
+                .unwrap();
+            let rows: Vec<usize> = (0..4)
+                .filter(|&row| covered.values()[2 * row] == -1)
+                .collect();
+            assert_eq!(rows.len(), 2, "{covered:?}");
+            assert_eq!(rows[1], rows[0] + 1);
+            for row in 0..4 {
+                let line: Vec<i8> = covered
+                    .values()
+                    .iter()
+                    .skip(2 * row)
+                    .take(2)
+                    .copied()
+                    .collect();
+                let value = if rows.contains(&row) { -1 } else { 1 };
+                assert_eq!(line, [value, value], "row {row}");
+            }
+            firsts.insert(rows[0]);
+        }
+        assert_eq!(firsts, BTreeSet::from([0, 1, 2]));
+    }
+
+    #[test]
+    fn covers_nothing_or_everything() {
+        use rand::SeedableRng;
+        use rand_chacha::ChaCha8Rng;
+
+        let pattern = Pattern::new(array![1, -1, -1, -1, 1, 1]).unwrap();
+        let bitmap = Bitmap::new(pattern.view(), 3, 2).unwrap();
+        let rng = &mut ChaCha8Rng::seed_from_u64(1);
+        assert_eq!(bitmap.occluded(0, rng).unwrap(), pattern);
+        assert_eq!(bitmap.occluded(2, rng).unwrap().fraction_on(), 0.0);
+        let error = bitmap.occluded(3, rng).unwrap_err();
+        assert!(error.to_string().contains("cover 3 rows"), "{error}");
     }
 
     #[test]

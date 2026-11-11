@@ -615,6 +615,51 @@ fn experiment_writes_tables_and_metadata() {
     assert!(!out.join("stability.parquet").exists());
 }
 
+/// Covering `round(0.3 * 7) = 2` rows of the 7 x 7 patterns damages 14
+/// pixels; the experiment and a `recall` of one of its trials both accept
+/// `source = "occlusion"`, and the invalid levels are reported.
+#[test]
+fn experiment_and_recall_cover_rows() {
+    let dir = tempfile::tempdir().unwrap();
+    let text = EXPERIMENT.replace(
+        "source = \"pattern\"\nnoise = [0.0, 0.2]",
+        "source = \"occlusion\"\nocclusion = [0.0, 0.3]",
+    );
+    let config = experiment_config(dir.path(), &text);
+    let out = dir.path().join("run");
+    experiment(&config)
+        .arg("--out")
+        .arg(&out)
+        .assert()
+        .success()
+        .stdout(contains("grid         4 cells, 65 runs"));
+    let cells = read_json(&out.join("summary.json"))["cells"].clone();
+    assert_eq!(cells[1]["noise"], 0.3);
+    assert_eq!(cells[1]["flips"], 14);
+    let metadata = read_json(&out.join("metadata.json"));
+    assert_eq!(metadata["config"]["input"]["source"], "occlusion");
+    assert_eq!(metadata["config"]["input"]["occlusion"][1], 0.3);
+
+    let recall_config = run_config(
+        dir.path(),
+        &RECALL.replace(
+            "source = \"pattern\"\nindex = 1\nflips = 6",
+            "source = \"occlusion\"\nindex = 1\nrows = 2",
+        ),
+    );
+    recall(&recall_config, &dir.path().join("recall"))
+        .success()
+        .stdout(contains("input        pattern 1 with 2 covered rows"));
+
+    let clash = experiment_config(dir.path(), &text.replace("[0.0, 0.3]", "[0.1, 0.2]"));
+    experiment(&clash)
+        .arg("--out")
+        .arg(dir.path().join("clash"))
+        .assert()
+        .failure()
+        .stderr(contains("both cover 1 of the 7 rows"));
+}
+
 /// With `stability_fields` the experiment writes one row per pattern and
 /// neuron of every training: 5 x 49 for `small-7x7` and one rule. Its
 /// negative fields agree with the unstable neurons in the metadata.

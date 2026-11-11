@@ -19,9 +19,11 @@ use crate::{Error, PatternSet, Result};
 /// flips = 10
 /// ```
 ///
-/// `source = "random"` takes no parameters; `source = "file"` takes `path`
-/// (an `.npy` pattern set of the same bitmap size, relative to the
-/// configuration file) and `index` (0 by default).
+/// `source = "occlusion"` takes `index` and `rows` (a band of that many
+/// consecutive rows of the pattern covered with `-1`), `source = "random"`
+/// no parameters and `source = "file"` takes `path` (an `.npy` pattern set
+/// of the same bitmap size, relative to the configuration file) and `index`
+/// (0 by default).
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(tag = "source", rename_all = "kebab-case", deny_unknown_fields)]
 pub enum Input {
@@ -33,6 +35,15 @@ pub enum Input {
         /// Number of flipped pixels.
         #[serde(default)]
         flips: usize,
+    },
+    /// Stored pattern `index` with a band of `rows` consecutive full-width
+    /// rows at a random position set to `-1` (see
+    /// [`Bitmap::occluded`](crate::patterns::Bitmap::occluded)).
+    Occlusion {
+        /// Index of the stored pattern, from 0.
+        index: usize,
+        /// Number of covered rows.
+        rows: usize,
     },
     /// A random state, every pixel `1` or `-1` with probability 1/2.
     Random {},
@@ -64,6 +75,13 @@ impl Input {
                 check_index(*index, set.len(), "the dataset")?;
                 Ok(Initial {
                     state: set.pattern(*index).flipped(*flips, rng)?,
+                    target: Some(*index),
+                })
+            }
+            Self::Occlusion { index, rows } => {
+                check_index(*index, set.len(), "the dataset")?;
+                Ok(Initial {
+                    state: set.bitmap(*index).occluded(*rows, rng)?,
                     target: Some(*index),
                 })
             }
@@ -135,6 +153,23 @@ mod tests {
         assert!(initial(&Input::Pattern { index: 0, flips: 7 }, 0).is_err());
     }
 
+    /// Pattern 1 of the 3 x 2 set is `(1, -1, 1)` over `(-1, 1, -1)`;
+    /// covering one row leaves the other one unchanged.
+    #[test]
+    fn pattern_with_covered_rows() {
+        let input = Input::Occlusion { index: 1, rows: 1 };
+        let covered = initial(&input, 5).unwrap();
+        assert_eq!(covered.target, Some(1));
+        let values = covered.state.values().to_vec();
+        assert!(
+            values == [-1, -1, -1, -1, 1, -1] || values == [1, -1, 1, -1, -1, -1],
+            "{values:?}"
+        );
+        assert_eq!(covered, initial(&input, 5).unwrap());
+        assert!(initial(&Input::Occlusion { index: 2, rows: 1 }, 0).is_err());
+        assert!(initial(&Input::Occlusion { index: 0, rows: 3 }, 0).is_err());
+    }
+
     #[test]
     fn random_state_has_n_pixels() {
         let random = initial(&Input::Random {}, 1).unwrap();
@@ -194,6 +229,11 @@ mod tests {
                 index: 0
             }
         );
+        assert_eq!(
+            parse("[input]\nsource = \"occlusion\"\nindex = 1\nrows = 4").unwrap(),
+            Input::Occlusion { index: 1, rows: 4 }
+        );
+        assert!(parse("[input]\nsource = \"occlusion\"\nindex = 1").is_err());
         assert!(parse("[input]\nsource = \"random\"\nflips = 2").is_err());
         assert!(parse("[input]\nsource = \"pattern\"").is_err());
     }

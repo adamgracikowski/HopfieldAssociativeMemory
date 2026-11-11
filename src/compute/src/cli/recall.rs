@@ -92,6 +92,9 @@ fn describe(input: &Input) -> String {
         Input::Pattern { index, flips } => {
             format!("pattern {index} with {flips} flipped pixels")
         }
+        Input::Occlusion { index, rows } => {
+            format!("pattern {index} with {rows} covered rows")
+        }
         Input::Random {} => "random state".to_owned(),
         Input::File { path, index } => format!("pattern {index} of `{}`", path.display()),
     }

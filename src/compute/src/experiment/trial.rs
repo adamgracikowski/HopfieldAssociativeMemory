@@ -1,6 +1,6 @@
 //! A single trial of an experiment.
 
-use super::FinalClass;
+use super::{Damage, FinalClass};
 use crate::dynamics::{Dynamics, NoHistory, Termination};
 use crate::run::{Input, Nearest};
 use crate::seed::Seed;
@@ -14,8 +14,8 @@ use crate::{PatternSet, Result};
 /// So `recall` repeats the trial with this seed, the experiment's dataset,
 /// `registry`, `backend` and `[learning]` table of the rule, `[dynamics]`
 /// with the cell's `mode` and the experiment's `zero_field`, `order` and
-/// `max_steps`, and the input `pattern` with `index = target` and `flips`
-/// (or `random`).
+/// `max_steps`, and the [input](Damage::input) of its damage with `index =
+/// target` (or `random`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Trial {
     /// Index of the grid cell.
@@ -25,8 +25,8 @@ pub struct Trial {
     /// Stored pattern the initial state is made from; `None` for a random
     /// state.
     pub target: Option<usize>,
-    /// Number of flipped pixels of the target.
-    pub flips: usize,
+    /// Damage of the target; `None` for a random state.
+    pub damage: Option<Damage>,
     /// Seed of the trial.
     pub seed: Seed,
 }
@@ -75,13 +75,16 @@ impl TrialResult {
 impl Trial {
     /// The initial state settings of this trial.
     pub fn input(&self) -> Input {
-        match self.target {
-            Some(index) => Input::Pattern {
-                index,
-                flips: self.flips,
-            },
-            None => Input::Random {},
+        match (self.target, self.damage) {
+            (Some(index), Some(damage)) => damage.input(index),
+            _ => Input::Random {},
         }
+    }
+
+    /// Number of damaged pixels of the target (see [`Damage::pixels`]); 0
+    /// for a random state.
+    pub fn damaged_pixels(&self) -> usize {
+        self.damage.map_or(0, |damage| damage.pixels())
     }
 
     /// Runs the network with `weights`, which stores `set`, under
@@ -136,7 +139,7 @@ mod tests {
             cell: 0,
             trial: 0,
             target: Some(0),
-            flips,
+            damage: Some(Damage::Flip { pixels: flips }),
             seed: Seed(0),
         };
         let dynamics = Dynamics {

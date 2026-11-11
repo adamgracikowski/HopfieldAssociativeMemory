@@ -95,6 +95,8 @@ max_steps = 1000          # synchronous steps or asynchronous sweeps
 source = "pattern"        # stored pattern `index` with `flips` random pixels flipped
 index = 0
 flips = 5
+# source = "occlusion"    # stored pattern `index` with a band of `rows` consecutive
+# rows = 3                # full-width rows at a random position set to -1
 # source = "random"       # random state
 # source = "file"         # pattern `index` of an `.npy` set of the same bitmap size,
 # path = "x.npy"          # given with `path` (and `index`, 0 by default)
@@ -117,7 +119,7 @@ Running `recall` again with the same configuration and code gives identical file
 
 ### `experiment`
 
-Runs a grid of datasets, learning rules, update modes and noise levels with many trials in every cell, in parallel over the trials.
+Runs a grid of datasets, learning rules, update modes and damage levels (noise or occlusion) with many trials in every cell, in parallel over the trials.
 
 ```bash
 cargo run --release -- experiment --config ../../data/experiments/00-example/config.toml
@@ -147,16 +149,18 @@ max_steps = 1000
 [input]
 source = "pattern"        # in every trial each stored pattern with flipped pixels
 noise = [0.0, 0.1, 0.2]   # grid axis: fractions of flipped pixels, round(noise * N) pixels
+# source = "occlusion"    # in every trial each stored pattern with a band of rows set to -1
+# occlusion = [0.0, 0.3]  # grid axis: fractions of covered rows, round(occlusion * H) rows
 # source = "random"       # in every trial one random state
 ```
 
-Axes must not be empty or repeat a value, and the rule names (`hebb`, `oja (subspace)`, `oja (single-neuron)`) must differ. Two noise levels must not give the same number of flipped pixels on any dataset (e.g. `0.1` and `0.11` on `N = 49` both flip 5), because they would give identical cells. Every (dataset, rule) pair is trained once; its stability check uses `zero_field`. A synchronous cell without flipped pixels draws no random numbers, so it runs a single trial and its fractions are exact (`deterministic` in the summary).
+Axes must not be empty or repeat a value, and the rule names (`hebb`, `oja (subspace)`, `oja (single-neuron)`) must differ. Two noise levels must not give the same number of flipped pixels on any dataset (e.g. `0.1` and `0.11` on `N = 49` both flip 5), and two occlusion levels not the same number of covered rows (e.g. `0.1` and `0.2` of 7 rows both cover 1), because they would give identical cells. Every (dataset, rule) pair is trained once; its stability check uses `zero_field`. A synchronous cell without damaged pixels does not depend on random numbers, so it runs a single trial and its fractions are exact (`deterministic` in the summary).
 
-Every run draws from its own seed: the first 8 bytes of the SHA-1 of `seed/dataset/source/flips/target/trial` (`-` for the flips and target of a random input). It does not depend on the rule or the mode, so all of them start from the same initial states, and the results do not depend on the number of threads. A `recall` run repeats a run with its history when it has this seed, the experiment's `dataset`, `registry` and `backend`, the `[learning]` table of the rule, `[dynamics]` with the cell's `mode` and the experiment's `zero_field`, `order` and `max_steps`, and `[input]` `source = "pattern"`, `index = target`, `flips = flips` (or `source = "random"`).
+Every run draws from its own seed: the first 8 bytes of the SHA-1 of `seed/dataset/source/pixels/target/trial`, where `pixels` is the number of damaged pixels (`-` for the pixels and target of a random input). It does not depend on the rule or the mode, so all of them start from the same initial states, and the results do not depend on the number of threads. A `recall` run repeats a run with its history when it has this seed, the experiment's `dataset`, `registry` and `backend`, the `[learning]` table of the rule, `[dynamics]` with the cell's `mode` and the experiment's `zero_field`, `order` and `max_steps`, and `[input]` `source = "pattern"`, `index = target`, `flips = flips` (`source = "occlusion"`, `index = target`, `rows = flips / width` for occlusion, or `source = "random"`).
 
 The final state is classified by exact equality: `pattern` (a fixed point equal to a stored pattern), `negation` (equal to a negated pattern), `spurious` (another fixed point), `cycle` (two-cycle) or `unconverged` (step limit). The command writes:
 
-- `trials.parquet`: one row per run, ordered by cell, trial and target, with the columns `dataset`, `learning`, `mode`, `noise`, `flips`, `target`, `trial`, `seed`, `steps`, `changes`, `termination`, `class`, `energy`, `recovered` (the run ended in a fixed point equal to the target), `initial_distance`, `final_distance` (Hamming distances to the target), `final_overlap` (with the target), `nearest` and `nearest_overlap` (the pattern with the largest `|m|`); target columns are null for random inputs,
+- `trials.parquet`: one row per run, ordered by cell, trial and target, with the columns `dataset`, `learning`, `mode`, `noise` (the damage level: fraction of flipped pixels or of covered rows), `flips` (damaged pixels: flipped, or covered, rows times width; only covered pixels equal to `1` change), `target`, `trial`, `seed`, `steps`, `changes`, `termination`, `class`, `energy`, `recovered` (the run ended in a fixed point equal to the target), `initial_distance`, `final_distance` (Hamming distances to the target), `final_overlap` (with the target), `nearest` and `nearest_overlap` (the pattern with the largest `|m|`); target columns are null for random inputs,
 - `summary.json`: `{"cells": [...]}` with, for every cell, the number of runs, whether it is `deterministic`, the fraction of every class, of recovered runs and of runs whose final state is nearest their target (`nearest_target`: the stored pattern with the largest `|m|` is the target with `m > 0`, in any final class, so it also counts runs that end near an unstable target) with a 95% Wilson interval (`count`, `fraction`, `lower`, `upper`; both ends equal the fraction in a deterministic cell), and the mean and sample standard deviation of steps, final energy, final overlap and final Hamming distance to the target (`final_distance`),
 - `datasets.json`: `{"datasets": [...]}` with, for every dataset, its size, the load `p/N`, the fraction of `1` in every pattern (`fraction_on`), the overlap matrix `m^{mu nu}` (`overlaps`), for every pattern the sum of `|m^{mu nu}|` over the other patterns (`overlap_sums`; with Hebbian weights a pattern whose sum is below `1 - p/N` is stable) and the largest `|m^{mu nu}|` of two different patterns with the pair,
 - `stability.parquet` (only with `stability_fields = true`): the aligned local field `xi_i^mu h_i` (`h = W xi^mu`) of every neuron of every stored pattern, one row per training, pattern and neuron, with the columns `dataset`, `learning`, `pattern`, `neuron` (row-major pixel index) and `field`; a negative field means the neuron would change, a zero one is decided by `zero_field`. It has `p N` rows per rule, so it is off by default,

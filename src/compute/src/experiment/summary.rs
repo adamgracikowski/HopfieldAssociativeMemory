@@ -154,9 +154,11 @@ pub struct CellSummary {
     pub learning: String,
     /// Update mode.
     pub mode: Mode,
-    /// Fraction of flipped pixels; `None` for random initial states.
+    /// Damage level: the fraction of flipped pixels, or of covered rows;
+    /// `None` for random initial states.
     pub noise: Option<f64>,
-    /// Number of flipped pixels; `None` for random initial states.
+    /// Number of damaged pixels (see [`Damage::pixels`](super::Damage::pixels));
+    /// `None` for random initial states.
     pub flips: Option<usize>,
     /// Number of runs: trials times targets.
     pub runs: usize,
@@ -189,7 +191,7 @@ impl CellSummary {
     /// Aggregates `results`, all from cell `cell`, which are not empty.
     pub fn new(dataset: String, learning: String, cell: Cell, results: &[TrialResult]) -> Self {
         let first = results.first().expect("a cell has at least one run");
-        let deterministic = cell.is_deterministic(first.trial.flips);
+        let deterministic = cell.is_deterministic(first.trial.damaged_pixels());
         let share = |flags: Vec<bool>| {
             (!flags.is_empty()).then(|| {
                 let count = flags.iter().filter(|&&flag| flag).count();
@@ -201,7 +203,7 @@ impl CellSummary {
             learning,
             mode: cell.mode,
             noise: cell.noise,
-            flips: cell.noise.map(|_| first.trial.flips),
+            flips: cell.noise.map(|_| first.trial.damaged_pixels()),
             runs: results.len(),
             deterministic,
             classes: Classes::of(results, deterministic),
@@ -292,15 +294,16 @@ mod tests {
     #[test]
     fn summarizes_the_nearest_target_and_the_final_distance() {
         use crate::dynamics::Termination;
+        use crate::experiment::{Damage, Trial};
         use crate::run::Nearest;
         use crate::seed::Seed;
 
         let result = |pattern, overlap, distance| TrialResult {
-            trial: super::super::Trial {
+            trial: Trial {
                 cell: 0,
                 trial: 0,
                 target: Some(0),
-                flips: 5,
+                damage: Some(Damage::Flip { pixels: 5 }),
                 seed: Seed(0),
             },
             steps: 1,

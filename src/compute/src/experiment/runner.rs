@@ -82,7 +82,7 @@ impl ExperimentRun {
     ///
     /// Every trial draws only from its own [`Seed`], derived from the
     /// experiment seed, the dataset name, the input source, the number of
-    /// flipped pixels, the target and the trial number, and the results are
+    /// damaged pixels, the target and the trial number, and the results are
     /// collected in task order, so they do not depend on the number of
     /// threads. The seed does not depend on the rule or the mode: all of
     /// them start from the same initial states.
@@ -97,7 +97,7 @@ impl ExperimentRun {
             .map(|name| DatasetInfo::load(&registry, name, config.directory()))
             .collect::<Result<Vec<_>>>()?;
         for (info, _) in &loaded {
-            config.check_noise_levels(&info.name, info.neurons)?;
+            config.check_damage_levels(&info.name, info.width, info.height)?;
         }
         let statistics = loaded
             .iter()
@@ -217,15 +217,16 @@ fn trials(
     dataset: &str,
     set: &PatternSet,
 ) -> Vec<Trial> {
-    let flips = cell
+    let damage = cell
         .noise
-        .map_or(0, |noise| ExperimentInput::flips(noise, set.neurons()));
+        .and_then(|level| config.input.damage(level, set.width(), set.height()));
+    let pixels = damage.map_or(0, |damage| damage.pixels());
     let targets: Vec<Option<usize>> = match config.input {
-        ExperimentInput::Pattern { .. } => (0..set.len()).map(Some).collect(),
         ExperimentInput::Random {} => vec![None],
+        _ => (0..set.len()).map(Some).collect(),
     };
     let source = config.input.source();
-    let count = if cell.is_deterministic(flips) {
+    let count = if cell.is_deterministic(pixels) {
         1
     } else {
         config.trials
@@ -233,19 +234,19 @@ fn trials(
     let mut trials = Vec::new();
     for trial in 0..count {
         for &target in &targets {
-            let (flips_part, target_part) = match target {
-                Some(mu) => (flips.to_string(), mu.to_string()),
+            let (pixels_part, target_part) = match target {
+                Some(mu) => (pixels.to_string(), mu.to_string()),
                 None => ("-".to_owned(), "-".to_owned()),
             };
             let seed = Seed::derive(
                 config.seed,
-                &[&dataset, &source, &flips_part, &target_part, &trial],
+                &[&dataset, &source, &pixels_part, &target_part, &trial],
             );
             trials.push(Trial {
                 cell: index,
                 trial,
                 target,
-                flips,
+                damage,
                 seed,
             });
         }
@@ -257,6 +258,7 @@ fn trials(
 mod tests {
     use super::*;
     use crate::dynamics::{Mode, Termination};
+    use crate::experiment::Damage;
     use crate::run::{RecallRun, RunConfig};
     use std::collections::HashMap;
     use std::path::Path;
@@ -315,7 +317,7 @@ mod tests {
         for result in &run.results {
             let cell = run.cells[result.trial.cell];
             let flips = if cell.noise == Some(0.2) { 10 } else { 0 };
-            assert_eq!(result.trial.flips, flips);
+            assert_eq!(result.trial.damaged_pixels(), flips);
             assert_eq!(result.initial_distance, Some(flips));
             let fixed = result.termination == Termination::FixedPoint;
             assert_eq!(
@@ -393,7 +395,7 @@ mod tests {
         let mut seeds = HashMap::new();
         for result in &run.results {
             let trial = result.trial;
-            let key = (trial.flips, trial.target, trial.trial);
+            let key = (trial.damage, trial.target, trial.trial);
             let seed = *seeds.entry(key).or_insert(trial.seed);
             assert_eq!(trial.seed, seed, "{key:?}");
         }
@@ -408,7 +410,7 @@ mod tests {
         let checked = run
             .results
             .iter()
-            .filter(|result| result.trial.flips > 0)
+            .filter(|result| result.trial.damaged_pixels() > 0)
             .step_by(7)
             .map(|result| {
                 let cell = run.cells[result.trial.cell];
@@ -420,7 +422,7 @@ mod tests {
                     ["hebb", "oja"][cell.learning],
                     cell.mode,
                     result.trial.target.unwrap(),
-                    result.trial.flips,
+                    result.trial.damaged_pixels(),
                 );
                 let config = RunConfig::parse(
                     &text,
@@ -437,6 +439,64 @@ mod tests {
             })
             .count();
         assert!(checked >= 8);
+    }
+
+    /// Occlusion levels 0 and 0.3 of the 7-row `small-7x7` cover 0 and
+    /// `round(2.1) = 2` rows, 14 pixels; only covered pixels equal to `1`
+    /// change, so the initial distance is at most 14. The grid has the same
+    /// shape as with noise (100 runs), but the seeds differ from the noise
+    /// trials, and `recall` with `source = "occlusion"` repeats a trial.
+    #[test]
+    fn covers_rows_of_the_targets() {
+        let text = CONFIG.replace(
+            "source = \"pattern\"\n        noise = [0.0, 0.2]",
+            "source = \"occlusion\"\n        occlusion = [0.0, 0.3]",
+        );
+        let run = execute(&text);
+        assert_eq!(run.results.len(), 100);
+        let noise = execute(CONFIG);
+        let mut checked = 0;
+        for (result, flipped) in run.results.iter().zip(&noise.results) {
+            let cell = run.cells[result.trial.cell];
+            let distance = result.initial_distance.unwrap();
+            if cell.noise == Some(0.3) {
+                let damage = Damage::Occlusion {
+                    rows: 2,
+                    pixels: 14,
+                };
+                assert_eq!(result.trial.damage, Some(damage));
+                assert!(distance <= 14, "{result:?}");
+                assert_ne!(result.trial.seed, flipped.trial.seed);
+                if checked < 4 && distance > 0 {
+                    checked += 1;
+                    let text = format!(
+                        "dataset = \"small-7x7\"\nseed = {}\n[learning]\nrule = \"{}\"\n\
+                         [dynamics]\nmode = \"{}\"\n[input]\nsource = \"occlusion\"\n\
+                         index = {}\nrows = 2\n",
+                        result.trial.seed,
+                        ["hebb", "oja"][cell.learning],
+                        cell.mode,
+                        result.trial.target.unwrap(),
+                    );
+                    let config = RunConfig::parse(
+                        &text,
+                        Path::new("../../data/experiments/00-example/recall.toml"),
+                    )
+                    .unwrap();
+                    let summary = RecallRun::execute(&config).unwrap().summary();
+                    assert_eq!(summary.steps, result.steps);
+                    assert_eq!(summary.energy, result.energy);
+                    assert_eq!(summary.final_distance, result.final_distance);
+                }
+            } else {
+                assert_eq!(result.trial.damaged_pixels(), 0);
+                assert_eq!(distance, 0);
+            }
+        }
+        assert_eq!(checked, 4);
+        let summaries = run.summaries();
+        assert_eq!(summaries[1].flips, Some(14));
+        assert!(summaries[0].deterministic && !summaries[1].deterministic);
     }
 
     /// Random initial states give one run per trial, without a target.
