@@ -6,14 +6,18 @@ import pytest
 
 from hopfield_analysis.cli import main
 from hopfield_analysis.experiments import (
+    damage,
+    dataset_sizes,
     load_metadata,
     load_summary,
     load_trials,
     plot_classes,
+    plot_load,
     plot_recovery,
 )
 
 EXAMPLE = Path(__file__).parents[4] / "data" / "experiments" / "00-example" / "results"
+OCCLUSION = Path(__file__).parents[1] / "fixtures" / "occlusion"
 
 
 def proportion(count, runs):
@@ -44,6 +48,7 @@ def cell(dataset, learning, mode, noise, recovered):
         "runs": runs,
         "classes": classes,
         "recovered": proportion(recovered, runs),
+        "nearest_target": proportion(min(recovered + 2, runs), runs),
         "steps": {"mean": 1.5, "std": 0.5},
         "energy": {"mean": -20.0, "std": None},
         "final_overlap": {"mean": 0.9, "std": 0.1},
@@ -61,7 +66,13 @@ def results(tmp_path):
     ]
     (tmp_path / "summary.json").write_text(json.dumps({"cells": cells}), encoding="utf-8")
     (tmp_path / "metadata.json").write_text(
-        json.dumps({"command": "experiment", "config": {"trials": 2}}), encoding="utf-8"
+        json.dumps(
+            {
+                "command": "experiment",
+                "config": {"trials": 2, "input": {"source": "pattern", "noise": [0.0, 0.2]}},
+            }
+        ),
+        encoding="utf-8",
     )
     pl.DataFrame(
         {
@@ -110,8 +121,12 @@ def test_plot_recovery_has_a_panel_per_dataset_and_a_line_per_series(results):
 
 def test_plot_recovery_rejects_random_inputs():
     summary = pl.DataFrame({"dataset": ["a"], "noise": [None], "recovered": [None]})
-    with pytest.raises(ValueError, match="no recovery fractions"):
+    with pytest.raises(ValueError, match="no `recovered` fractions"):
         plot_recovery(summary)
+    with pytest.raises(ValueError, match="unknown metric `final`"):
+        plot_recovery(summary, metric="final")
+    with pytest.raises(ValueError, match="no damaged inputs"):
+        damage({"config": {"input": {"source": "random"}}})
 
 
 def test_cli_writes_a_pdf_and_a_png(results, tmp_path, capsys):
@@ -214,3 +229,74 @@ def test_plot_classes_labels_every_kth_of_many_noise_levels():
     figure = plot_classes(summary)
     ticks = [tick.get_text() for tick in figure.axes[0].get_xticklabels()]
     assert ticks == ["0", "", "0,05", "", "0,1", "", "0,15", "", "0,2", "", "0,25"]
+
+
+def test_plot_recovery_draws_the_nearest_target_fractions(results):
+    """The cells have 7 of 10 runs recovered at noise 0.2, so 9 of 10 nearest
+    their target."""
+    summary = load_summary(results)
+    figure = plot_recovery(summary, metric="nearest-target")
+    ax = figure.get_axes()[0]
+    assert ax.get_ylabel() == "odsetek najbliżej celu"
+    assert list(ax.get_lines()[0].get_ydata()) == pytest.approx([1.0, 0.9])
+
+
+def test_reads_the_damage_and_sizes_of_the_occlusion_fixture():
+    metadata = load_metadata(OCCLUSION)
+    assert damage(metadata) == "occlusion"
+    sizes = dataset_sizes(metadata)
+    assert sizes.rows() == [("small-7x7:3", "small-7x7", 3), ("small-7x7", "small-7x7", 5)]
+    summary = load_summary(OCCLUSION)
+    assert summary["dataset"].unique(maintain_order=True).to_list() == sizes["dataset"].to_list()
+    assert (summary["recovered_count"] <= summary["nearest_target_count"]).all()
+
+
+def test_plot_recovery_names_the_occlusion_axis():
+    figure = plot_recovery(load_summary(OCCLUSION), damage="occlusion")
+    assert figure._supxlabel.get_text() == "poziom zasłonięcia (odsetek zasłoniętych wierszy)"
+    assert [ax.get_title() for ax in figure.get_axes()] == ["small-7x7:3", "small-7x7"]
+
+
+def test_plot_load_has_a_line_per_level_and_a_point_per_prefix():
+    """One dataset in the registry and two rules: one row of two panels with
+    a line per occlusion level over p = 3 and 5, drawn from the cells of the
+    chosen mode."""
+    summary = load_summary(OCCLUSION)
+    sizes = dataset_sizes(load_metadata(OCCLUSION))
+    figure = plot_load(
+        summary, sizes, mode="asynchronous", metric="nearest-target", damage="occlusion"
+    )
+    axes = figure.get_axes()
+    assert [ax.get_title() for ax in axes] == ["Hebb", "Oja (podprzestrzeń)"]
+    assert axes[0].get_ylabel() == "small-7x7\nodsetek najbliżej celu"
+    assert figure._supxlabel.get_text() == "liczba wzorców $p$"
+    for ax, learning in zip(axes, ["hebb", "oja (subspace)"], strict=True):
+        lines = [container.lines[0] for container in ax.containers]
+        assert len(lines) == 2
+        for line, level in zip(lines, [0.0, 0.3], strict=True):
+            assert list(line.get_xdata()) == [3, 5]
+            expected = summary.filter(
+                (pl.col("learning") == learning)
+                & (pl.col("mode") == "asynchronous")
+                & (pl.col("noise") == level)
+            )["nearest_target_fraction"].to_list()
+            assert list(line.get_ydata()) == pytest.approx(expected)
+    [legend] = figure.legends
+    assert legend.get_title().get_text() == "poziom zasłonięcia (asynchroniczny)"
+    assert [text.get_text() for text in legend.get_texts()] == ["0", "0,3"]
+
+    one = plot_load(summary, sizes, levels=[0.3])
+    assert len(one.get_axes()[0].containers) == 1
+    with pytest.raises(ValueError, match="no cells"):
+        plot_load(summary, sizes, levels=[0.5])
+
+
+def test_cli_draws_the_load_and_the_occlusion_recovery(tmp_path):
+    out = tmp_path / "load"
+    assert main(["load", str(OCCLUSION), "--levels", "0,0.3", "--out", str(out)]) == 0
+    assert (tmp_path / "load.pdf").read_bytes()[:5] == b"%PDF-"
+    out = tmp_path / "nearest"
+    arguments = ["recovery", str(OCCLUSION), "--metric", "nearest-target", "--out", str(out)]
+    assert main(arguments) == 0
+    assert (tmp_path / "nearest.png").is_file()
+    assert main(["classes", str(OCCLUSION), "--out", str(tmp_path / "classes")]) == 0

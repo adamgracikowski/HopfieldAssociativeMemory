@@ -11,7 +11,16 @@ from matplotlib.figure import Figure
 from hopfield_analysis import style
 from hopfield_analysis.capacity import load_capacity_summary, plot_capacity
 from hopfield_analysis.datasets import Registry, plot_patterns
-from hopfield_analysis.experiments import load_summary, plot_classes, plot_recovery
+from hopfield_analysis.experiments import (
+    METRICS,
+    damage,
+    dataset_sizes,
+    load_metadata,
+    load_summary,
+    plot_classes,
+    plot_load,
+    plot_recovery,
+)
 from hopfield_analysis.recall import Recall
 from hopfield_analysis.runs import animate, parse_frames, plot_frames, plot_run, select_frames
 from hopfield_analysis.stability import (
@@ -157,11 +166,38 @@ def parser() -> argparse.ArgumentParser:
 
     recovery = commands.add_parser(
         "recovery",
-        help="recovered fraction against the noise level of an experiment",
+        help="recovered fraction against the damage level of an experiment",
     )
     recovery.add_argument("results", type=Path, help="results directory of an experiment")
     recovery.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    recovery.add_argument(
+        "--metric",
+        choices=list(METRICS),
+        default="recovered",
+        help="runs that ended in their target, or whose final state is nearest "
+        "their target (default recovered)",
+    )
     recovery.set_defaults(handler=_recovery)
+
+    load = commands.add_parser(
+        "load",
+        help="recovered fraction against the number of patterns of dataset prefixes",
+    )
+    load.add_argument("results", type=Path, help="results directory of an experiment")
+    load.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    load.add_argument(
+        "--levels", type=levels, help="comma-separated damage levels, e.g. 0,0.2 (default all)"
+    )
+    load.add_argument(
+        "--mode",
+        choices=["synchronous", "asynchronous"],
+        default="synchronous",
+        help="update mode of the drawn cells (default synchronous)",
+    )
+    load.add_argument(
+        "--metric", choices=list(METRICS), default="recovered", help="as in `recovery`"
+    )
+    load.set_defaults(handler=_load)
 
     classes = commands.add_parser(
         "classes", help="fractions of the final state classes of an experiment"
@@ -228,6 +264,14 @@ def parser() -> argparse.ArgumentParser:
     capacity.add_argument("--out", type=Path, required=True, help=OUT_HELP)
     capacity.set_defaults(handler=_capacity)
     return parser
+
+
+def levels(text: str) -> list[float]:
+    """Argument type of a comma-separated list of damage levels."""
+    try:
+        return [float(value) for value in text.split(",")]
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(f"invalid levels `{text}`") from error
 
 
 def names(text: str) -> list[str]:
@@ -309,11 +353,29 @@ def _weights(args: argparse.Namespace) -> int:
 
 
 def _recovery(args: argparse.Namespace) -> int:
-    return _save(plot_recovery(load_summary(args.results)), args.out)
+    kind = damage(load_metadata(args.results))
+    figure = plot_recovery(load_summary(args.results), metric=args.metric, damage=kind)
+    return _save(figure, args.out)
+
+
+def _load(args: argparse.Namespace) -> int:
+    metadata = load_metadata(args.results)
+    figure = plot_load(
+        load_summary(args.results),
+        dataset_sizes(metadata),
+        levels=args.levels,
+        mode=args.mode,
+        metric=args.metric,
+        damage=damage(metadata),
+    )
+    return _save(figure, args.out)
 
 
 def _classes(args: argparse.Namespace) -> int:
-    return _save(plot_classes(load_summary(args.results)), args.out)
+    metadata = load_metadata(args.results)
+    source = metadata["config"]["input"]["source"]
+    kind = "noise" if source == "random" else damage(metadata)
+    return _save(plot_classes(load_summary(args.results), damage=kind), args.out)
 
 
 def _stable(args: argparse.Namespace) -> int:

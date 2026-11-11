@@ -1047,10 +1047,12 @@ fn single_neuron_stability_matches_the_committed_results() {
 fn analysis_fixtures_match_the_current_output() {
     let fixtures = Path::new("../analysis/tests/fixtures");
     let dir = tempfile::tempdir().unwrap();
-    for (command, files) in [
-        ("recall", &["history.npy", "frames.json"][..]),
-        ("train", &["weights.npy"][..]),
+    let tables = &["trials.parquet", "summary.json", "datasets.json"][..];
+    for (fixture, command, files) in [
+        ("recall", "recall", &["history.npy", "frames.json"][..]),
+        ("train", "train", &["weights.npy"][..]),
         (
+            "experiment",
             "experiment",
             &[
                 "trials.parquet",
@@ -1059,21 +1061,26 @@ fn analysis_fixtures_match_the_current_output() {
                 "stability.parquet",
             ][..],
         ),
-        ("capacity", &["capacity.parquet", "summary.json"][..]),
+        ("occlusion", "experiment", tables),
+        (
+            "capacity",
+            "capacity",
+            &["capacity.parquet", "summary.json"][..],
+        ),
     ] {
-        let out = dir.path().join(command);
+        let out = dir.path().join(fixture);
         compute()
             .arg(command)
             .arg("--config")
-            .arg(fixtures.join(format!("{command}.toml")))
+            .arg(fixtures.join(format!("{fixture}.toml")))
             .arg("--out")
             .arg(&out)
             .assert()
             .success();
         for file in files {
             assert!(
-                same_file(&out, &fixtures.join(command), file),
-                "{command}/{file} differs from the fixture; regenerate it"
+                same_file(&out, &fixtures.join(fixture), file),
+                "{fixture}/{file} differs from the fixture; regenerate it"
             );
         }
     }

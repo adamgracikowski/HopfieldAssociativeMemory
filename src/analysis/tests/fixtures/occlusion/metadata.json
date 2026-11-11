@@ -1,0 +1,143 @@
+{
+  "command": "experiment",
+  "created": "2026-11-11T14:30:42Z",
+  "build": {
+    "version": "0.1.0",
+    "commit": "024e2c54f8a093eaef75650d382b14111a060c2a",
+    "dirty": false
+  },
+  "config": {
+    "seed": 1,
+    "datasets": [
+      {
+        "name": "small-7x7",
+        "patterns": 3
+      },
+      "small-7x7"
+    ],
+    "backend": "auto",
+    "trials": 2,
+    "learning": [
+      {
+        "rule": "hebb"
+      },
+      {
+        "rule": "oja",
+        "variant": "subspace",
+        "eta": 0.5,
+        "max_epochs": 100000,
+        "tolerance": 1e-6
+      }
+    ],
+    "dynamics": {
+      "modes": [
+        "synchronous",
+        "asynchronous"
+      ],
+      "zero_field": "keep",
+      "order": "permutation",
+      "max_steps": 1000
+    },
+    "input": {
+      "source": "occlusion",
+      "occlusion": [
+        0.0,
+        0.3
+      ]
+    },
+    "stability_fields": false
+  },
+  "datasets": [
+    {
+      "name": "small-7x7",
+      "prefix": 3,
+      "registry": "../../../../data/datasets/datasets.toml",
+      "file": "small-7x7.csv",
+      "description": "Five simple geometric shapes: a diagonal cross, a frame, a small filled square, a diamond and four squares.",
+      "width": 7,
+      "height": 7,
+      "patterns": 3,
+      "neurons": 49
+    },
+    {
+      "name": "small-7x7",
+      "registry": "../../../../data/datasets/datasets.toml",
+      "file": "small-7x7.csv",
+      "description": "Five simple geometric shapes: a diagonal cross, a frame, a small filled square, a diamond and four squares.",
+      "width": 7,
+      "height": 7,
+      "patterns": 5,
+      "neurons": 49
+    }
+  ],
+  "trainings": [
+    {
+      "dataset": "small-7x7:3",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 49,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 3,
+        "unstable_neurons": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "small-7x7:3",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 49,
+      "epochs": 89,
+      "converged": true,
+      "stability": {
+        "stable": 3,
+        "unstable_neurons": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "hebb",
+      "backend": "dense",
+      "neurons": 49,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 3,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "dataset": "small-7x7",
+      "learning": "oja (subspace)",
+      "backend": "dense",
+      "neurons": 49,
+      "epochs": 261,
+      "converged": true,
+      "stability": {
+        "stable": 5,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  ]
+}
