@@ -225,6 +225,40 @@ fn generate_writes_datasets_and_provenance() {
     assert_eq!(files("groups-d10.json"), json);
 }
 
+/// The committed grouped datasets are what the current code generates from
+/// their configuration; only the `.npy` files are compared, because the
+/// provenance records the build.
+#[test]
+fn generated_datasets_match_the_committed_files() {
+    let source = Path::new("../../data/generated/groups-25x25/config.toml");
+    let datasets = Path::new("../../data/datasets");
+    let registry = std::path::absolute(datasets.join("datasets.toml")).unwrap();
+    let dir = tempfile::tempdir().unwrap();
+    let text = std::fs::read_to_string(source)
+        .unwrap()
+        .replace("file = \"../../datasets/", "file = \"");
+    let config = dir.path().join("config.toml");
+    std::fs::write(
+        &config,
+        format!("registry = '{}'\n{text}", registry.display()),
+    )
+    .unwrap();
+    compute()
+        .arg("generate")
+        .arg("--config")
+        .arg(&config)
+        .assert()
+        .success();
+    for d in ["02", "05", "10", "20"] {
+        let name = format!("groups-25x25-d{d}.npy");
+        assert_eq!(
+            std::fs::read(dir.path().join(&name)).unwrap(),
+            std::fs::read(datasets.join(&name)).unwrap(),
+            "{name} differs from the committed file; regenerate it"
+        );
+    }
+}
+
 #[test]
 fn convert_images_reports_a_missing_image() {
     let dir = tempfile::tempdir().unwrap();

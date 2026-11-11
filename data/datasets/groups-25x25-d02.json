@@ -1,0 +1,21 @@
+{
+  "command": "generate",
+  "build": {
+    "version": "0.1.0",
+    "commit": "024e2c54f8a093eaef75650d382b14111a060c2a",
+    "dirty": false
+  },
+  "config": "../generated/groups-25x25/config.toml",
+  "seed": 20261110,
+  "dataset": "large-25x25",
+  "prototypes": [
+    0,
+    2,
+    4
+  ],
+  "variants": 5,
+  "flip": 0.02,
+  "flips": 13,
+  "width": 25,
+  "height": 25
+}

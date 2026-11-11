@@ -55,6 +55,30 @@ width = 25
 height = 50
 description = "The six pictures of large-25x25 in the top half, the bottom half filled with 1."
 
+[datasets.groups-25x25-d02]
+file = "groups-25x25-d02.npy"
+width = 25
+height = 25
+description = "Three groups of five variants of the large-25x25 pictures 0, 2 and 4, each with 2% of the pixels flipped (generated: data/generated/groups-25x25/config.toml)."
+
+[datasets.groups-25x25-d05]
+file = "groups-25x25-d05.npy"
+width = 25
+height = 25
+description = "Three groups of five variants of the large-25x25 pictures 0, 2 and 4, each with 5% of the pixels flipped (generated: data/generated/groups-25x25/config.toml)."
+
+[datasets.groups-25x25-d10]
+file = "groups-25x25-d10.npy"
+width = 25
+height = 25
+description = "Three groups of five variants of the large-25x25 pictures 0, 2 and 4, each with 10% of the pixels flipped (generated: data/generated/groups-25x25/config.toml)."
+
+[datasets.groups-25x25-d20]
+file = "groups-25x25-d20.npy"
+width = 25
+height = 25
+description = "Three groups of five variants of the large-25x25 pictures 0, 2 and 4, each with 20% of the pixels flipped (generated: data/generated/groups-25x25/config.toml)."
+
 [datasets.cats-300x200-median]
 file = "cats-300x200-median.npy"
 width = 300
