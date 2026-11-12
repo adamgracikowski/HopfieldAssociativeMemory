@@ -5,8 +5,8 @@ use rayon::prelude::*;
 use serde::Serialize;
 
 use super::{
-    Cell, CellSummary, DatasetStatistics, ExperimentConfig, ExperimentInput, ExperimentMetadata,
-    FieldTable, Trial, TrialResult, TrialTable,
+    Attractor, AttractorTable, Cell, CellSummary, DatasetStatistics, ExperimentConfig,
+    ExperimentInput, ExperimentMetadata, FieldTable, Trial, TrialResult, TrialTable,
 };
 use crate::dynamics::Stability;
 use crate::learning::LearningRule;
@@ -24,6 +24,8 @@ pub const SUMMARY_FILE: &str = "summary.json";
 pub const DATASETS_FILE: &str = "datasets.json";
 /// Name of the table of aligned local fields (see [`FieldTable`]).
 pub const FIELDS_FILE: &str = "stability.parquet";
+/// Name of the table of distinct final states (see [`AttractorTable`]).
+pub const ATTRACTORS_FILE: &str = "attractors.parquet";
 
 /// Contents of [`SUMMARY_FILE`].
 #[derive(Serialize)]
@@ -72,6 +74,10 @@ pub struct ExperimentRun {
     pub cells: Vec<Cell>,
     /// Results ordered by cell, then trial, then target.
     pub results: Vec<TrialResult>,
+    /// The distinct final states of every cell, ordered by cell, then
+    /// [rank](Attractor::rank), if the configuration asks for
+    /// `attractors`; otherwise empty.
+    pub attractors: Vec<Attractor>,
 }
 
 impl ExperimentRun {
@@ -114,6 +120,7 @@ impl ExperimentRun {
         let mut trainings = Vec::new();
         let mut fields = Vec::new();
         let mut results = Vec::new();
+        let mut attractors = Vec::new();
         for (d, (info, set)) in loaded.iter().enumerate() {
             for (l, rule) in config.learning.iter().enumerate() {
                 let trained = rule.train(set, config.backend)?;
@@ -147,10 +154,35 @@ impl ExperimentRun {
                 let pair = tasks
                     .par_iter()
                     .map(|(trial, cell)| {
-                        trial.run(&trained.weights, set, &config.dynamics.for_mode(cell.mode))
+                        let dynamics = config.dynamics.for_mode(cell.mode);
+                        if config.attractors {
+                            trial
+                                .run_with_state(&trained.weights, set, &dynamics)
+                                .map(|(result, state)| (result, Some(state)))
+                        } else {
+                            trial
+                                .run(&trained.weights, set, &dynamics)
+                                .map(|result| (result, None))
+                        }
                     })
                     .collect::<Result<Vec<_>>>()?;
-                results.extend(pair);
+                if config.attractors {
+                    let runs: Vec<_> = pair
+                        .into_iter()
+                        .map(|(result, state)| (result, state.expect("states are kept")))
+                        .collect();
+                    for cell in runs.chunk_by(|a, b| a.0.trial.cell == b.0.trial.cell) {
+                        attractors.extend(Attractor::collect(
+                            cell,
+                            set,
+                            &trained.weights,
+                            config.dynamics.zero_field,
+                        ));
+                    }
+                    results.extend(runs.into_iter().map(|(result, _)| result));
+                } else {
+                    results.extend(pair.into_iter().map(|(result, _)| result));
+                }
             }
         }
         Ok(Self {
@@ -161,6 +193,7 @@ impl ExperimentRun {
             fields,
             cells,
             results,
+            attractors,
         })
     }
 
@@ -184,9 +217,10 @@ impl ExperimentRun {
     /// [`CellSummary`] of every cell), [`DATASETS_FILE`]
     /// (`{"datasets": [...]}` with the [`DatasetStatistics`] of every
     /// dataset), [`TRIALS_FILE`] (the [`TrialTable`]) and, if the run kept
-    /// them, [`FIELDS_FILE`] (the [`FieldTable`]); otherwise an old
-    /// [`FIELDS_FILE`] is removed, so a run without fields in a reused
-    /// directory leaves none. All files but the metadata depend only on the
+    /// them, [`FIELDS_FILE`] (the [`FieldTable`]) and [`ATTRACTORS_FILE`]
+    /// (the [`AttractorTable`]); an old file of a table the run did not keep
+    /// is removed, so a reused directory holds only tables of this run. All
+    /// files but the metadata depend only on the
     /// configuration and the code, not on the time or the number of threads.
     pub fn write(&self, config: &ExperimentConfig, out: &OutputDir) -> Result<()> {
         out.write_json(METADATA_FILE, &ExperimentMetadata::new(config, self))?;
@@ -204,9 +238,14 @@ impl ExperimentRun {
         )?;
         out.write_parquet(TRIALS_FILE, TrialTable::new(self).batch())?;
         if config.stability_fields {
-            out.write_parquet(FIELDS_FILE, FieldTable::new(self).batch())
+            out.write_parquet(FIELDS_FILE, FieldTable::new(self).batch())?;
         } else {
-            out.remove(FIELDS_FILE)
+            out.remove(FIELDS_FILE)?;
+        }
+        if config.attractors {
+            out.write_parquet(ATTRACTORS_FILE, AttractorTable::new(self).batch())
+        } else {
+            out.remove(ATTRACTORS_FILE)
         }
     }
 }
@@ -580,6 +619,72 @@ mod tests {
         )
         .unwrap_err();
         assert!(error.to_string().contains("which has 5"), "{error}");
+    }
+
+    /// [`CONFIG`] with random initial states, 30 trials and attractors.
+    fn random_attractors() -> String {
+        CONFIG
+            .replace(
+                "source = \"pattern\"
+        noise = [0.0, 0.2]",
+                "source = \"random\"",
+            )
+            .replace(
+                "trials = 3",
+                "trials = 30
+        attractors = true",
+            )
+    }
+
+    /// The attractors are the same with one and with four threads, and a
+    /// `recall` run with the seed, rule and mode of an attractor's first run
+    /// ends in its state (or, for a cycle, in one of its two states).
+    #[test]
+    fn recall_repeats_the_first_run_of_an_attractor() {
+        let text = random_attractors();
+        let in_pool = |threads: usize| {
+            rayon::ThreadPoolBuilder::new()
+                .num_threads(threads)
+                .build()
+                .unwrap()
+                .install(|| execute(&text))
+        };
+        let run = in_pool(1);
+        assert_eq!(run, in_pool(4));
+        assert!(run.attractors.len() >= 8);
+        for attractor in &run.attractors {
+            let cell = run.cells[attractor.cell];
+            let text = format!(
+                "dataset = \"small-7x7\"
+seed = {}
+[learning]
+rule = \"{}\"
+                 [dynamics]
+mode = \"{}\"
+[input]
+source = \"random\"
+",
+                attractor.first.seed,
+                ["hebb", "oja"][cell.learning],
+                cell.mode,
+            );
+            let config = RunConfig::parse(
+                &text,
+                Path::new("../../data/experiments/00-example/recall.toml"),
+            )
+            .unwrap();
+            let recall = RecallRun::execute(&config).unwrap();
+            assert_eq!(recall.outcome.termination, attractor.termination);
+            let state = recall.outcome.state.values();
+            let expected = attractor.state.values();
+            if attractor.termination == Termination::TwoCycle {
+                let frames = recall.history.states();
+                let previous = frames.row(frames.nrows() - 2);
+                assert!(state == expected || previous == expected);
+            } else {
+                assert_eq!(state, expected);
+            }
+        }
     }
 
     /// Random initial states give one run per trial, without a target.

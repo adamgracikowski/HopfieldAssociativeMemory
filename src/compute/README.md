@@ -160,6 +160,7 @@ datasets = ["small-7x7", { name = "animals-14x9", patterns = 3 }]  # grid axis; 
 backend = "auto"          # as in a run configuration
 trials = 100              # trials per cell
 stability_fields = false  # optional: write stability.parquet
+attractors = false        # optional: write attractors.parquet
 
 [[learning]]              # grid axis, one table per rule, parameters as above
 rule = "hebb"
@@ -190,9 +191,10 @@ The final state is classified by exact equality: `pattern` (a fixed point equal 
 - `summary.json`: `{"cells": [...]}` with, for every cell, the number of runs, whether it is `deterministic`, the fraction of every class, of recovered runs and of runs whose final state is nearest their target (`nearest_target`: the target has `m > 0` and the largest `|m|` of all stored patterns, ties included, in any final class, so it also counts runs that end near an unstable target) with a 95% Wilson interval (`count`, `fraction`, `lower`, `upper`; both ends equal the fraction in a deterministic cell), and the mean and sample standard deviation of steps, final energy, final overlap and final Hamming distance to the target (`final_distance`),
 - `datasets.json`: `{"datasets": [...]}` with, for every dataset, its size, the load `p/N`, the fraction of `1` in every pattern (`fraction_on`), the overlap matrix `m^{mu nu}` (`overlaps`), for every pattern the sum of `|m^{mu nu}|` over the other patterns (`overlap_sums`; with Hebbian weights a pattern whose sum is below `1 - p/N` is stable) and the largest `|m^{mu nu}|` of two different patterns with the pair,
 - `stability.parquet` (only with `stability_fields = true`): the aligned local field `xi_i^mu h_i` (`h = W xi^mu`) of every neuron of every stored pattern, one row per training, pattern and neuron, with the columns `dataset`, `learning`, `pattern`, `neuron` (row-major pixel index) and `field`; a negative field means the neuron would change, a zero one is decided by `zero_field`. It has `p N` rows per rule, so it is off by default,
+- `attractors.parquet` (only with `attractors = true`): the distinct final states of every cell, one row per cell and state, ordered by cell and then by `count` (ties by the first run), with the columns `dataset`, `learning`, `mode`, `noise`, `rank`, `count` (runs that ended in the state), `fraction` (of the runs of the cell), `class`, `termination`, `energy` (computed from the weights), `nearest`, `nearest_overlap`, `overlaps` (list, overlap with every stored pattern), the closest mixture of stored patterns, `target`, `trial` and `seed` of the first run that ended in the state (for `recall`) and `state` (list of `1`/`-1`, row-major). A cycle of length 2 is one row, represented by the lexicographically smaller of its two states. The mixture of size `k` (3, 5 or 7, at most `p`) is `sgn(sum e_mu xi^mu)` over the `k` patterns with the largest `|m|`, with the signs `e_mu` of their overlaps: `mixture_size`, `mixture_distance` (Hamming distance to the state), `mixture_patterns` and `mixture_signs` describe the closest one (the smaller on ties), and `mixture` is its size when the state equals it (null otherwise, and all mixture columns are null for `p < 3`). For strongly correlated patterns the check may miss a mixture of patterns with smaller overlaps, so the distance is an upper bound,
 - `metadata.json`: command, time, build, the configuration with all defaults, the datasets and every training (backend, epochs, convergence, unstable neurons of every pattern).
 
-Running the experiment again gives identical `trials.parquet`, `summary.json`, `datasets.json` and `stability.parquet`; `metadata.json` differs only in `created`.
+Running the experiment again gives identical `trials.parquet`, `summary.json`, `datasets.json`, `stability.parquet` and `attractors.parquet`; `metadata.json` differs only in `created`.
 
 ### `capacity`
 
