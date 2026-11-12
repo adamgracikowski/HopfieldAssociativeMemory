@@ -33,4 +33,10 @@ Artifacts written by the compute layer, so the tests check the real file formats
   cargo run --release -- capacity --config ../analysis/tests/fixtures/capacity.toml --out ../analysis/tests/fixtures/capacity --force
   ```
 
-The tests check the shapes and statistics of the fixtures, not the time or the build in `metadata.json`. A test of `src/compute` (`tests/cli.rs`) runs every configuration and compares the data files with these fixtures, so a change of the output format fails there until the fixtures are regenerated.
+- `benchmark/`: `compute benchmark` with `benchmark.toml` (`small-7x7` and random sets of 3 patterns for `N` = 64 and 128, dense weights up to `N` = 64 and factored weights, both learning rules, 2 repeats). Regenerate from `src/compute`:
+
+  ```bash
+  cargo run --release -- benchmark --config ../analysis/tests/fixtures/benchmark.toml --out ../analysis/tests/fixtures/benchmark --force
+  ```
+
+The tests check the shapes and statistics of the fixtures, not the time or the build in `metadata.json`. A test of `src/compute` (`tests/cli.rs`) runs every configuration except `benchmark.toml` and compares the data files with these fixtures, so a change of the output format fails there until the fixtures are regenerated; the measured times of `benchmark/` change from run to run, so its tests check only the structure.

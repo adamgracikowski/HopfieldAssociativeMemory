@@ -18,6 +18,7 @@ from hopfield_analysis.attractors import (
     plot_energies,
     plot_outcomes,
 )
+from hopfield_analysis.benchmark import load_benchmark, plot_benchmark
 from hopfield_analysis.capacity import load_capacity_summary, plot_capacity
 from hopfield_analysis.datasets import Registry, plot_patterns
 from hopfield_analysis.experiments import (
@@ -274,6 +275,13 @@ def parser() -> argparse.ArgumentParser:
     capacity.add_argument("--out", type=Path, required=True, help=OUT_HELP)
     capacity.set_defaults(handler=_capacity)
 
+    benchmark = commands.add_parser(
+        "benchmark", help="time and memory of training and recall against the number of neurons"
+    )
+    benchmark.add_argument("results", type=Path, help="results directory of `compute benchmark`")
+    benchmark.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    benchmark.set_defaults(handler=_benchmark)
+
     random_results = "results directory of an experiment with random inputs"
     with_attractors = "results directory of an experiment with `attractors = true`"
     mode_help = "update mode of the drawn cells (default asynchronous)"
@@ -472,6 +480,10 @@ def _overlaps(args: argparse.Namespace) -> int:
 
 def _capacity(args: argparse.Namespace) -> int:
     return _save(plot_capacity(load_capacity_summary(args.results)), args.out)
+
+
+def _benchmark(args: argparse.Namespace) -> int:
+    return _save(plot_benchmark(load_benchmark(args.results)), args.out)
 
 
 def _outcomes(args: argparse.Namespace) -> int:

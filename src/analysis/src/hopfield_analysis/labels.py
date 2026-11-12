@@ -42,6 +42,18 @@ PATTERN_INDEX = "wzorzec $\\mu$"
 RUN_COUNT = "liczba przebiegów"
 SPURIOUS_COUNT = "liczba różnych\nstanów pozornych"
 SPURIOUS_FRACTION = "odsetek przebiegów\nw stanie pozornym"
+TRAIN_TIME = "czas uczenia [s]"
+FIELDS_TIME = "czas pól $h = W x$ [s]"
+SWEEP_TIME = "czas sweepu\nasynchronicznego [s]"
+MEMORY = "pamięć [MiB]"
+NEURONS = "liczba neuronów $N$"
+DENSE_SIZE = "macierz $N \\times N$ ($8 N^2$ B)"
+TRAIN_PEAK = "szczyt sterty przy uczeniu"
+
+BACKENDS = {
+    "dense": "macierz pełna",
+    "factored": "postać czynnikowa",
+}
 
 MODES = {
     "synchronous": "synchroniczny",
@@ -71,6 +83,11 @@ def mode(name: str) -> str:
 def rule(name: str) -> str:
     """Polish name of a learning rule, e.g. ``Oja (podprzestrzeń)``."""
     return RULES.get(name, name)
+
+
+def backend(name: str) -> str:
+    """Polish name of a weight storage backend, e.g. ``postać czynnikowa``."""
+    return BACKENDS.get(name, name)
 
 
 def final_class(name: str) -> str:
