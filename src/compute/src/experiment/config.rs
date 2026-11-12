@@ -69,7 +69,8 @@ pub struct ExperimentConfig {
     pub stability_fields: bool,
     /// Whether to write the distinct final states of every cell
     /// (`attractors.parquet`); off by default, because the table holds a
-    /// state of `N` pixels for every distinct final state.
+    /// state of `N` pixels for every distinct final state and the run keeps
+    /// the `N`-pixel final states of all trials of one cell in memory.
     #[serde(default)]
     pub attractors: bool,
     #[serde(skip)]

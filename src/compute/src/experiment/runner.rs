@@ -85,6 +85,10 @@ impl ExperimentRun {
     /// numbers of flipped pixels and, for every (dataset, rule) pair in turn,
     /// trains the network, checks pattern stability, passes the training to
     /// `on_training` and runs the trials of the pair's cells in parallel.
+    /// With `attractors` the cells run one after another, each with its
+    /// trials in parallel, and the final states of a cell are grouped into
+    /// attractors as soon as it ends, so only one cell's states are held in
+    /// memory.
     ///
     /// Every trial draws only from its own [`Seed`], derived from the
     /// experiment seed, the dataset name in the registry (the same for all
@@ -151,37 +155,32 @@ impl ExperimentRun {
                             .map(|trial| (trial, *cell))
                     })
                     .collect();
-                let pair = tasks
-                    .par_iter()
-                    .map(|(trial, cell)| {
-                        let dynamics = config.dynamics.for_mode(cell.mode);
-                        if config.attractors {
-                            trial
-                                .run_with_state(&trained.weights, set, &dynamics)
-                                .map(|(result, state)| (result, Some(state)))
-                        } else {
-                            trial
-                                .run(&trained.weights, set, &dynamics)
-                                .map(|result| (result, None))
-                        }
-                    })
-                    .collect::<Result<Vec<_>>>()?;
                 if config.attractors {
-                    let runs: Vec<_> = pair
-                        .into_iter()
-                        .map(|(result, state)| (result, state.expect("states are kept")))
-                        .collect();
-                    for cell in runs.chunk_by(|a, b| a.0.trial.cell == b.0.trial.cell) {
+                    for cell in tasks.chunk_by(|a, b| a.0.cell == b.0.cell) {
+                        let runs = cell
+                            .par_iter()
+                            .map(|(trial, cell)| {
+                                let dynamics = config.dynamics.for_mode(cell.mode);
+                                trial.run_with_state(&trained.weights, set, &dynamics)
+                            })
+                            .collect::<Result<Vec<_>>>()?;
                         attractors.extend(Attractor::collect(
-                            cell,
+                            &runs,
                             set,
                             &trained.weights,
                             config.dynamics.zero_field,
                         ));
+                        results.extend(runs.into_iter().map(|(result, _)| result));
                     }
-                    results.extend(runs.into_iter().map(|(result, _)| result));
                 } else {
-                    results.extend(pair.into_iter().map(|(result, _)| result));
+                    let pair = tasks
+                        .par_iter()
+                        .map(|(trial, cell)| {
+                            let dynamics = config.dynamics.for_mode(cell.mode);
+                            trial.run(&trained.weights, set, &dynamics)
+                        })
+                        .collect::<Result<Vec<_>>>()?;
+                    results.extend(pair);
                 }
             }
         }

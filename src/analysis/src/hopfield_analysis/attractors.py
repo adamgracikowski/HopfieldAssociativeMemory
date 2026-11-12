@@ -416,9 +416,9 @@ def plot_energies(
     One row of panels per dataset and one column per learning rule; in every
     panel one step histogram per group of :data:`ENERGY_GROUPS` that occurs,
     over the same bins, so the energies of stored patterns and of spurious
-    states can be compared. At most five ticks on the energy axis, so long
-    labels of a narrow range do not overlap. A pattern and its negation have the same energy,
-    so they form one group.
+    states can be compared. A pattern and its negation have the same energy,
+    so they form one group. At most five ticks on the energy axis, so long
+    labels of a narrow range do not overlap.
 
     Args:
         trials: Trial table from :func:`hopfield_analysis.experiments.load_trials`.

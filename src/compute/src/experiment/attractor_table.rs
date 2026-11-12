@@ -182,7 +182,7 @@ fn to_u32(value: usize) -> u32 {
 mod tests {
     use super::*;
     use crate::experiment::{ExperimentConfig, FinalClass};
-    use arrow_array::{Array, Int8Array};
+    use arrow_array::{Array, Float64Array, Int8Array, UInt32Array};
     use arrow_schema::DataType;
     use std::path::Path;
 
@@ -256,6 +256,47 @@ mod tests {
             .filter(|a| a.mixture.as_ref().is_some_and(|m| m.is_exact()))
             .count();
         assert_eq!(mixture.len() - mixture.null_count(), exact);
+    }
+
+    /// Damaged copies of the `p = 5` patterns with 4 trials per target give
+    /// `4 * 5 = 20` runs per cell, except `5` in the synchronous cell
+    /// without noise, which runs one trial per target. The first run of
+    /// every row is a run of its cell with a target, and the table has the
+    /// noise level of the cell and that target in every row.
+    #[test]
+    fn keeps_the_noise_level_and_target_of_damaged_inputs() {
+        let run = run(&CONFIG.replace("trials = 40", "trials = 4").replace(
+            "source = \"random\"\n",
+            "source = \"pattern\"\nnoise = [0.0, 0.2]\n",
+        ));
+        assert_eq!(run.cells.len(), 2 * 2 * 2);
+        for (cell, summary) in run.summaries().iter().enumerate() {
+            let runs = if run.cells[cell].is_deterministic(0) && summary.noise == Some(0.0) {
+                5
+            } else {
+                20
+            };
+            assert_eq!(summary.runs, runs);
+            let rows: Vec<&Attractor> = run.attractors.iter().filter(|a| a.cell == cell).collect();
+            assert_eq!(rows.iter().map(|a| a.count).sum::<usize>(), runs);
+            for a in rows {
+                assert!(a.first.target.is_some());
+                assert_eq!(a.first.cell, cell);
+                assert!(run.results.iter().any(|r| r.trial == a.first));
+            }
+        }
+
+        let batch = AttractorTable::new(&run).batch().clone();
+        let column = |name: &str| batch.column_by_name(name).unwrap().clone();
+        let noise = column("noise");
+        let noise = noise.as_any().downcast_ref::<Float64Array>().unwrap();
+        let target = column("target");
+        let target = target.as_any().downcast_ref::<UInt32Array>().unwrap();
+        assert_eq!((noise.null_count(), target.null_count()), (0, 0));
+        for (row, a) in run.attractors.iter().enumerate() {
+            assert_eq!(Some(noise.value(row)), run.cells[a.cell].noise);
+            assert_eq!(Some(target.value(row) as usize), a.first.target);
+        }
     }
 
     /// Without the option the run keeps no attractors and the table is

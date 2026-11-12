@@ -71,17 +71,21 @@ impl Attractor {
         zero_field: ZeroField,
     ) -> Vec<Self> {
         assert!(!runs.is_empty(), "a cell has at least one run");
-        let mut groups: BTreeMap<(&'static str, Vec<i8>), (usize, usize, Pattern)> =
-            BTreeMap::new();
+        let mut groups: BTreeMap<(&'static str, Vec<i8>), (usize, usize)> = BTreeMap::new();
         for (index, (result, state)) in runs.iter().enumerate() {
             let state = Self::canonical(state, result.termination, weights, zero_field);
             let key = (result.termination.into(), state.values().to_vec());
             groups
                 .entry(key)
-                .and_modify(|(count, _, _)| *count += 1)
-                .or_insert((1, index, state));
+                .and_modify(|(count, _)| *count += 1)
+                .or_insert((1, index));
         }
-        let mut groups: Vec<(usize, usize, Pattern)> = groups.into_values().collect();
+        let mut groups: Vec<(usize, usize, Pattern)> = groups
+            .into_iter()
+            .map(|((_, values), (count, first))| {
+                (count, first, Pattern::new_unchecked(Array1::from(values)))
+            })
+            .collect();
         groups.sort_by_key(|&(count, first, _)| (std::cmp::Reverse(count), first));
         groups
             .into_iter()
