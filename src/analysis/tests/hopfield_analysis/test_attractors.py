@@ -12,6 +12,7 @@ from hopfield_analysis.attractors import (
     plot_distinct,
     plot_energies,
     plot_outcomes,
+    share,
     spurious_counts,
 )
 from hopfield_analysis.cli import main
@@ -71,6 +72,12 @@ def test_describe_names_patterns_mixtures_and_classes():
     assert describe({**row, "class": "spurious", "mixture": 3}) == "mieszanina 3"
     assert describe({**row, "class": "spurious"}) == "stan pozorny"
     assert describe({**row, "class": "cycle"}) == "cykl"
+
+
+def test_share_marks_fractions_below_the_last_decimal():
+    assert share(0.4804) == "0,480"
+    assert share(0.0005) == "0,001"
+    assert share(0.0001) == "< 0,001"
 
 
 def test_accessibility_has_a_row_per_pattern_of_every_cell(attractors):
@@ -149,6 +156,8 @@ def test_plot_energies_draws_a_histogram_per_class_group():
     figure = plot_energies(load_trials(RANDOM), ["small-7x7"])
     axes = figure.get_axes()
     assert len(axes) == 2
+    for ax in axes:
+        assert len(ax.get_xticks()) <= 5 + 2
     [legend] = figure.legends
     names = [text.get_text() for text in legend.get_texts()]
     assert names[0] == "wzorzec lub negacja"

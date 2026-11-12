@@ -176,6 +176,21 @@ def plot_outcomes(summary: pl.DataFrame) -> Figure:
     return figure
 
 
+def share(fraction: float) -> str:
+    """Formats the fraction of runs that ended in a state, with three decimals.
+
+    Args:
+        fraction: Fraction of runs, positive.
+
+    Returns:
+        The text, e.g. ``0,480``, or ``< 0,001`` for a fraction that would
+        round to ``0,000``.
+    """
+    if round(fraction, 3) == 0:
+        return f"< {labels.number(0.001, 3)}"
+    return labels.number(fraction, 3)
+
+
 def plot_attractors(
     attractors: pl.DataFrame, shape: tuple[int, int], dataset: str, top: int = 6
 ) -> Figure:
@@ -183,8 +198,8 @@ def plot_attractors(
 
     One row per learning rule and update mode with its ``top`` most frequent
     final states, from the left by rank; every panel is titled with the
-    fraction of runs that ended in the state and its description (see
-    :func:`describe`).
+    fraction of runs that ended in the state (see :func:`share`) and its
+    description (see :func:`describe`).
 
     Args:
         attractors: Table from :func:`load_attractors`.
@@ -218,7 +233,7 @@ def plot_attractors(
                     f"a state of `{dataset}` has {state.size} pixels, not {height * width}"
                 )
             draw_bitmap(ax, state.reshape(height, width))
-            ax.set_title(f"{labels.number(row['fraction'], 3)}\n{describe(row)}", fontsize=7)
+            ax.set_title(f"{share(row['fraction'])}\n{describe(row)}", fontsize=7)
         axes[line, 0].set_ylabel(f"{labels.rule(learning)}\n{labels.mode(mode)}", fontsize=7)
     return figure
 
@@ -401,7 +416,8 @@ def plot_energies(
     One row of panels per dataset and one column per learning rule; in every
     panel one step histogram per group of :data:`ENERGY_GROUPS` that occurs,
     over the same bins, so the energies of stored patterns and of spurious
-    states can be compared. A pattern and its negation have the same energy,
+    states can be compared. At most five ticks on the energy axis, so long
+    labels of a narrow range do not overlap. A pattern and its negation have the same energy,
     so they form one group.
 
     Args:
@@ -434,6 +450,7 @@ def plot_energies(
                 if values.size:
                     counts, _ = np.histogram(values, bins=bins)
                     ax.stairs(counts, bins, color=color, label=group)
+            ax.xaxis.set_major_locator(MaxNLocator(nbins=5))
             if row == 0:
                 ax.set_title(labels.rule(learning))
         axes[row, 0].set_ylabel(f"{dataset}\n{labels.RUN_COUNT}")

@@ -5,6 +5,8 @@
 #
 # Run from src/compute:
 #   cargo run --release -- experiment --config ../../data/experiments/10-random-load/config.toml
+# Report figure, from src/analysis:
+#   uv run hopfield-analysis distinct ../../data/experiments/10-random-load/results --out ../../data/experiments/10-random-load/figures/distinct
 
 seed = 20261112
 datasets = [
