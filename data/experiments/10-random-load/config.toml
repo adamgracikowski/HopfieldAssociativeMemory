@@ -1,0 +1,36 @@
+# Reaction to random inputs against the number of stored patterns at a fixed
+# N: prefixes of large-25x25.plus (N = 625) and letters-14x20 (N = 280),
+# 10000 random initial states, the same ones in every prefix (seeds use the
+# registry name), with the distinct final states in attractors.parquet.
+#
+# Run from src/compute:
+#   cargo run --release -- experiment --config ../../data/experiments/10-random-load/config.toml
+
+seed = 20261112
+datasets = [
+    { name = "large-25x25.plus", patterns = 3 },
+    { name = "large-25x25.plus", patterns = 6 },
+    { name = "large-25x25.plus", patterns = 9 },
+    { name = "large-25x25.plus", patterns = 12 },
+    "large-25x25.plus",
+    { name = "letters-14x20", patterns = 2 },
+    { name = "letters-14x20", patterns = 5 },
+    { name = "letters-14x20", patterns = 10 },
+    { name = "letters-14x20", patterns = 15 },
+    { name = "letters-14x20", patterns = 20 },
+    "letters-14x20",
+]
+trials = 10000
+attractors = true
+
+[[learning]]
+rule = "hebb"
+
+[[learning]]
+rule = "oja"
+
+[dynamics]
+modes = ["synchronous", "asynchronous"]
+
+[input]
+source = "random"
