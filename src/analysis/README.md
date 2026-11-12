@@ -74,6 +74,22 @@ uv run hopfield-analysis overlaps <results> --out <out> [--datasets a,b]
 - `unstable`: the stored patterns of one dataset with the neurons that one update would change in red and their number below each pattern, for the rule named as in the results (`hebb`, `oja (subspace)`, `oja (single-neuron)`); a neuron is unstable when its aligned field is negative, or zero at a `-1` neuron with `zero_field = "plus-one"`. The patterns come from the registry, as for `patterns`.
 - `overlaps`: the overlap matrices $m^{\mu\nu}$ from `datasets.json` as heat maps on the scale $[-1, 1]$, with the values written into matrices of at most eight patterns.
 
+Random inputs (`source = "random"`; `attractors`, `accessibility` and `distinct` need `attractors = true`, which writes `attractors.parquet`):
+
+```bash
+uv run hopfield-analysis outcomes <results> --out <out>
+uv run hopfield-analysis attractors <results> --dataset <label> --out <out> [--top 6]
+uv run hopfield-analysis accessibility <results> --out <out> [--datasets a,b] [--mode asynchronous]
+uv run hopfield-analysis distinct <results> --out <out>
+uv run hopfield-analysis energies <results> --out <out> [--datasets a,b] [--mode asynchronous]
+```
+
+- `outcomes`: the fractions of the final state classes as stacked bars, one bar per dataset, one row of panels per update mode and one column per learning rule.
+- `attractors`: the `--top` most frequent final states of one dataset (label as in the results, e.g. `large-25x25` or `letters-14x20:5`) as bitmaps, one row per learning rule and update mode, each titled with the fraction of runs and a description: `wzorzec 2` or `negacja 2` for a stored pattern or its negation, `mieszanina 3` for a spurious state equal to a mixture of three patterns, otherwise the class.
+- `accessibility`: the fraction of runs that ended in every stored pattern and in its negation, two bars per pattern, one row of panels per dataset and one column per learning rule, for one update mode.
+- `distinct`: for the prefixes of a dataset, the number of distinct spurious fixed points reached (symmetric logarithmic axis) and the fraction of runs that ended in one (with the 95% Wilson intervals) against the number of patterns `p`, one line per learning rule and update mode.
+- `energies`: histograms of the final energy from `trials.parquet`, one per group of classes (a pattern or its negation, which have the same energy; spurious state; cycle; step limit), one row of panels per dataset and one column per learning rule, for one update mode.
+
 A capacity run (the results directory of `compute capacity`):
 
 ```bash
@@ -84,7 +100,7 @@ uv run hopfield-analysis capacity <results> --out <out>
 
 A missing or invalid input ends with a one-line error message and exit code 1.
 
-The module `hopfield_analysis.experiments` reads the results of an experiment: `load_trials` (`trials.parquet` as a polars DataFrame, one row per run), `load_summary` (the cells of `summary.json` as a flat DataFrame, nested fields joined with `_`, e.g. `recovered_fraction` or `nearest_target_fraction`) and `load_metadata`, with `damage` (the kind of damage of the inputs, from the metadata) and `dataset_sizes` (label, registry name and `p` of every dataset). `hopfield_analysis.stability` reads `stability.parquet` (`load_fields`), `datasets.json` (`load_datasets`) and the stability of every training from `metadata.json` (`load_stability`); `hopfield_analysis.capacity` reads `capacity.parquet` (`load_capacity`) and `summary.json` of a capacity run (`load_capacity_summary`). `hopfield_analysis.recall.Recall.load` reads a recall run, `hopfield_analysis.datasets.Registry` the dataset registry and `hopfield_analysis.weights.load_weights` the weights of a train run.
+The module `hopfield_analysis.experiments` reads the results of an experiment: `load_trials` (`trials.parquet` as a polars DataFrame, one row per run), `load_summary` (the cells of `summary.json` as a flat DataFrame, nested fields joined with `_`, e.g. `recovered_fraction` or `nearest_target_fraction`) and `load_metadata`, with `damage` (the kind of damage of the inputs, from the metadata) and `dataset_sizes` (label, registry name and `p` of every dataset). `hopfield_analysis.stability` reads `stability.parquet` (`load_fields`), `datasets.json` (`load_datasets`) and the stability of every training from `metadata.json` (`load_stability`); `hopfield_analysis.attractors` reads `attractors.parquet` (`load_attractors`, one row per cell and distinct final state) with `bitmap_shapes` (bitmap size of every dataset, from the metadata), `accessibility` (fraction of runs that ended in every pattern and negation) and `spurious_counts` (distinct spurious fixed points of every cell); `hopfield_analysis.capacity` reads `capacity.parquet` (`load_capacity`) and `summary.json` of a capacity run (`load_capacity_summary`). `hopfield_analysis.recall.Recall.load` reads a recall run, `hopfield_analysis.datasets.Registry` the dataset registry and `hopfield_analysis.weights.load_weights` the weights of a train run.
 
 ## Checks
 

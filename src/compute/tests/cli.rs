@@ -1118,6 +1118,16 @@ fn analysis_fixtures_match_the_current_output() {
         ),
         ("occlusion", "experiment", tables),
         (
+            "random",
+            "experiment",
+            &[
+                "trials.parquet",
+                "summary.json",
+                "datasets.json",
+                "attractors.parquet",
+            ][..],
+        ),
+        (
             "capacity",
             "capacity",
             &["capacity.parquet", "summary.json"][..],
