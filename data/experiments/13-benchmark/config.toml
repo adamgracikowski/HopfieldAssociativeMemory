@@ -5,6 +5,8 @@
 #
 # Run from src/compute:
 #   cargo run --release -- benchmark --config ../../data/experiments/13-benchmark/config.toml
+# Report figure, from src/analysis:
+#   uv run hopfield-analysis benchmark ../../data/experiments/13-benchmark/results --out ../../data/experiments/13-benchmark/figures/benchmark
 
 seed = 20261113
 datasets = ["cats-300x200-median", "cats-300x200-dither"]

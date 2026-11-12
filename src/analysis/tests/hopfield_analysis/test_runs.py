@@ -1,3 +1,5 @@
+import dataclasses
+
 import pytest
 from PIL import Image, ImageSequence
 
@@ -32,6 +34,12 @@ def test_plot_frames_shows_a_captioned_panel_per_frame(recall):
     assert [ax.get_title() for ax in visible] == ["klatka 0", "klatka 4", "klatka 9"]
     assert visible[-1].get_xlabel() == "$E$ = −66,67"
     assert len(figure.axes) == 4
+
+
+def test_plot_frames_rounds_large_energies(recall):
+    large = dataclasses.replace(recall, energy=recall.energy * 1000)
+    figure = plot_frames(large, [9])
+    assert figure.axes[0].get_xlabel() == "$E$ = −66667"
 
 
 def test_plot_run_highlights_the_target(recall):

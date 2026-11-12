@@ -5,6 +5,11 @@
 #
 # Run from src/compute:
 #   cargo run --release -- experiment --config ../../data/experiments/13-noise/config.toml
+# Report figures, from src/analysis:
+#   uv run hopfield-analysis patterns cats-300x200-median --columns 4 --out ../../data/experiments/13-noise/figures/patterns-median
+#   uv run hopfield-analysis unstable ../../data/experiments/13-noise/results --dataset cats-300x200-median --learning hebb --columns 4 --out ../../data/experiments/13-noise/figures/unstable-median-hebb
+#   uv run hopfield-analysis fields ../../data/experiments/13-noise/results --log --out ../../data/experiments/13-noise/figures/fields
+#   uv run hopfield-analysis recovery ../../data/experiments/13-noise/results --out ../../data/experiments/13-noise/figures/recovery
 
 seed = 20261113
 datasets = ["cats-300x200-median", "cats-300x200-dither"]
