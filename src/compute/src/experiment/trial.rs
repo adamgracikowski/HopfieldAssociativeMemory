@@ -2,6 +2,7 @@
 
 use super::{Damage, FinalClass};
 use crate::dynamics::{Dynamics, NoHistory, Termination};
+use crate::patterns::Pattern;
 use crate::run::{Input, Nearest};
 use crate::seed::Seed;
 use crate::weights::Weights;
@@ -97,6 +98,17 @@ impl Trial {
         set: &PatternSet,
         dynamics: &Dynamics,
     ) -> Result<TrialResult> {
+        self.run_with_state(weights, set, dynamics)
+            .map(|(result, _)| result)
+    }
+
+    /// Like [`run`](Self::run), but also returns the final state.
+    pub fn run_with_state(
+        &self,
+        weights: &Weights,
+        set: &PatternSet,
+        dynamics: &Dynamics,
+    ) -> Result<(TrialResult, Pattern)> {
         let initial = self.input().initial(set, &mut self.seed.input_rng())?;
         let outcome = dynamics.run(
             weights,
@@ -106,7 +118,7 @@ impl Trial {
         )?;
         let target = self.target.map(|mu| set.pattern(mu));
         let overlaps: Vec<f64> = set.iter().map(|xi| outcome.state.overlap(&xi)).collect();
-        Ok(TrialResult {
+        let result = TrialResult {
             trial: *self,
             steps: outcome.steps,
             changes: outcome.changes,
@@ -119,7 +131,8 @@ impl Trial {
             final_distance: target.map(|xi| outcome.state.hamming(&xi)),
             final_overlap: self.target.map(|mu| overlaps[mu]),
             nearest: Nearest::of(&overlaps),
-        })
+        };
+        Ok((result, outcome.state))
     }
 }
 

@@ -1,0 +1,23 @@
+# Recall from a random input: run 2 of letters-abc-8x12 in 10-random (seed
+# from attractors.parquet), trained with Oja's subspace rule, asynchronous
+# updates with a frame every 8 of the 96 updates of a sweep. The same seed
+# gives the same input for both rules. The state ends in the letter a
+# (pattern 0).
+#
+# Run from src/compute:
+#   cargo run --release -- recall --config ../../data/experiments/10-random/recall-random-oja.toml --out ../../data/experiments/10-random/runs/recall-random-oja
+# Report figure, from src/analysis:
+#   uv run hopfield-analysis frames ../../data/experiments/10-random/runs/recall-random-oja --out ../../data/experiments/10-random/figures/recall-random-oja
+
+dataset = "letters-abc-8x12"
+seed = 191849100212383786
+
+[learning]
+rule = "oja"
+
+[dynamics]
+mode = "asynchronous"
+record_every = 8
+
+[input]
+source = "random"

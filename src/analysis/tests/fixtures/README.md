@@ -22,6 +22,11 @@ Artifacts written by the compute layer, so the tests check the real file formats
   ```bash
   cargo run --release -- experiment --config ../analysis/tests/fixtures/occlusion.toml --out ../analysis/tests/fixtures/occlusion --force
   ```
+- `random/`: `compute experiment` with `random.toml` (50 random initial states for the first 3 patterns of `small-7x7` and for the whole set, both learning rules and update modes, with `attractors.parquet`). Regenerate from `src/compute`:
+
+  ```bash
+  cargo run --release -- experiment --config ../analysis/tests/fixtures/random.toml --out ../analysis/tests/fixtures/random --force
+  ```
 - `capacity/`: `compute capacity` with `capacity.toml` (prefixes of `small-7x7` and 5 random sets of 49 neurons for every `p` from 2 to 20 in steps of 2, both learning rules). Regenerate from `src/compute`:
 
   ```bash

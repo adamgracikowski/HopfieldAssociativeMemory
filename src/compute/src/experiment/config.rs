@@ -21,6 +21,7 @@ use crate::{Error, Result};
 /// backend = "auto"         # optional, `auto` by default
 /// trials = 100
 /// stability_fields = false # optional, writes stability.parquet when true
+/// attractors = false       # optional, writes attractors.parquet when true
 ///
 /// [[learning]]
 /// rule = "hebb"
@@ -66,6 +67,12 @@ pub struct ExperimentConfig {
     /// table has `p N` rows per learning rule.
     #[serde(default)]
     pub stability_fields: bool,
+    /// Whether to write the distinct final states of every cell
+    /// (`attractors.parquet`); off by default, because the table holds a
+    /// state of `N` pixels for every distinct final state and the run keeps
+    /// the `N`-pixel final states of all trials of one cell in memory.
+    #[serde(default)]
+    pub attractors: bool,
     #[serde(skip)]
     path: PathBuf,
 }

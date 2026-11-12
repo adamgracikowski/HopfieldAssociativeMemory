@@ -801,6 +801,60 @@ fn experiment_writes_stability_fields_on_request() {
     );
 }
 
+/// With `attractors` a random-input experiment writes one row per distinct
+/// final state of every cell, whose counts add up to the runs of the cell
+/// in `summary.json`; a run without the option removes the old table.
+#[test]
+fn experiment_writes_attractors_on_request() {
+    let dir = tempfile::tempdir().unwrap();
+    let random = EXPERIMENT.replace(
+        "source = \"pattern\"\nnoise = [0.0, 0.2]",
+        "source = \"random\"",
+    );
+    let config = experiment_config(dir.path(), &format!("attractors = true\n{random}"));
+    let out = dir.path().join("run");
+    experiment(&config)
+        .arg("--out")
+        .arg(&out)
+        .assert()
+        .success();
+
+    let table = read_parquet(&out.join("attractors.parquet"));
+    let column = |name: &str| table.column_by_name(name).unwrap().clone();
+    let mode = column("mode");
+    let mode = mode
+        .as_any()
+        .downcast_ref::<arrow_array::StringArray>()
+        .unwrap();
+    let count = column("count");
+    let count = count
+        .as_any()
+        .downcast_ref::<arrow_array::UInt32Array>()
+        .unwrap();
+    let summary = read_json(&out.join("summary.json"));
+    for cell in summary["cells"].as_array().unwrap() {
+        let runs: u32 = (0..table.num_rows())
+            .filter(|&row| mode.value(row) == cell["mode"].as_str().unwrap())
+            .map(|row| count.value(row))
+            .sum();
+        assert_eq!(u64::from(runs), cell["runs"].as_u64().unwrap());
+    }
+    let metadata = read_json(&out.join("metadata.json"));
+    assert_eq!(metadata["config"]["attractors"], true);
+
+    let config = experiment_config(dir.path(), &random);
+    experiment(&config)
+        .arg("--out")
+        .arg(&out)
+        .arg("--force")
+        .assert()
+        .success();
+    assert!(
+        !out.join("attractors.parquet").exists(),
+        "a run without attractors leaves an old attractors.parquet"
+    );
+}
+
 /// The tables are byte for byte the same with one and with four threads;
 /// the metadata differs only in `created`.
 #[test]
@@ -808,7 +862,7 @@ fn experiment_tables_do_not_depend_on_the_number_of_threads() {
     let dir = tempfile::tempdir().unwrap();
     let config = experiment_config(
         dir.path(),
-        &format!("stability_fields = true\n{EXPERIMENT}").replace(
+        &format!("stability_fields = true\nattractors = true\n{EXPERIMENT}").replace(
             "[[learning]]\nrule = \"hebb\"\n",
             "[[learning]]\nrule = \"hebb\"\n[[learning]]\nrule = \"oja\"\n",
         ),
@@ -829,6 +883,7 @@ fn experiment_tables_do_not_depend_on_the_number_of_threads() {
         "summary.json",
         "datasets.json",
         "stability.parquet",
+        "attractors.parquet",
     ] {
         assert_eq!(
             std::fs::read(one.join(file)).unwrap(),
@@ -1062,6 +1117,16 @@ fn analysis_fixtures_match_the_current_output() {
             ][..],
         ),
         ("occlusion", "experiment", tables),
+        (
+            "random",
+            "experiment",
+            &[
+                "trials.parquet",
+                "summary.json",
+                "datasets.json",
+                "attractors.parquet",
+            ][..],
+        ),
         (
             "capacity",
             "capacity",

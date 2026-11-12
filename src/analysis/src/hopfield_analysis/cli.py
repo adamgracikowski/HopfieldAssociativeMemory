@@ -9,6 +9,15 @@ import polars as pl
 from matplotlib.figure import Figure
 
 from hopfield_analysis import style
+from hopfield_analysis.attractors import (
+    bitmap_shapes,
+    load_attractors,
+    plot_accessibility,
+    plot_attractors,
+    plot_distinct,
+    plot_energies,
+    plot_outcomes,
+)
 from hopfield_analysis.capacity import load_capacity_summary, plot_capacity
 from hopfield_analysis.datasets import Registry, plot_patterns
 from hopfield_analysis.experiments import (
@@ -17,6 +26,7 @@ from hopfield_analysis.experiments import (
     dataset_sizes,
     load_metadata,
     load_summary,
+    load_trials,
     plot_classes,
     plot_load,
     plot_recovery,
@@ -263,6 +273,57 @@ def parser() -> argparse.ArgumentParser:
     capacity.add_argument("results", type=Path, help="results directory of `compute capacity`")
     capacity.add_argument("--out", type=Path, required=True, help=OUT_HELP)
     capacity.set_defaults(handler=_capacity)
+
+    random_results = "results directory of an experiment with random inputs"
+    with_attractors = "results directory of an experiment with `attractors = true`"
+    mode_help = "update mode of the drawn cells (default asynchronous)"
+
+    outcomes = commands.add_parser(
+        "outcomes", help="final state classes of random inputs for every dataset"
+    )
+    outcomes.add_argument("results", type=Path, help=random_results)
+    outcomes.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    outcomes.set_defaults(handler=_outcomes)
+
+    attractors = commands.add_parser(
+        "attractors", help="bitmaps of the most frequent final states of a dataset"
+    )
+    attractors.add_argument("results", type=Path, help=with_attractors)
+    attractors.add_argument("--dataset", required=True, help="dataset label in the results")
+    attractors.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    attractors.add_argument(
+        "--top", type=at_least(1), default=6, help="states per rule and mode (default 6)"
+    )
+    attractors.set_defaults(handler=_attractors)
+
+    reached = commands.add_parser(
+        "accessibility", help="fraction of random inputs ending in every pattern and negation"
+    )
+    reached.add_argument("results", type=Path, help=with_attractors)
+    reached.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    reached.add_argument("--datasets", type=names, help="comma-separated datasets (default: all)")
+    reached.add_argument(
+        "--mode", choices=["synchronous", "asynchronous"], default="asynchronous", help=mode_help
+    )
+    reached.set_defaults(handler=_accessibility)
+
+    distinct = commands.add_parser(
+        "distinct", help="spurious states against the number of patterns of dataset prefixes"
+    )
+    distinct.add_argument("results", type=Path, help=with_attractors)
+    distinct.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    distinct.set_defaults(handler=_distinct)
+
+    energies = commands.add_parser(
+        "energies", help="histograms of the final energy by final state class"
+    )
+    energies.add_argument("results", type=Path, help="results directory of an experiment")
+    energies.add_argument("--out", type=Path, required=True, help=OUT_HELP)
+    energies.add_argument("--datasets", type=names, help="comma-separated datasets (default: all)")
+    energies.add_argument(
+        "--mode", choices=["synchronous", "asynchronous"], default="asynchronous", help=mode_help
+    )
+    energies.set_defaults(handler=_energies)
     return parser
 
 
@@ -411,3 +472,36 @@ def _overlaps(args: argparse.Namespace) -> int:
 
 def _capacity(args: argparse.Namespace) -> int:
     return _save(plot_capacity(load_capacity_summary(args.results)), args.out)
+
+
+def _outcomes(args: argparse.Namespace) -> int:
+    return _save(plot_outcomes(load_summary(args.results)), args.out)
+
+
+def _attractors(args: argparse.Namespace) -> int:
+    shapes = bitmap_shapes(load_metadata(args.results))
+    if args.dataset not in shapes:
+        raise ValueError(f"no dataset `{args.dataset}` in the experiment")
+    figure = plot_attractors(
+        load_attractors(args.results), shapes[args.dataset], args.dataset, top=args.top
+    )
+    return _save(figure, args.out)
+
+
+def _accessibility(args: argparse.Namespace) -> int:
+    figure = plot_accessibility(load_attractors(args.results), args.datasets, mode=args.mode)
+    return _save(figure, args.out)
+
+
+def _distinct(args: argparse.Namespace) -> int:
+    figure = plot_distinct(
+        load_attractors(args.results),
+        load_summary(args.results),
+        dataset_sizes(load_metadata(args.results)),
+    )
+    return _save(figure, args.out)
+
+
+def _energies(args: argparse.Namespace) -> int:
+    figure = plot_energies(load_trials(args.results), args.datasets, mode=args.mode)
+    return _save(figure, args.out)

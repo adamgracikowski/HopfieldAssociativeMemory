@@ -1,0 +1,40 @@
+# Reaction of a trained network to random inputs: 10000 random initial
+# states (every pixel 1 or -1 with probability 1/2) for every CSV dataset,
+# both learning rules and update modes, with the distinct final states in
+# attractors.parquet. Every rule and mode starts from the same states.
+#
+# Run from src/compute:
+#   cargo run --release -- experiment --config ../../data/experiments/10-random/config.toml
+# Report figures, from src/analysis:
+#   uv run hopfield-analysis outcomes ../../data/experiments/10-random/results --out ../../data/experiments/10-random/figures/outcomes
+#   uv run hopfield-analysis accessibility ../../data/experiments/10-random/results --datasets small-7x7,animals-14x9,large-25x25,large-25x50 --out ../../data/experiments/10-random/figures/accessibility
+#   uv run hopfield-analysis energies ../../data/experiments/10-random/results --datasets small-7x7,animals-14x9,large-25x25,large-25x50 --out ../../data/experiments/10-random/figures/energies
+#   uv run hopfield-analysis attractors ../../data/experiments/10-random/results --dataset letters-abc-8x12 --out ../../data/experiments/10-random/figures/attractors-letters-abc-8x12
+#   uv run hopfield-analysis attractors ../../data/experiments/10-random/results --dataset large-25x25.plus --out ../../data/experiments/10-random/figures/attractors-large-25x25.plus
+# Example runs: recall-random-hebb.toml and recall-random-oja.toml.
+
+seed = 20261112
+datasets = [
+    "small-7x7",
+    "letters-abc-8x12",
+    "animals-14x9",
+    "letters-14x20",
+    "OCRA-12x30-cut",
+    "large-25x25",
+    "large-25x25.plus",
+    "large-25x50",
+]
+trials = 10000
+attractors = true
+
+[[learning]]
+rule = "hebb"
+
+[[learning]]
+rule = "oja"
+
+[dynamics]
+modes = ["synchronous", "asynchronous"]
+
+[input]
+source = "random"

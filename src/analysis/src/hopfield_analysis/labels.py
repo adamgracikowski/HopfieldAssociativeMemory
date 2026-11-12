@@ -36,6 +36,12 @@ RANDOM_PATTERNS = "wzorce losowe"
 THEORY = "teoria (wzorce losowe, Hebb)"
 HOPFIELD_LOAD = "$p/N = 0{,}138$"
 STABLE_LOAD = "$p/N = 1/(2 \\ln N)$"
+MIXTURE = "mieszanina"
+PATTERN_OR_NEGATION = "wzorzec lub negacja"
+PATTERN_INDEX = "wzorzec $\\mu$"
+RUN_COUNT = "liczba przebiegów"
+SPURIOUS_COUNT = "liczba różnych\nstanów pozornych"
+SPURIOUS_FRACTION = "odsetek przebiegów\nw stanie pozornym"
 
 MODES = {
     "synchronous": "synchroniczny",
