@@ -111,6 +111,20 @@ impl Weights {
         }
     }
 
+    /// Bytes of the stored arrays: `8 N^2` for dense weights (`f64`
+    /// matrix), `p N + 8 N p + 8 N` for factored weights (`i8` patterns,
+    /// `f64` coefficients and diagonal).
+    pub fn bytes(&self) -> usize {
+        match self {
+            Self::Dense(weights) => weights.matrix().len() * std::mem::size_of::<f64>(),
+            Self::Factored(weights) => {
+                weights.basis().len() * std::mem::size_of::<i8>()
+                    + weights.coefficients().len() * std::mem::size_of::<f64>()
+                    + weights.diagonal().len() * std::mem::size_of::<f64>()
+            }
+        }
+    }
+
     fn inner(&self) -> &dyn WeightMatrix {
         match self {
             Self::Dense(weights) => weights,
@@ -158,6 +172,17 @@ mod tests {
     use ndarray::array;
     use rand::SeedableRng;
     use rand_chacha::ChaCha8Rng;
+
+    /// `N = 4` neurons and `p = 2` patterns: dense weights take
+    /// `8 * 4^2 = 128` bytes, factored ones `2 * 4 + 8 * 4 * 2 + 8 * 4 =
+    /// 8 + 64 + 32 = 104` bytes.
+    #[test]
+    fn counts_the_bytes_of_the_stored_arrays() {
+        let set = PatternSet::new(4, 1, array![[1, -1, 1, -1], [1, 1, -1, -1]]).unwrap();
+        let bytes = |backend| Hebb.train(&set, backend).unwrap().weights.bytes();
+        assert_eq!(bytes(Backend::Dense), 128);
+        assert_eq!(bytes(Backend::Factored), 104);
+    }
 
     #[test]
     fn delegates_to_the_backend() {

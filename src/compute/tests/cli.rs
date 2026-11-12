@@ -1053,6 +1053,65 @@ fn capacity_rejects_too_many_random_patterns() {
         .stderr(contains("at most N"));
 }
 
+const BENCHMARK: &str = "seed = 5\ndatasets = [\"small-7x7\"]\nrepeats = 2\n\
+                         backends = [\"dense\", \"factored\"]\ndense_limit = 49\nnoise = 0.1\n\
+                         [random]\nneurons = [40, 80]\npatterns = 3\n\
+                         [[learning]]\nrule = \"hebb\"\n[[learning]]\nrule = \"oja\"\n";
+
+/// `small-7x7` (`N = 49`) and the random set of `N = 40` with both backends,
+/// the one of `N = 80 > dense_limit` with factored weights only:
+/// `(2 + 2 + 1) * 2 rules * 2 repeats = 20` measurements, each with the
+/// heap counted by the allocator of the binary; dense weights of
+/// `small-7x7` take `8 * 49^2 = 19208` bytes, and training them allocates
+/// at least as much.
+#[test]
+fn benchmark_writes_the_table_and_metadata() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = experiment_config(dir.path(), BENCHMARK);
+    let out = dir.path().join("run");
+    let benchmark = || {
+        let mut command = compute();
+        command
+            .arg("benchmark")
+            .arg("--config")
+            .arg(&config)
+            .arg("--out")
+            .arg(&out);
+        command
+    };
+    benchmark()
+        .assert()
+        .success()
+        .stdout(contains("measurements 20"));
+
+    let table = read_parquet(&out.join("benchmark.parquet"));
+    assert_eq!(table.num_rows(), 20);
+    let column = |name: &str| table.column_by_name(name).unwrap().clone();
+    let peak = column("train_peak_bytes");
+    let peak = peak
+        .as_any()
+        .downcast_ref::<arrow_array::UInt64Array>()
+        .unwrap();
+    assert_eq!(arrow_array::Array::null_count(peak), 0);
+    let bytes = column("weights_bytes");
+    let bytes = bytes
+        .as_any()
+        .downcast_ref::<arrow_array::UInt64Array>()
+        .unwrap();
+    assert_eq!(bytes.value(0), 19208);
+    assert!(peak.value(0) >= 19208);
+    let metadata = read_json(&out.join("metadata.json"));
+    assert_eq!(metadata["command"], "benchmark");
+    assert_eq!(metadata["heap_measured"], true);
+    assert!(metadata["threads"].as_u64().unwrap() >= 1);
+
+    benchmark()
+        .assert()
+        .failure()
+        .stderr(contains("compute::output_exists"));
+    benchmark().arg("--force").assert().success();
+}
+
 /// Whether the written file `name` in `out` equals the one in `expected`: a
 /// Parquet table as decoded data, because the file also records the version
 /// of the `parquet` crate; any other file byte for byte.
