@@ -3,16 +3,18 @@
 use std::time::Instant;
 
 use ndarray::Array1;
+use rand::Rng;
 
 use super::{BenchmarkConfig, BenchmarkMetadata, BenchmarkTable, HeapProbe};
 use crate::capacity::Task;
-use crate::dynamics::{Dynamics, Mode, NoHistory, Outcome};
+use crate::dynamics::{Dynamics, Mode, NoHistory, Outcome, UpdateOrder, ZeroField};
+use crate::experiment::ExperimentInput;
 use crate::learning::LearningRule;
-use crate::patterns::Pattern;
+use crate::patterns::{Pattern, PatternView};
 use crate::run::train::METADATA_FILE;
 use crate::run::{DatasetInfo, Learning, OutputDir};
 use crate::seed::Seed;
-use crate::weights::{Backend, WeightMatrix};
+use crate::weights::{Backend, FieldTracker, WeightMatrix, Weights};
 use crate::{PatternSet, Result};
 
 /// Name of the table with one row per measurement.
@@ -51,8 +53,11 @@ pub struct Measurement {
     /// Largest growth of the heap during training.
     pub train_peak_bytes: Option<usize>,
     /// Time of the local fields of one random state, the main cost of a
-    /// synchronous step.
+    /// synchronous step, measured after one untimed call so that it does
+    /// not include waking up the threads.
     pub fields_seconds: f64,
+    /// Time of one asynchronous sweep from that state (see [`sweep`]).
+    pub sweep_seconds: f64,
     /// Time of a synchronous recall run from the damaged input.
     pub sync_seconds: f64,
     /// Steps of that run.
@@ -89,13 +94,18 @@ impl BenchmarkRun {
     /// [measures](BenchmarkConfig::measures) it and every rule,
     /// `repeats` times, one measurement after another, and passes each one
     /// to `on_measurement`. Every measurement trains the network, computes
-    /// the local fields of a random state, and runs the synchronous and the
-    /// asynchronous dynamics from the first pattern with
-    /// `round(noise N)` pixels flipped. The random state, the input and the
-    /// update orders come from the seed derived from `seed`, the source,
-    /// `N` and the repeat, so every backend and rule gets the same ones.
-    /// Random sets are drawn as in a capacity run
-    /// ([`Task::random`] with trial 0).
+    /// the local fields of a random state, makes one asynchronous sweep from
+    /// it, and runs the synchronous and the asynchronous dynamics from the
+    /// first pattern with `round(noise N)` pixels flipped. The random state,
+    /// the sweep order, the input and the update orders come from the seed
+    /// derived from `seed`, the source, `N` and the repeat, so every backend
+    /// and rule gets the same ones. Random sets are drawn as in a capacity
+    /// run ([`Task::random`] with trial 0).
+    ///
+    /// # Errors
+    ///
+    /// Besides loading errors, an invalid configuration if no set is
+    /// measured with any backend (see [`BenchmarkConfig::check_measured`]).
     pub fn execute(
         config: &BenchmarkConfig,
         probe: &impl HeapProbe,
@@ -126,6 +136,8 @@ impl BenchmarkRun {
                     .map(|&n| ("random".to_owned(), None, n, random.patterns)),
             );
         }
+        let neurons: Vec<usize> = sources.iter().map(|source| source.2).collect();
+        config.check_measured(&neurons)?;
 
         let heap_measured = probe.start().is_some();
         let mut sets = Vec::new();
@@ -200,9 +212,11 @@ fn measure(
     let mut rng = seed.input_rng();
     let state = Pattern::random(n, &mut rng)?;
     let mut fields = Array1::zeros(n);
+    weights.local_fields_into(state.values(), fields.view_mut());
     let ((), fields_seconds) =
         timed(|| weights.local_fields_into(state.values(), fields.view_mut()));
-    let flips = (config.noise * n as f64).round() as usize;
+    let sweep_seconds = sweep(weights, state.view(), &mut rng);
+    let flips = ExperimentInput::flips(config.noise, n);
     let input = set.pattern(0).flipped(flips, &mut rng)?;
 
     let recall = |mode: Mode| -> (Result<Outcome>, f64) {
@@ -234,12 +248,35 @@ fn measure(
         weights_bytes: weights.bytes(),
         train_peak_bytes,
         fields_seconds,
+        sweep_seconds,
         sync_seconds,
         sync_steps: sync.steps,
         async_seconds,
         async_sweeps: asynchronous.steps,
         recall_peak_bytes,
     })
+}
+
+/// Time in seconds of one asynchronous sweep from `state`: `N` updates in a
+/// random order drawn from `rng`, each reading the field of a
+/// [`FieldTracker`] and flipping the neuron if `sgn` of its field differs
+/// (`sgn(0)` keeps the state). The tracker and the order are built before
+/// the clock starts, so unlike a recall run the time excludes the energies
+/// and the setup.
+fn sweep(weights: &Weights, state: PatternView<'_>, rng: &mut impl Rng) -> f64 {
+    let n = state.len();
+    let mut tracker = FieldTracker::new(weights, state);
+    let mut order = Vec::with_capacity(n);
+    UpdateOrder::Permutation.fill_sweep(&mut order, n, rng);
+    let ((), seconds) = timed(|| {
+        for &i in &order {
+            let x = tracker.state().values()[i];
+            if ZeroField::Keep.activate(tracker.field(i), x) != x {
+                tracker.flip(i);
+            }
+        }
+    });
+    seconds
 }
 
 /// Result of `work` and its wall-clock time in seconds.
@@ -330,6 +367,11 @@ mod tests {
         );
         assert!(!run.heap_measured);
         assert!(run.measurements.iter().map(|m| m.sync_steps).sum::<usize>() > 0);
+        assert!(
+            run.measurements
+                .iter()
+                .all(|m| m.fields_seconds > 0.0 && m.sweep_seconds > 0.0)
+        );
         let oja = run.measurements.iter().find(|m| m.learning == 1).unwrap();
         assert!(oja.epochs > 0);
     }

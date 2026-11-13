@@ -34,8 +34,7 @@ def test_medians_have_a_row_per_set_backend_and_rule(table):
         & (pl.col("backend") == "dense")
         & (pl.col("learning") == "hebb")
     )
-    sweeps = first["async_seconds"] / (first["async_sweeps"] + 1)
-    assert data["sweep_seconds"][0] == pytest.approx(sweeps.median())
+    assert data["sweep_seconds"][0] == pytest.approx(first["sweep_seconds"].median())
     assert data["weights_bytes"][0] == 8 * 49**2
 
 

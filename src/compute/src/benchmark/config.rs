@@ -151,6 +151,27 @@ impl BenchmarkConfig {
         backend != Backend::Dense || neurons <= self.dense_limit
     }
 
+    /// Checks that at least one set of `neurons` (the numbers of neurons of
+    /// all sets, datasets included) is [measured](Self::measures) with at
+    /// least one backend, e.g. not only dense weights for sets larger than
+    /// `dense_limit`.
+    pub fn check_measured(&self, neurons: &[usize]) -> Result<()> {
+        let any = neurons.iter().any(|&n| {
+            self.backends
+                .iter()
+                .any(|&backend| self.measures(backend, n))
+        });
+        if any {
+            Ok(())
+        } else {
+            Err(self.invalid(format!(
+                "no set is measured: the sets have {neurons:?} neurons, above `dense_limit` = {} \
+                 of the only backend `dense`",
+                self.dense_limit
+            )))
+        }
+    }
+
     /// Configuration file.
     pub fn path(&self) -> &Path {
         &self.path
@@ -215,6 +236,16 @@ mod tests {
         assert!(config.measures(Backend::Dense, 64));
         assert!(!config.measures(Backend::Dense, 65));
         assert!(config.measures(Backend::Factored, 1_000_000));
+    }
+
+    /// With dense weights only and `dense_limit = 64`, sets of 49 and 128
+    /// neurons give a measurement, sets of 128 neurons alone none.
+    #[test]
+    fn rejects_a_benchmark_that_measures_nothing() {
+        let config = parse(&CONFIG.replace("[\"dense\", \"factored\"]", "[\"dense\"]")).unwrap();
+        assert!(config.check_measured(&[49, 128]).is_ok());
+        let message = config.check_measured(&[128]).unwrap_err().to_string();
+        assert!(message.contains("no set is measured"), "{message}");
     }
 
     #[test]

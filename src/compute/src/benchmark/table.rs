@@ -22,6 +22,7 @@ use super::{BenchmarkRun, Measurement};
 /// | `weights_bytes` | uint64 | bytes of the stored weights |
 /// | `train_peak_bytes` | uint64, nullable | largest growth of the heap during training |
 /// | `fields_seconds` | float64 | time of the local fields of one state |
+/// | `sweep_seconds` | float64 | time of one asynchronous sweep from that state |
 /// | `sync_seconds` | float64 | time of the synchronous recall run |
 /// | `sync_steps` | uint32 | its steps |
 /// | `async_seconds` | float64 | time of the asynchronous recall run |
@@ -77,6 +78,7 @@ impl BenchmarkTable {
             ),
             ("train_peak_bytes", bytes(&|row| row.train_peak_bytes), true),
             ("fields_seconds", seconds(&|row| row.fields_seconds), false),
+            ("sweep_seconds", seconds(&|row| row.sweep_seconds), false),
             ("sync_seconds", seconds(&|row| row.sync_seconds), false),
             ("sync_steps", counts(&|row| row.sync_steps), false),
             ("async_seconds", seconds(&|row| row.async_seconds), false),
@@ -128,7 +130,7 @@ mod tests {
         let table = BenchmarkTable::new(&run);
         let batch = table.batch();
         assert_eq!(batch.num_rows(), 2);
-        assert_eq!(batch.num_columns(), 16);
+        assert_eq!(batch.num_columns(), 17);
         let column = |name: &str| batch.column_by_name(name).unwrap().clone();
         assert_eq!(column("train_peak_bytes").null_count(), 2);
         let backend = column("backend");

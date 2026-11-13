@@ -35,6 +35,7 @@ def load_benchmark(results: Path) -> pl.DataFrame:
         ``src/compute/README.md`` (``source``, ``neurons``, ``patterns``,
         ``backend``, ``learning``, ``repeat``, ``epochs``, ``train_seconds``,
         ``weights_bytes``, ``train_peak_bytes``, ``fields_seconds``,
+        ``sweep_seconds``,
         ``sync_seconds``, ``sync_steps``, ``async_seconds``,
         ``async_sweeps``, ``recall_peak_bytes``).
     """
@@ -43,10 +44,6 @@ def load_benchmark(results: Path) -> pl.DataFrame:
 
 def medians(table: pl.DataFrame) -> pl.DataFrame:
     """The median of every measurement over the repeats.
-
-    The time of a sweep is the time of the asynchronous run divided by its
-    sweeps plus one: the last sweep only confirms the fixed point and is not
-    counted in ``async_sweeps``.
 
     Args:
         table: Table from :func:`load_benchmark`.
@@ -58,7 +55,6 @@ def medians(table: pl.DataFrame) -> pl.DataFrame:
         ``recall_peak_bytes``, the ``weights_bytes`` and the ``epochs`` of
         the first repeat and the number of ``repeats``.
     """
-    sweep = pl.col("async_seconds") / (pl.col("async_sweeps") + 1)
     return table.group_by(KEYS, maintain_order=True).agg(
         pl.len().alias("repeats"),
         pl.col("epochs").first(),
@@ -68,12 +64,12 @@ def medians(table: pl.DataFrame) -> pl.DataFrame:
             for name in (
                 "train_seconds",
                 "fields_seconds",
+                "sweep_seconds",
                 "sync_seconds",
                 "train_peak_bytes",
                 "recall_peak_bytes",
             )
         ),
-        sweep.median().alias("sweep_seconds"),
     )
 
 

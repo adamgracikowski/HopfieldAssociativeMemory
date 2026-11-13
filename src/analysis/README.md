@@ -104,7 +104,7 @@ A benchmark (the results directory of `compute benchmark`):
 uv run hopfield-analysis benchmark <results> --out <out>
 ```
 
-- `benchmark`: four log-log panels against the number of neurons `N`, with the median over the repeats: the time of training, of the local fields of one state (the main cost of a synchronous step), of one asynchronous sweep (the time of the run divided by its sweeps plus the final sweep that confirms the fixed point) and the memory (the bytes of the weights as solid lines, the peak growth of the heap during training dashed, the size `8 N^2` bytes of a dense matrix dotted). One line per backend and learning rule of the random sets; the registered datasets are markers in the color of their backend and rule.
+- `benchmark`: four log-log panels against the number of neurons `N`, with the median over the repeats: the time of training, of the local fields of one state (the main cost of a synchronous step), of one asynchronous sweep (`sweep_seconds`: `N` updates without the energies and the setup of a recall run) and the memory (the bytes of the weights as solid lines, the peak growth of the heap during training dashed, the size `8 N^2` bytes of a dense matrix dotted). One line per backend and learning rule of the random sets; the registered datasets are markers in the color of their backend and rule.
 
 A missing or invalid input ends with a one-line error message and exit code 1.
 
