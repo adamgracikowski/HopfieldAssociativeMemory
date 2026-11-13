@@ -1,5 +1,6 @@
 //! Parsing of the command line and dispatch to the subcommands.
 
+mod benchmark;
 mod capacity;
 mod convert_images;
 mod experiment;
@@ -11,6 +12,7 @@ mod train;
 use clap::{Parser, Subcommand};
 use compute::build_info;
 
+use benchmark::BenchmarkArgs;
 use capacity::CapacityArgs;
 use convert_images::ConvertImagesArgs;
 use experiment::ExperimentArgs;
@@ -38,6 +40,7 @@ impl Cli {
             Command::Recall(args) => args.run(),
             Command::Experiment(args) => args.run(),
             Command::Capacity(args) => args.run(),
+            Command::Benchmark(args) => args.run(),
         }
     }
 }
@@ -69,4 +72,8 @@ enum Command {
     /// Check how many stored patterns stay stable as their number grows, for
     /// prefixes of datasets and for random patterns.
     Capacity(CapacityArgs),
+
+    /// Measure the time and memory of training and recall for growing
+    /// numbers of neurons, with dense and factored weights.
+    Benchmark(BenchmarkArgs),
 }

@@ -1,0 +1,179 @@
+{
+  "command": "experiment",
+  "created": "2026-11-12T22:28:57Z",
+  "build": {
+    "version": "0.1.0",
+    "commit": "fabe05f1f1f9cd1e792a862f078f92d877729a2f",
+    "dirty": false
+  },
+  "config": {
+    "seed": 20261113,
+    "datasets": [
+      "cats-300x200-median",
+      "cats-300x200-dither"
+    ],
+    "backend": "auto",
+    "trials": 100,
+    "learning": [
+      {
+        "rule": "hebb"
+      },
+      {
+        "rule": "oja",
+        "variant": "subspace",
+        "eta": 0.5,
+        "max_epochs": 100000,
+        "tolerance": 1e-6
+      }
+    ],
+    "dynamics": {
+      "modes": [
+        "synchronous",
+        "asynchronous"
+      ],
+      "zero_field": "keep",
+      "order": "permutation",
+      "max_steps": 1000
+    },
+    "input": {
+      "source": "occlusion",
+      "occlusion": [
+        0.0,
+        0.1,
+        0.2,
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7,
+        0.8
+      ]
+    },
+    "stability_fields": false,
+    "attractors": false
+  },
+  "datasets": [
+    {
+      "name": "cats-300x200-median",
+      "registry": "../../datasets/datasets.toml",
+      "file": "cats-300x200-median.npy",
+      "description": "Twelve cat photos, thresholded at the median brightness (sources and licenses: data/images/README.md).",
+      "width": 300,
+      "height": 200,
+      "patterns": 12,
+      "neurons": 60000
+    },
+    {
+      "name": "cats-300x200-dither",
+      "registry": "../../datasets/datasets.toml",
+      "file": "cats-300x200-dither.npy",
+      "description": "Twelve cat photos, Floyd-Steinberg dithering (sources and licenses: data/images/README.md).",
+      "width": 300,
+      "height": 200,
+      "patterns": 12,
+      "neurons": 60000
+    }
+  ],
+  "trainings": [
+    {
+      "dataset": "cats-300x200-median",
+      "learning": "hebb",
+      "backend": "factored",
+      "neurons": 60000,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 2,
+        "unstable_neurons": [
+          4390,
+          4616,
+          2299,
+          0,
+          64,
+          3178,
+          0,
+          4052,
+          1951,
+          321,
+          4272,
+          1670
+        ]
+      }
+    },
+    {
+      "dataset": "cats-300x200-median",
+      "learning": "oja (subspace)",
+      "backend": "factored",
+      "neurons": 60000,
+      "epochs": 356,
+      "converged": true,
+      "stability": {
+        "stable": 12,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "cats-300x200-dither",
+      "learning": "hebb",
+      "backend": "factored",
+      "neurons": 60000,
+      "epochs": 0,
+      "converged": true,
+      "stability": {
+        "stable": 8,
+        "unstable_neurons": [
+          0,
+          1939,
+          0,
+          0,
+          0,
+          1154,
+          0,
+          722,
+          0,
+          0,
+          1445,
+          0
+        ]
+      }
+    },
+    {
+      "dataset": "cats-300x200-dither",
+      "learning": "oja (subspace)",
+      "backend": "factored",
+      "neurons": 60000,
+      "epochs": 226,
+      "converged": true,
+      "stability": {
+        "stable": 12,
+        "unstable_neurons": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  ]
+}

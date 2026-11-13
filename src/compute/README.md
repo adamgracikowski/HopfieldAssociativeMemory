@@ -232,6 +232,42 @@ There must be at least one dataset or random entry; datasets, numbers of neurons
 
 Running it again gives identical `capacity.parquet` and `summary.json`; `metadata.json` differs only in `created`. Oja's subspace rule on random sets is the slow part: its epochs cost `O(p^3)` and their number grows with `p`.
 
+### `benchmark`
+
+Measures the time and memory of training and recall for registered datasets and for random sets of growing `N`, with dense and factored weights, one measurement after another (only the local fields of a large network are computed in parallel).
+
+```bash
+cargo run --release -- benchmark --config ../../data/experiments/13-benchmark/config.toml
+```
+
+The results go to `results/` next to the configuration, or to `--out <dir>` (`--force` as above). The configuration:
+
+```toml
+seed = 7                  # master seed, required
+datasets = ["cats-300x200-median"]  # optional: registered datasets
+# registry = "../../datasets/datasets.toml"  # by default found from this file's directory upwards
+repeats = 5               # measurements of every (set, backend, rule)
+backends = ["dense", "factored"]  # `auto` is not allowed
+dense_limit = 16384       # largest N measured with dense weights (8 N^2 bytes)
+noise = 0.1               # fraction of flipped pixels of the recall input
+
+[random]                  # optional: one random set of `patterns` patterns per N
+neurons = [1024, 4096, 16384, 60000]
+patterns = 12
+
+[[learning]]              # one table per rule, parameters as above
+rule = "hebb"
+[[learning]]
+rule = "oja"
+```
+
+There must be at least one dataset or number of neurons, without repeats, and at least one set measured with some backend; a random set has at most `N` patterns and is drawn as in `capacity` (trial 0). Every measurement trains the network, computes the local fields of one random state (the main cost of a synchronous step; timed after one untimed call, so it does not include waking up the threads), makes one asynchronous sweep from that state (`N` updates in a random order on a field tracker built before the clock starts, so without the energies and the setup of a recall run), and runs the synchronous and the asynchronous dynamics (default settings) from the first pattern with `round(noise N)` pixels flipped. The state, the input and the update orders come from the seed derived from `seed/source/N/repeat`, so every backend and rule gets the same ones. The binary counts the bytes on the heap with a global allocator (`peak_alloc`); the peak is the largest growth of the heap during training and during both recall runs. The command prints one line per measurement and writes:
+
+- `benchmark.parquet`: one row per measurement, ordered by set (datasets, then random sets), backend, rule and repeat, with the columns `source`, `neurons`, `patterns`, `backend`, `learning`, `repeat`, `epochs`, `train_seconds`, `weights_bytes` (`8 N^2` dense, `p N + 8 N p + 8 N` factored), `train_peak_bytes`, `fields_seconds`, `sweep_seconds`, `sync_seconds`, `sync_steps`, `async_seconds`, `async_sweeps` and `recall_peak_bytes` (times in wall-clock seconds),
+- `metadata.json`: command, time, build, the configuration with all defaults, the datasets, the number of threads and whether the heap was measured.
+
+The times depend on the machine and change from run to run; the steps, epochs and bytes of the weights do not.
+
 ## Checks
 
 The same checks run in CI:

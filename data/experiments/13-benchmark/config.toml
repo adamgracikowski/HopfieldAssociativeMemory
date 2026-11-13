@@ -1,0 +1,26 @@
+# Time and memory of training and recall against the number of neurons:
+# random sets of 12 patterns for N = 1024 to 60000 and the two cat datasets
+# (N = 60000), dense weights up to N = 16384 (2 GiB) and factored weights,
+# both learning rules, 5 repeats of every measurement.
+#
+# Run from src/compute:
+#   cargo run --release -- benchmark --config ../../data/experiments/13-benchmark/config.toml
+# Report figure, from src/analysis:
+#   uv run hopfield-analysis benchmark ../../data/experiments/13-benchmark/results --out ../../data/experiments/13-benchmark/figures/benchmark
+
+seed = 20261113
+datasets = ["cats-300x200-median", "cats-300x200-dither"]
+repeats = 5
+backends = ["dense", "factored"]
+dense_limit = 16384
+noise = 0.1
+
+[random]
+neurons = [1024, 2048, 4096, 8192, 16384, 32768, 60000]
+patterns = 12
+
+[[learning]]
+rule = "hebb"
+
+[[learning]]
+rule = "oja"

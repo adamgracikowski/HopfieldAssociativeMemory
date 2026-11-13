@@ -14,6 +14,8 @@ from hopfield_analysis.recall import Recall
 
 GIF_SIDE = 256
 """Default longer side of an animation in pixels, reached with an integer scale."""
+ENERGY_WITHOUT_DECIMALS = 1000
+"""Smallest absolute energy shown in a frame caption without decimals."""
 
 
 def select_frames(count: int, maximum: int) -> list[int]:
@@ -60,7 +62,9 @@ def parse_frames(text: str, count: int) -> list[int]:
 def plot_frames(recall: Recall, frames: Sequence[int], columns: int = 8) -> Figure:
     """Shows the chosen frames as bitmaps in a grid.
 
-    Every panel has the frame number above and its energy below.
+    Every panel has the frame number above and its energy below, with two
+    decimals, or none from 1000 on, so the label of a large network fits
+    under its panel.
 
     Args:
         recall: The run.
@@ -81,7 +85,9 @@ def plot_frames(recall: Recall, frames: Sequence[int], columns: int = 8) -> Figu
     for ax, frame in zip(axes.flat, frames, strict=False):
         draw_bitmap(ax, recall.frames[frame])
         ax.set_title(f"{labels.FRAME} {frame}")
-        ax.set_xlabel(f"$E$ = {labels.number(recall.energy[frame])}")
+        energy = recall.energy[frame]
+        digits = 2 if abs(energy) < ENERGY_WITHOUT_DECIMALS else 0
+        ax.set_xlabel(f"$E$ = {labels.number(energy, digits)}")
     return figure
 
 

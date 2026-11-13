@@ -4,6 +4,7 @@
 //! rules, simulates their synchronous and asynchronous dynamics and writes
 //! the results to files that the presentation layer visualizes.
 
+pub mod benchmark;
 pub mod build_info;
 pub mod capacity;
 pub mod dynamics;

@@ -1,0 +1,71 @@
+{
+  "command": "benchmark",
+  "created": "2026-11-13T07:29:46Z",
+  "build": {
+    "version": "0.1.0",
+    "commit": "7c6210a56a3bc1ee582d39bbd096239b541da5de",
+    "dirty": false
+  },
+  "config": {
+    "seed": 20261113,
+    "datasets": [
+      "cats-300x200-median",
+      "cats-300x200-dither"
+    ],
+    "random": {
+      "neurons": [
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        60000
+      ],
+      "patterns": 12
+    },
+    "repeats": 5,
+    "backends": [
+      "dense",
+      "factored"
+    ],
+    "dense_limit": 16384,
+    "noise": 0.1,
+    "learning": [
+      {
+        "rule": "hebb"
+      },
+      {
+        "rule": "oja",
+        "variant": "subspace",
+        "eta": 0.5,
+        "max_epochs": 100000,
+        "tolerance": 1e-6
+      }
+    ]
+  },
+  "datasets": [
+    {
+      "name": "cats-300x200-median",
+      "registry": "../../datasets/datasets.toml",
+      "file": "cats-300x200-median.npy",
+      "description": "Twelve cat photos, thresholded at the median brightness (sources and licenses: data/images/README.md).",
+      "width": 300,
+      "height": 200,
+      "patterns": 12,
+      "neurons": 60000
+    },
+    {
+      "name": "cats-300x200-dither",
+      "registry": "../../datasets/datasets.toml",
+      "file": "cats-300x200-dither.npy",
+      "description": "Twelve cat photos, Floyd-Steinberg dithering (sources and licenses: data/images/README.md).",
+      "width": 300,
+      "height": 200,
+      "patterns": 12,
+      "neurons": 60000
+    }
+  ],
+  "threads": 8,
+  "heap_measured": true
+}

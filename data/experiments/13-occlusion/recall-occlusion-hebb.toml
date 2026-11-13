@@ -1,0 +1,26 @@
+# Recall of a cat photo from an occluded input: pattern 8 of
+# cats-300x200-median with a band of 100 of the 200 rows at a random
+# position set to -1, trained with the Hebbian rule, asynchronous updates
+# with a frame every 6000 of the 60000 updates of a sweep. The same seed
+# gives the same input for both rules; the state ends in a spurious state
+# nearest pattern 10 (overlap 0.66).
+#
+# Run from src/compute:
+#   cargo run --release -- recall --config ../../data/experiments/13-occlusion/recall-occlusion-hebb.toml --out ../../data/experiments/13-occlusion/runs/recall-occlusion-hebb
+# Report figure, from src/analysis:
+#   uv run hopfield-analysis frames ../../data/experiments/13-occlusion/runs/recall-occlusion-hebb --out ../../data/experiments/13-occlusion/figures/recall-occlusion-hebb
+
+dataset = "cats-300x200-median"
+seed = 20261113
+
+[learning]
+rule = "hebb"
+
+[dynamics]
+mode = "asynchronous"
+record_every = 6000
+
+[input]
+source = "occlusion"
+index = 8
+rows = 100
