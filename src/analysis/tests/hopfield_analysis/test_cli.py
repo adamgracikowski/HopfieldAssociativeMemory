@@ -39,10 +39,25 @@ def test_view_opens_the_viewer_in_a_window(monkeypatch):
     shown = []
     monkeypatch.setattr(plt, "show", lambda: shown.append(plt.gcf()))
     assert main(["view", RUN]) == 0
-    [figure] = shown
-    assert len(figure.axes) == 4
-    assert figure.axes[0].get_title().startswith("klatka 0/9")
+    assert main(["view", RUN, "--frame", "3"]) == 0
+    first, third = shown
+    assert len(first.axes) == 4
+    assert first.axes[0].get_title().startswith("klatka 0/9")
+    assert third.axes[0].get_title().startswith("klatka 3/9")
     plt.close("all")
+
+
+def test_view_saves_the_viewer_at_a_frame_without_a_window(monkeypatch, tmp_path, capsys):
+    from matplotlib import pyplot as plt
+
+    monkeypatch.setattr(plt, "show", lambda: pytest.fail("a window was opened"))
+    out = tmp_path / "viewer"
+    assert main(["view", RUN, "--frame", "9", "--out", str(out)]) == 0
+    assert out.with_suffix(".pdf").read_bytes()[:5] == b"%PDF-"
+    assert out.with_suffix(".png").read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+    assert capsys.readouterr().out.count("written to") == 2
+    assert main(["view", RUN, "--frame", "10", "--out", str(out)]) == 1
+    assert "frame 10 does not exist, the run has 10 frames" in capsys.readouterr().err
 
 
 def test_reports_missing_or_invalid_inputs_without_a_traceback(tmp_path, capsys):

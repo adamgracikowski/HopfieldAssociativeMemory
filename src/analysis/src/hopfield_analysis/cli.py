@@ -151,6 +151,13 @@ def parser() -> argparse.ArgumentParser:
 
     view = commands.add_parser("view", help="step through the frames of a recall run in a window")
     view.add_argument("run", type=Path, help="output directory of `compute recall`")
+    view.add_argument("--frame", type=at_least(0), default=0, help="frame shown first (default 0)")
+    view.add_argument(
+        "--out",
+        type=Path,
+        help="output path without extension; writes the viewer at --frame to "
+        "<out>.pdf and <out>.png instead of opening a window",
+    )
     view.set_defaults(handler=_view)
 
     patterns = commands.add_parser("patterns", help="bitmaps of the patterns of a dataset")
@@ -384,25 +391,34 @@ def _animate(args: argparse.Namespace) -> int:
 
 
 def _view(args: argparse.Namespace) -> int:
-    """Opens the viewer in a window.
+    """Opens the viewer at ``--frame`` in a window, or saves it with ``--out``.
 
-    pyplot, and with it a GUI backend, is imported only here. The keys of the
-    viewer are taken from the toolbar shortcuts while the window is open, so
-    stepping through frames does not also undo a zoom. The viewer is
-    referenced until the window closes, because matplotlib keeps the
-    callbacks of its widgets only through weak references.
+    The saved figure has the report text width and shows the viewer as the
+    window does, slider included. pyplot, and with it a GUI backend, is
+    imported only for the window. The keys of the viewer are taken from the
+    toolbar shortcuts while the window is open, so stepping through frames
+    does not also undo a zoom. The viewer is referenced until the window
+    closes, because matplotlib keeps the callbacks of its widgets only
+    through weak references.
     """
-    import matplotlib as mpl
-    from matplotlib import pyplot as plt
-
     from hopfield_analysis.viewer import RunViewer, free_keymaps
 
     recall = Recall.load(args.run)
+    [frame] = parse_frames(str(args.frame), recall.count)
+    if args.out is not None:
+        figure = style.new_figure(height=style.TEXT_WIDTH)
+        RunViewer(figure, recall).set_frame(frame)
+        return _save(figure, args.out)
+
+    import matplotlib as mpl
+    from matplotlib import pyplot as plt
+
     style.apply()
     with mpl.rc_context(free_keymaps()):
         figure = plt.figure(figsize=(8, 8), layout="constrained")
         figure.canvas.manager.set_window_title(f"{recall.dataset}: {args.run}")
         viewer = RunViewer(figure, recall)
+        viewer.set_frame(frame)
         plt.show()
     del viewer
     return 0
