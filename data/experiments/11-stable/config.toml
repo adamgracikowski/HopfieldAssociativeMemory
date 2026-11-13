@@ -6,6 +6,8 @@
 #
 # Run from src/compute:
 #   cargo run --release -- search-stable --config ../../data/experiments/11-stable/config.toml
+# Report figure, from src/analysis:
+#   uv run hopfield-analysis patterns stable-5x5-sample --columns 8 --out ../../data/experiments/11-stable/figures/sample
 
 width = 5
 height = 5

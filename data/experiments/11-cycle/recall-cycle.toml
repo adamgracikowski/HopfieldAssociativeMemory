@@ -7,6 +7,9 @@
 #
 # Run from src/compute:
 #   cargo run --release -- recall --config ../../data/experiments/11-cycle/recall-cycle.toml --out ../../data/experiments/11-cycle/runs/recall-cycle
+# Report figures, from src/analysis:
+#   uv run hopfield-analysis patterns cycle-5x5 --out ../../data/experiments/11-cycle/figures/patterns
+#   uv run hopfield-analysis frames ../../data/experiments/11-cycle/runs/recall-cycle --out ../../data/experiments/11-cycle/figures/frames
 
 dataset = "cycle-5x5"
 seed = 20261113
