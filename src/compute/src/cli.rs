@@ -7,6 +7,7 @@ mod experiment;
 mod generate;
 mod inspect;
 mod recall;
+mod search_stable;
 mod train;
 
 use clap::{Parser, Subcommand};
@@ -19,6 +20,7 @@ use experiment::ExperimentArgs;
 use generate::GenerateArgs;
 use inspect::InspectArgs;
 use recall::RecallArgs;
+use search_stable::SearchStableArgs;
 use train::TrainArgs;
 
 /// Hopfield associative memory: training, recall and experiments.
@@ -41,6 +43,7 @@ impl Cli {
             Command::Experiment(args) => args.run(),
             Command::Capacity(args) => args.run(),
             Command::Benchmark(args) => args.run(),
+            Command::SearchStable(args) => args.run(),
         }
     }
 }
@@ -76,4 +79,8 @@ enum Command {
     /// Measure the time and memory of training and recall for growing
     /// numbers of neurons, with dense and factored weights.
     Benchmark(BenchmarkArgs),
+
+    /// Search hyperplane sets of bitmaps whose every pattern is a strict
+    /// fixed point of the network trained with each rule.
+    SearchStable(SearchStableArgs),
 }

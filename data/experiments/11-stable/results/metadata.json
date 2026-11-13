@@ -1,0 +1,24 @@
+{
+  "command": "search-stable",
+  "created": "2026-11-13T08:52:27Z",
+  "build": {
+    "version": "0.1.0",
+    "commit": "ef6dcb65f7aaaf07a333cbff48a486e7d9e41f22",
+    "dirty": false
+  },
+  "config": {
+    "width": 5,
+    "height": 5,
+    "max_weight": 3,
+    "verify": 5,
+    "samples": 24,
+    "oja": {
+      "variant": "subspace",
+      "eta": 0.5,
+      "max_epochs": 100000,
+      "tolerance": 1e-6
+    },
+    "basis": "../../datasets/stable-5x5-basis.npy",
+    "sample": "../../datasets/stable-5x5-sample.npy"
+  }
+}
