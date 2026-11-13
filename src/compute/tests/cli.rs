@@ -1112,6 +1112,62 @@ fn benchmark_writes_the_table_and_metadata() {
     benchmark().arg("--force").assert().success();
 }
 
+/// 5 x 3 bitmaps: the largest set, `u = (1, ..., 1, 2)` with `2 C(14, 6) =
+/// 6006` members, is strictly stable with both rules; its basis of 14
+/// patterns and a sample of 24 are written as `(p, 3, 5)` datasets with
+/// their provenance.
+#[test]
+fn search_stable_writes_the_summary_and_the_datasets() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = dir.path().join("config.toml");
+    std::fs::write(
+        &config,
+        "width = 5\nheight = 3\nmax_weight = 2\nverify = 2\n\
+         basis = \"data/basis.npy\"\nsample = \"data/sample.npy\"\n",
+    )
+    .unwrap();
+    let out = dir.path().join("run");
+    let search = || {
+        let mut command = compute();
+        command
+            .arg("search-stable")
+            .arg("--config")
+            .arg(&config)
+            .arg("--out")
+            .arg(&out);
+        command
+    };
+    search()
+        .assert()
+        .success()
+        .stdout(contains("best         |S_u| = 6006"));
+
+    let summary = read_json(&out.join("summary.json"));
+    assert_eq!(summary["best"]["size"], 6006);
+    assert_eq!(summary["best"]["hebb"]["stable"], 6006);
+    assert_eq!(summary["best"]["oja"]["stable"], 6006);
+    assert_eq!(summary["verified"].as_array().unwrap().len(), 2);
+    assert_eq!(summary["candidates"].as_array().unwrap().len(), 16);
+    let data = dir.path().join("data");
+    assert_eq!(npy_shape(&data.join("basis.npy")), [14, 3, 5]);
+    assert_eq!(npy_shape(&data.join("sample.npy")), [24, 3, 5]);
+    let provenance = read_json(&data.join("basis.json"));
+    assert_eq!(provenance["command"], "search-stable");
+    assert_eq!(provenance["content"], "basis");
+    assert_eq!(provenance["set_size"], 6006);
+    assert_eq!(provenance["config"], "../config.toml");
+    assert_eq!(
+        read_json(&out.join("metadata.json"))["command"],
+        "search-stable"
+    );
+
+    search()
+        .assert()
+        .failure()
+        .stderr(contains("compute::output_exists"));
+    search().arg("--force").assert().success();
+}
+
 /// Whether the written file `name` in `out` equals the one in `expected`: a
 /// Parquet table as decoded data, because the file also records the version
 /// of the `parquet` crate; any other file byte for byte.

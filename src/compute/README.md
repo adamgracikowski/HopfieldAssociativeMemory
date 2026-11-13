@@ -268,6 +268,36 @@ There must be at least one dataset or number of neurons, without repeats, and at
 
 The times depend on the machine and change from run to run; the steps, epochs and bytes of the weights do not.
 
+### `search-stable`
+
+Searches large sets of bitmaps whose every pattern is a strict fixed point (every aligned field `xi_i h_i > 1e-10`, whatever `sgn(0)` means) of the network trained with each rule. The sets are the bipolar points of hyperplanes, `S_u = {xi in {-1, 1}^N : u . xi = 0}` for a vector `u` of positive integers: Oja's subspace rule tends to the projection `P` onto the span of its training set, here `u^perp`, and with the zeroed diagonal every member has the aligned field `1 - P_ii > 0`.
+
+```bash
+cargo run --release -- search-stable --config ../../data/experiments/11-stable/config.toml
+```
+
+The results go to `results/` next to the configuration, or to `--out <dir>` (`--force` as above). The configuration:
+
+```toml
+width = 5                 # bitmap of N = width * height pixels, N from 2 to 32
+height = 5
+max_weight = 3            # candidates u: non-decreasing, weights 1 to max_weight
+verify = 5                # largest non-empty sets checked for stability
+samples = 24              # optional, members of the best set written to `sample`
+basis = "../../datasets/stable-5x5-basis.npy"    # optional outputs, relative to this file
+sample = "../../datasets/stable-5x5-sample.npy"
+
+[oja]                     # optional, parameters of Oja's rule as above
+```
+
+Permuting `u` permutes the pixels and changing the sign of `u_j` flips pixel `j`, so the non-decreasing positive vectors cover all sets up to such a change. The command counts `|S_u|` of every candidate by dynamic programming over partial sums, then checks the `verify` largest sets by enumerating all `2^N` states in fixed chunks in parallel (the result does not depend on the number of threads): the Hebbian weights of the whole set, accumulated exactly from the integer sums `sum xi_i xi_j`, and Oja's rule trained (dense weights) on a basis of `N - 1` members, chosen by Gram-Schmidt with pivoting among `8 N` evenly spread members so that it is close to orthogonal. The best set is the largest one strictly stable with both rules. Nothing is random. The command writes:
+
+- `summary.json`: `neurons`, `best` (the best checked set or `null`), `verified` (for every checked set its `weights`, `size`, and for `hebb` and `oja` the number of `patterns`, of strictly `stable` ones and the smallest and mean aligned field; the number of patterns, epochs and convergence of Oja's training) and `candidates` (`weights` and `size` of every candidate, largest first),
+- `metadata.json`: command, time, build and the configuration with all defaults,
+- the basis and the sample of the best set as `.npy` datasets of `width x height` bitmaps, with a provenance `<stem>.json` next to each (build, configuration, `u`, size of the set, `basis` or `sample`).
+
+Running it again gives identical `summary.json` and datasets; `metadata.json` differs only in `created`.
+
 ## Checks
 
 The same checks run in CI:

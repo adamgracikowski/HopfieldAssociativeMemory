@@ -17,6 +17,7 @@ pub mod paths;
 pub mod patterns;
 pub mod run;
 pub mod seed;
+pub mod stable;
 pub mod weights;
 
 pub use error::{Error, Result};
