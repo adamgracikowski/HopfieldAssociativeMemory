@@ -115,7 +115,7 @@ Poniższe wyprowadzenie jest własne i opiera się na równaniu~\eqref{eq:oja-od
     \dot f_k = \lambda_k f_k \left(1 - f_k^2\right), \qquad f_k(0) > 0.
     \label{eq:oja-widmo}
 \end{equation}
-Każde $f_k$ zbiega monotonicznie do 1, więc $W$ zbiega do $P = \sum_k u_k u_k^T$, czyli rzutu ortogonalnego na podprzestrzeń wzorców. Kierunki prostopadłe do tej podprzestrzeni mają w $W(0)$ współczynnik zero i nie zmieniają się. Start od Hebba jest istotny. Start od zera jest punktem stałym i nie prowadzi do żadnego uczenia. Start losowy prowadzi do jednej z wielu macierzy $W$ spełniających $W^T W = P$, która w ogólności nie jest symetryczna i nie stabilizuje wzorców. Wersję dyskretną, liczoną w projekcie, opisano w rozdziale o implementacji.
+Każde $f_k$ zbiega monotonicznie do 1, więc $W$ zbiega do $P = \sum_k u_k u_k^T$, czyli rzutu ortogonalnego na podprzestrzeń wzorców. Kierunki prostopadłe do tej podprzestrzeni mają w $W(0)$ współczynnik zero i nie zmieniają się. Start od Hebba jest istotny. Start od zera jest punktem stałym i nie prowadzi do żadnego uczenia. Start losowy prowadzi do jednej z wielu macierzy $W$ spełniających $W^T W = P$, która w ogólności nie jest symetryczna i nie stabilizuje wzorców. Wersję dyskretną, liczoną w projekcie, opisano w rozdziale~\ref{sec:uczenie}.
 
 \subsection{Dlaczego reguła Oji działa: reguła rzutowa}
 \label{sec:regula-rzutowa}
