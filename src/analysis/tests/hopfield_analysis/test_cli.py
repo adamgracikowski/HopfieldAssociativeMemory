@@ -18,6 +18,8 @@ def test_figure_commands_write_a_pdf_and_a_png(command, tmp_path, capsys):
 
 def test_frames_accepts_an_explicit_choice(tmp_path):
     assert main(["frames", RUN, "--out", str(tmp_path / "f"), "--frames", "0,9"]) == 0
+    narrow = ["--frames", "0,9", "--width", "0.4"]
+    assert main(["frames", RUN, "--out", str(tmp_path / "n"), *narrow]) == 0
     assert main(["frames", RUN, "--out", str(tmp_path / "f"), "--frames", "12"]) == 1
     with pytest.raises(SystemExit):
         main(["frames", RUN, "--out", str(tmp_path / "f"), "--frames", "0", "--max", "3"])

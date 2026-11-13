@@ -122,6 +122,12 @@ def parser() -> argparse.ArgumentParser:
         help="largest number of evenly spaced frames, at least 2 (default 8)",
     )
     choice.add_argument("--frames", help="comma-separated frame numbers, e.g. 0,2,5")
+    frames.add_argument(
+        "--width",
+        type=fraction,
+        default=1.0,
+        help="figure width as a fraction of the report text width, in (0, 1] (default 1)",
+    )
     frames.set_defaults(handler=_frames)
 
     run = commands.add_parser("run", help="energy and overlaps of a recall run")
@@ -389,7 +395,7 @@ def _frames(args: argparse.Namespace) -> int:
         frames = select_frames(recall.count, args.max)
     else:
         frames = parse_frames(args.frames, recall.count)
-    return _save(plot_frames(recall, frames), args.out)
+    return _save(plot_frames(recall, frames, width=args.width * style.TEXT_WIDTH), args.out)
 
 
 def _run(args: argparse.Namespace) -> int:
