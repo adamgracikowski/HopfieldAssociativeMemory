@@ -150,4 +150,10 @@ gdzie $r$ to liczba liniowo niezależnych wzorców. Ponieważ $\lVert P s \rVert
 
 Oprócz wzorców sieć ma zwykle inne punkty stałe, nazywane stanami pozornymi (ang. \textit{spurious states}). Funkcja $\operatorname{sgn}$ jest nieparzysta, więc negacja każdego punktu stałego też jest punktem stałym, a sieć zapamiętuje zawsze parę $\xi^\mu$ i $-\xi^\mu$~\cite[s.~510]{mackay2003}. W regule Hebba stabilne bywają także mieszaniny wzorców, na przykład stan $\operatorname{sgn}(\xi^1 + \xi^2 + \xi^3)$, który w każdym pikselu przyjmuje wartość większości z trzech wzorców~\cite{hopfield1983}.
 
-W trybie synchronicznym sieć może zamiast punktu stałego oscylować w cyklu długości 2. Para $\{s, -s\}$ tworzy cykl, gdy $s_i h_i < 0$ dla wszystkich neuronów, czyli gdy pole lokalne w każdym pikselu ma znak przeciwny do stanu. Przykładem są wagi $W = \left(\begin{smallmatrix} 0 & -1 \\ -1 & 0 \end{smallmatrix}\right)$, dla których stan $(1, 1)$ przechodzi w $(-1, -1)$ i z powrotem~\cite[s.~1580]{bruck1990}. W trybie asynchronicznym ta sama sieć zawsze dochodzi do punktu stałego.
+W trybie synchronicznym sieć może zamiast punktu stałego oscylować w cyklu długości 2. Para $\{s, -s\}$ tworzy cykl, gdy $s_i h_i < 0$ dla wszystkich neuronów, czyli gdy pole lokalne w każdym pikselu ma znak przeciwny do stanu.
+
+Przykładem jest sieć z dwoma neuronami o wagach
+\[
+    W = \begin{pmatrix} 0 & -1 \\ -1 & 0 \end{pmatrix},
+\]
+w której stan $(1, 1)$ przechodzi w trybie synchronicznym w $(-1, -1)$ i z powrotem~\cite[s.~1580]{bruck1990}. W trybie asynchronicznym ta sama sieć zawsze dochodzi do punktu stałego.
