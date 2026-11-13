@@ -136,7 +136,7 @@ W odróżnieniu od przybliżenia normalnego przedział ten nie wychodzi poza $[0
 \subsection{Przegląd eksperymentów}
 \label{sec:eksperymenty}
 
-Przeprowadzone eksperymenty zestawiono w Tabeli~\ref{tab:eksperymenty}. Nazwy odpowiadają katalogom z konfiguracjami i wynikami, a pierwsze dwie cyfry wskazują grupę zagadnień. Jeśli nie zaznaczono inaczej, każdy eksperyment obejmuje regułę Hebba i regułę Oji (wariant podprzestrzeni) w obu trybach dynamiki.
+Przeprowadzone eksperymenty zestawiono w Tabeli~\ref{tab:eksperymenty}. Nazwy odpowiadają katalogom z konfiguracjami i wynikami. Jeśli nie zaznaczono inaczej, każdy eksperyment obejmuje regułę Hebba i regułę Oji (wariant podprzestrzeni) w obu trybach dynamiki.
 
 \begin{table}[H]
     \centering
@@ -147,21 +147,21 @@ Przeprowadzone eksperymenty zestawiono w Tabeli~\ref{tab:eksperymenty}. Nazwy od
         \toprule
         \normalfont Eksperyment & Zbiory i reguły & Wejście, poziomy & Próby \\
         \midrule
-        08-stability & 8 dostarczonych & bez uszkodzeń & 20 \\
-        08-stability-single-neuron & 8 dostarczonych, tylko Oja jednoneuronowa & bez uszkodzeń & 20 \\
-        08-capacity & prefiksy \texttt{letters-14x20} i \texttt{large-25x25.plus}, wzorce losowe ($N = 280$ i 625), tylko stabilność & brak & 50 \\
-        08-large-recovery & \texttt{large-25x25}, \texttt{large-25x25.plus}, \texttt{large-25x50} & odwrócenie, \numrange{0}{0.5} co \num{0.05} & 100 \\
-        09-noise & 8 dostarczonych & odwrócenie, \numrange{0}{0.5} co \num{0.05} & 100 \\
-        09-occlusion & 8 dostarczonych & zasłonięcie, \numrange{0}{0.75} co \num{0.15} & 100 \\
-        09-load & prefiksy \texttt{large-25x25.plus} ($p = 3, 6, 9, 12, 15$) i \texttt{letters-14x20} ($p = 2, 5, 10, 15, 20, 26$) & odwrócenie, \numrange{0}{0.5} co \num{0.05} & 100 \\
-        09-groups & 4 grupowe i \texttt{large-25x25.plus} & odwrócenie, \numrange{0}{0.5} co \num{0.05} & 100 \\
-        10-random & 8 dostarczonych & losowe & \num{10000} \\
-        10-random-load & prefiksy jak w \texttt{09-load} & losowe & \num{10000} \\
-        11-stable & konstruowane zbiory bitmap \mbox{5x5}, tylko stabilność & brak & -- \\
-        11-cycle & cztery kształty \mbox{5x5}, Hebb, tryb synchroniczny & szachownica & 1 \\
-        13-noise & 2 zbiory kotów & odwrócenie, \numrange{0}{0.5} co \num{0.05} & 100 \\
-        13-occlusion & 2 zbiory kotów & zasłonięcie, \numrange{0}{0.8} co \num{0.1} & 100 \\
-        13-benchmark & wzorce losowe ($p = 12$, $N$ od \num{1024} do \num{60000}) i koty, czas i pamięć & odwrócenie, \num{0.1} & 5 \\
+        stability & 8 dostarczonych & bez uszkodzeń & 20 \\
+        stability-single-neuron & 8 dostarczonych, tylko Oja jednoneuronowa & bez uszkodzeń & 20 \\
+        capacity & prefiksy \texttt{letters-14x20} i \texttt{large-25x25.plus}, wzorce losowe ($N = 280$ i 625), tylko stabilność & brak & 50 \\
+        large-recovery & \texttt{large-25x25}, \texttt{large-25x25.plus}, \texttt{large-25x50} & odwrócenie, \numrange{0}{0.5} co \num{0.05} & 100 \\
+        noise & 8 dostarczonych & odwrócenie, \numrange{0}{0.5} co \num{0.05} & 100 \\
+        occlusion & 8 dostarczonych & zasłonięcie, \numrange{0}{0.75} co \num{0.15} & 100 \\
+        load & prefiksy \texttt{large-25x25.plus} ($p = 3, 6, 9, 12, 15$) i \texttt{letters-14x20} ($p = 2, 5, 10, 15, 20, 26$) & odwrócenie, \numrange{0}{0.5} co \num{0.05} & 100 \\
+        groups & 4 grupowe i \texttt{large-25x25.plus} & odwrócenie, \numrange{0}{0.5} co \num{0.05} & 100 \\
+        random & 8 dostarczonych & losowe & \num{10000} \\
+        random-load & prefiksy jak w \texttt{load} & losowe & \num{10000} \\
+        stable-5x5 & konstruowane zbiory bitmap \mbox{5x5}, tylko stabilność & brak & -- \\
+        cycle & cztery kształty \mbox{5x5}, Hebb, tryb synchroniczny & szachownica & 1 \\
+        cats-noise & 2 zbiory kotów & odwrócenie, \numrange{0}{0.5} co \num{0.05} & 100 \\
+        cats-occlusion & 2 zbiory kotów & zasłonięcie, \numrange{0}{0.8} co \num{0.1} & 100 \\
+        benchmark & wzorce losowe ($p = 12$, $N$ od \num{1024} do \num{60000}) i koty, czas i pamięć & odwrócenie, \num{0.1} & 5 \\
         \bottomrule
     \end{tabularx}
 \end{table}
