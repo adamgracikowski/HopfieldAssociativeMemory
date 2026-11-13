@@ -1112,6 +1112,30 @@ fn benchmark_writes_the_table_and_metadata() {
     benchmark().arg("--force").assert().success();
 }
 
+/// The committed oscillation example: the Hebbian network of the four
+/// shapes of `cycle-5x5` started from the checkerboard ends in a cycle of
+/// length 2 after one synchronous step, the second state being the negated
+/// checkerboard (all 25 pixels change) with the same energy.
+#[test]
+fn checkerboard_oscillates_in_the_network_of_the_cycle_shapes() {
+    let dir = tempfile::tempdir().unwrap();
+    let out = dir.path().join("run");
+    recall(
+        Path::new("../../data/experiments/11-cycle/recall-cycle.toml"),
+        &out,
+    )
+    .success();
+    let metadata = read_json(&out.join("metadata.json"));
+    assert_eq!(metadata["outcome"]["termination"], "two-cycle");
+    assert_eq!(metadata["outcome"]["steps"], 1);
+    assert_eq!(metadata["outcome"]["changes"], 25);
+    let history = read_npy(&out.join("history.npy")).unwrap();
+    assert_eq!(history.len(), 2);
+    assert_eq!(history.pattern(1), -&history.pattern(0));
+    let frames = read_json(&out.join("frames.json"));
+    assert_eq!(frames["energy"][0], frames["energy"][1]);
+}
+
 /// 5 x 3 bitmaps: the largest set, `u = (1, ..., 1, 2)` with `2 C(14, 6) =
 /// 6006` members, is strictly stable with both rules; its basis of 14
 /// patterns and a sample of 24 are written as `(p, 3, 5)` datasets with

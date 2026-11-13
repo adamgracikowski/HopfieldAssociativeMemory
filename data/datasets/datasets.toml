@@ -102,3 +102,9 @@ file = "stable-5x5-sample.npy"
 width = 5
 height = 5
 description = "24 members spread evenly over the set S_u = {xi : u . xi = 0}, u = (1, ..., 1, 2), of 4992288 bitmaps strictly stable with both rules (search: data/experiments/11-stable/config.toml)."
+
+[datasets.cycle-5x5]
+file = "cycle-5x5.csv"
+width = 5
+height = 5
+description = "Four 5x5 shapes, the letters T, L, H and a plus sign; with the Hebbian rule the checkerboard input (overlap 1/25 with every shape) makes the synchronous dynamics alternate between the checkerboard and its negation (data/experiments/11-cycle)."
