@@ -90,3 +90,15 @@ file = "cats-300x200-dither.npy"
 width = 300
 height = 200
 description = "Twelve cat photos, Floyd-Steinberg dithering (sources and licenses: data/images/README.md)."
+
+[datasets.stable-5x5-basis]
+file = "stable-5x5-basis.npy"
+width = 5
+height = 5
+description = "Basis of 24 bitmaps of the set S_u = {xi : u . xi = 0}, u = (1, ..., 1, 2), whose 4992288 members are all strictly stable with both rules; the training set of Oja's rule (search: data/experiments/11-stable/config.toml)."
+
+[datasets.stable-5x5-sample]
+file = "stable-5x5-sample.npy"
+width = 5
+height = 5
+description = "24 members spread evenly over the set S_u = {xi : u . xi = 0}, u = (1, ..., 1, 2), of 4992288 bitmaps strictly stable with both rules (search: data/experiments/11-stable/config.toml)."
