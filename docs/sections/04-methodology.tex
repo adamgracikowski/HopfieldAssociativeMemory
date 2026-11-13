@@ -55,7 +55,7 @@ Do zadania dostarczono osiem zbiorów bitmap, pokazanych na Rysunku~\ref{fig:zbi
     \label{fig:zbiory}
 \end{figure}
 
-Liczbowe własności zbiorów zebrano w Tabeli~\ref{tab:zbiory}. Oprócz liczby wzorców $p$ i liczby neuronów $N$ podano obciążenie $p/N$, udział pikseli czarnych we wzorcach oraz średnią i największą wartość bezwzględną nakładania~\eqref{eq:nakladanie} między parami różnych wzorców. Nakładanie decyduje o wielkości przesłuchu~\eqref{eq:przesluch}, więc jest głównym parametrem opisującym trudność zbioru dla reguły Hebba.
+\noindent Liczbowe własności zbiorów zebrano w Tabeli~\ref{tab:zbiory}. Oprócz liczby wzorców $p$ i liczby neuronów $N$ podano obciążenie $p/N$, udział pikseli czarnych we wzorcach oraz średnią i największą wartość bezwzględną nakładania~\eqref{eq:nakladanie} między parami różnych wzorców. Nakładanie decyduje o wielkości składnika zakłócającego~\eqref{eq:przesluch}, więc jest głównym parametrem opisującym trudność zbioru dla reguły Hebba.
 
 \begin{table}[H]
     \centering
@@ -86,7 +86,7 @@ Liczbowe własności zbiorów zebrano w Tabeli~\ref{tab:zbiory}. Oprócz liczby 
     \end{tabular}
 \end{table}
 
-Wszystkie dostarczone zbiory mają obciążenie znacznie mniejsze niż granica $\num{0.138} N$ dla wzorców losowych, ale ich wzorce nie są losowe. Litery zajmują mały fragment bitmapy (od \qtyrange{8}{23}{\percent} pikseli czarnych w \mbox{\texttt{letters-14x20}}), więc dwie różne litery zgadzają się w większości pikseli wspólnego białego tła. Stąd średnie nakładanie $\num{0.806}$ w \mbox{\texttt{letters-abc-8x12}} i $\num{0.728}$ w \mbox{\texttt{letters-14x20}}, gdzie najbardziej podobna para liter ma $\lvert m \rvert = \num{0.986}$. Zbiory \mbox{\texttt{large-25x25}} i \mbox{\texttt{large-25x50}} zawierają te same obrazki, a mimo to średnie nakładanie w drugim jest około cztery razy większe, bo wspólna czarna połowa bitmapy jest identyczna we wszystkich wzorcach.
+\noindent Wszystkie dostarczone zbiory mają obciążenie znacznie mniejsze niż granica $\num{0.138} N$ dla wzorców losowych, ale ich wzorce nie są losowe. Litery zajmują mały fragment bitmapy (od \qtyrange{8}{23}{\percent} pikseli czarnych w \mbox{\texttt{letters-14x20}}), więc dwie różne litery zgadzają się w większości pikseli wspólnego białego tła. Stąd średnie nakładanie $\num{0.806}$ w \mbox{\texttt{letters-abc-8x12}} i $\num{0.728}$ w \mbox{\texttt{letters-14x20}}, gdzie najbardziej podobna para liter ma $\lvert m \rvert = \num{0.986}$. Zbiory \mbox{\texttt{large-25x25}} i \mbox{\texttt{large-25x50}} zawierają te same obrazki, a mimo to średnie nakładanie w drugim jest około cztery razy większe, bo wspólna czarna połowa bitmapy jest identyczna we wszystkich wzorcach.
 
 \subsection{Zbiory grupowe i zdjęcia}
 \label{sec:zbiory-dodatkowe}
@@ -100,7 +100,7 @@ Do porównania zbioru z grupami podobnych wzorców ze zbiorem zróżnicowanym pr
     \label{fig:grupy}
 \end{figure}
 
-Eksperyment na dużych bitmapach przeprowadzono na dwunastu zdjęciach kotów z serwisu Wikimedia Commons, wymienionych w dodatku~\ref{app:zrodla-zdjec}. Każde zdjęcie przycięto do proporcji 3:2, przeskalowano do \mbox{300x200} pikseli ($N = \num{60000}$) i zamieniono na odcienie szarości. Zbiór \mbox{\texttt{cats-300x200-median}} powstał przez progowanie na medianie jasności zdjęcia, więc każda bitmapa ma prawie dokładnie połowę pikseli czarnych. Zbiór \mbox{\texttt{cats-300x200-dither}} powstał przez rozpraszanie błędu metodą Floyda-Steinberga (ang. \textit{dithering}), które oddaje jasność gęstością czarnych pikseli. Jego wzorce mają mniejsze nakładania, ale różne udziały pikseli czarnych (Tabela~\ref{tab:zbiory}). W obu zbiorach piksel ciemny odpowiada stanowi $+1$.
+\noindent Eksperyment na dużych bitmapach przeprowadzono na dwunastu zdjęciach kotów z serwisu Wikimedia Commons, wymienionych w dodatku~\ref{app:zrodla-zdjec}. Każde zdjęcie przycięto do proporcji 3:2, przeskalowano do \mbox{300x200} pikseli ($N = \num{60000}$) i zamieniono na odcienie szarości. Zbiór \mbox{\texttt{cats-300x200-median}} powstał przez progowanie na medianie jasności zdjęcia, więc każda bitmapa ma prawie dokładnie połowę pikseli czarnych. Zbiór \mbox{\texttt{cats-300x200-dither}} powstał przez rozpraszanie błędu metodą Floyda-Steinberga (ang. \textit{dithering}), które oddaje jasność gęstością czarnych pikseli. Jego wzorce mają mniejsze nakładania, ale różne udziały pikseli czarnych (Tabela~\ref{tab:zbiory}). W obu zbiorach piksel ciemny odpowiada stanowi $+1$.
 
 \subsection{Wejścia i uszkodzenia}
 \label{sec:uszkodzenia}
