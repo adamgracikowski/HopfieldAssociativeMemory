@@ -2,7 +2,7 @@
   "command": "search-stable",
   "build": {
     "version": "0.1.0",
-    "commit": "4b1993909434967d8274b148a9ddd29375313f87",
+    "commit": "ef6dcb65f7aaaf07a333cbff48a486e7d9e41f22",
     "dirty": false
   },
   "config": "../experiments/11-stable/config.toml",

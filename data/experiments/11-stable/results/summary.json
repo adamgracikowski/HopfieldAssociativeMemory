@@ -32,8 +32,8 @@
     "hebb": {
       "patterns": 4992288,
       "stable": 4992288,
-      "min_aligned": 5064.639999999992,
-      "mean_aligned": 8450.71360001906
+      "min_aligned": 5064.64,
+      "mean_aligned": 8450.7136
     },
     "oja": {
       "patterns": 4992288,
@@ -78,8 +78,8 @@
       "hebb": {
         "patterns": 4992288,
         "stable": 4992288,
-        "min_aligned": 5064.639999999992,
-        "mean_aligned": 8450.71360001906
+        "min_aligned": 5064.64,
+        "mean_aligned": 8450.7136
       },
       "oja": {
         "patterns": 4992288,
@@ -123,8 +123,8 @@
       "hebb": {
         "patterns": 4519416,
         "stable": 4519416,
-        "min_aligned": 1860.4799999999814,
-        "mean_aligned": 7732.732135857488
+        "min_aligned": 1860.48,
+        "mean_aligned": 7732.732135849056
       },
       "oja": {
         "patterns": 4519416,
@@ -168,8 +168,8 @@
       "hebb": {
         "patterns": 4338536,
         "stable": 0,
-        "min_aligned": -1757.12000000001,
-        "mean_aligned": 7899.988865762793
+        "min_aligned": -1757.12,
+        "mean_aligned": 7899.988865753425
       },
       "oja": {
         "patterns": 4338536,
@@ -213,8 +213,8 @@
       "hebb": {
         "patterns": 4165408,
         "stable": 4165408,
-        "min_aligned": 554.8799999999974,
-        "mean_aligned": 7133.500347394913
+        "min_aligned": 554.88,
+        "mean_aligned": 7133.500347394541
       },
       "oja": {
         "patterns": 4165408,
@@ -258,8 +258,8 @@
       "hebb": {
         "patterns": 4033624,
         "stable": 2704156,
-        "min_aligned": -1240.320000000007,
-        "mean_aligned": 7179.394869962907
+        "min_aligned": -1240.32,
+        "mean_aligned": 7179.3948699551565
       },
       "oja": {
         "patterns": 4033624,
@@ -10379,36 +10379,6 @@
         2,
         2,
         2,
-        2
-      ],
-      "size": 0
-    },
-    {
-      "weights": [
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
-        2,
         3
       ],
       "size": 0
@@ -10746,36 +10716,6 @@
     {
       "weights": [
         2,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3,
-        3
-      ],
-      "size": 0
-    },
-    {
-      "weights": [
-        3,
         3,
         3,
         3,
