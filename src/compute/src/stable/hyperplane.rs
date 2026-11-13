@@ -47,9 +47,11 @@ impl Hyperplane {
     }
 
     /// Every non-decreasing vector of `neurons` weights from 1 to
-    /// `max_weight`, in lexicographic order: one representative of every
-    /// set of vectors that differ by a permutation, which permutes the
-    /// pixels of `S_u` and changes neither its size nor its stability.
+    /// `max_weight` whose greatest common divisor is 1, in lexicographic
+    /// order: one representative of every set of vectors that differ by a
+    /// permutation, which permutes the pixels of `S_u` and changes neither
+    /// its size nor its stability, or by a common factor, which does not
+    /// change `S_u` at all.
     pub fn candidates(neurons: usize, max_weight: u32) -> Result<Vec<Self>> {
         let mut current = Vec::with_capacity(neurons);
         fn extend(
@@ -71,7 +73,26 @@ impl Hyperplane {
         }
         let mut vectors = Vec::new();
         extend(&mut current, neurons, 1, max_weight, &mut vectors);
-        vectors.into_iter().map(Self::new).collect()
+        vectors
+            .into_iter()
+            .filter(|weights| weights.iter().fold(0, |a, &b| gcd(a, b)) == 1)
+            .map(Self::new)
+            .collect()
+    }
+
+    /// Number of non-decreasing vectors of `neurons` weights from 1 to
+    /// `max_weight` (before removing those with a common factor):
+    /// `C(neurons + max_weight - 1, neurons)`, saturating at `u128::MAX`.
+    pub fn candidate_count(neurons: usize, max_weight: u32) -> u128 {
+        let k = u128::from(max_weight.max(1)) - 1;
+        let mut count: u128 = 1;
+        for i in 1..=k {
+            count = match count.checked_mul(neurons as u128 + i) {
+                Some(product) => product / i,
+                None => return u128::MAX,
+            };
+        }
+        count
     }
 
     /// The weights `u`.
@@ -117,11 +138,8 @@ impl Hyperplane {
         2 * sum == self.total
     }
 
-    /// Writes the pixels of the state with index `index` into `state`.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `state` does not have `N` elements.
+    /// Writes the pixels of the state with index `index` into `state`, one
+    /// per element of `state` (pixel `j` from bit `j`).
     pub fn fill_state(index: u64, state: &mut [i8]) {
         for (j, pixel) in state.iter_mut().enumerate() {
             *pixel = if index >> j & 1 == 1 { 1 } else { -1 };
@@ -129,7 +147,7 @@ impl Hyperplane {
     }
 
     /// Folds the members of `S_u` in index order within fixed chunks of
-    /// `2^16` indices, the chunks in parallel, and returns one accumulator
+    /// `2^min(16, N)` indices, the chunks in parallel, and returns one accumulator
     /// per chunk in chunk order, so that the caller can reduce them in an
     /// order that does not depend on the number of threads.
     pub fn fold_members<T: Send>(
@@ -169,13 +187,13 @@ impl Hyperplane {
             })
     }
 
-    /// A well-conditioned basis of the span of `S_u`, at most `N - 1`
-    /// members (the dimension of the hyperplane). Gram-Schmidt with
-    /// pivoting picks, from [`sample`](Self::sample) of `8 N` members, the
-    /// one farthest from the span of those already picked (the first one
-    /// on ties), so the basis is close to orthogonal; if these members do
-    /// not span the hyperplane, the remaining members in index order fill
-    /// it. A residual counts as independent when its squared norm exceeds
+    /// A well-conditioned basis of the span of `S_u`: at most `N - 1`
+    /// members (the dimension of the hyperplane), fewer if `S_u` spans a
+    /// smaller space. Gram-Schmidt with pivoting picks, from
+    /// [`sample`](Self::sample) of `8 N` members, the one farthest from the
+    /// span of those already picked (the first one on ties), so the basis
+    /// is close to orthogonal; members in index order independent of them
+    /// complete it if the sample does not span the whole set. A residual counts as independent when its squared norm exceeds
     /// `1e-6` (independent bipolar vectors of at most 32 pixels leave far
     /// larger ones). A nearly orthogonal basis matters for Oja's rule,
     /// which converges slowly along the small eigenvalues of the Gram
@@ -250,6 +268,11 @@ impl Hyperplane {
     }
 }
 
+/// Greatest common divisor of `a` and `b` (`gcd(0, b) = b`).
+fn gcd(a: u32, b: u32) -> u32 {
+    if b == 0 { a } else { gcd(b, a % b) }
+}
+
 /// Pixels of `pattern` as `f64`.
 fn as_f64(pattern: &Pattern) -> Vec<f64> {
     pattern.values().iter().map(|&x| f64::from(x)).collect()
@@ -313,16 +336,18 @@ mod tests {
         assert_eq!(Hyperplane::new(weights).unwrap().count(), 4_992_288);
     }
 
-    /// Non-decreasing vectors of 3 weights from 1 to 2: 111, 112, 122, 222.
+    /// Non-decreasing vectors of 3 weights from 1 to 2: 111, 112, 122, and
+    /// 222, which has the common factor 2 and the same set as 111.
     #[test]
     fn lists_sorted_candidates() {
         let candidates = Hyperplane::candidates(3, 2).unwrap();
         let weights: Vec<&[u32]> = candidates.iter().map(Hyperplane::weights).collect();
-        assert_eq!(
-            weights,
-            [&[1, 1, 1][..], &[1, 1, 2], &[1, 2, 2], &[2, 2, 2]]
-        );
-        assert_eq!(Hyperplane::candidates(25, 3).unwrap().len(), 351);
+        assert_eq!(weights, [&[1, 1, 1][..], &[1, 1, 2], &[1, 2, 2]]);
+        assert_eq!(Hyperplane::candidate_count(3, 2), 4);
+        assert_eq!(Hyperplane::candidates(25, 3).unwrap().len(), 351 - 2);
+        assert_eq!(Hyperplane::candidate_count(25, 3), 351);
+        assert_eq!(Hyperplane::candidate_count(25, 1), 1);
+        assert_eq!(Hyperplane::candidate_count(25, 20), 1_408_831_480_056);
     }
 
     #[test]

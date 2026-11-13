@@ -129,4 +129,31 @@ mod tests {
             assert!(check.stable as usize <= keep.stable);
         }
     }
+
+    /// `N = 18` ones: `C(18, 9) = 48620` members spread over `2^(18 - 16) =
+    /// 4` chunks. The chunks add up to the count, and the sums, the exact
+    /// and the floating-point checks are the same with one and with four
+    /// threads.
+    #[test]
+    fn several_chunks_give_the_same_result_with_any_number_of_threads() {
+        let plane = Hyperplane::new(vec![1; 18]).unwrap();
+        let chunks = plane.fold_members(|| 0u64, |count, _| *count += 1);
+        assert_eq!(chunks.len(), 4);
+        assert_eq!(chunks.iter().sum::<u64>(), 48620);
+        assert_eq!(plane.count(), 48620);
+        let run = |threads| {
+            rayon::ThreadPoolBuilder::new()
+                .num_threads(threads)
+                .build()
+                .unwrap()
+                .install(|| {
+                    let sum = crate::stable::HebbSum::of(&plane);
+                    let float = StrictStability::of(&sum.weights(), &plane);
+                    (sum.clone(), sum.strict_stability(&plane), float)
+                })
+        };
+        let (one, four) = (run(1), run(4));
+        assert_eq!(one, four);
+        assert_eq!(one.1.patterns, 48620);
+    }
 }

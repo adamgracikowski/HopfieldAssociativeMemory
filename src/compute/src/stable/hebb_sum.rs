@@ -2,7 +2,7 @@
 
 use ndarray::Array2;
 
-use super::Hyperplane;
+use super::{Hyperplane, StrictStability};
 use crate::weights::{DenseWeights, Weights};
 
 /// The Hebbian weights `W = (1/N) sum_mu xi^mu xi^mu^T` with zero diagonal
@@ -52,8 +52,56 @@ impl HebbSum {
         let mut matrix = self.sums.mapv(|c| c as f64 / n);
         matrix.diag_mut().fill(0.0);
         DenseWeights::new(matrix)
-            .expect("the sums are symmetric")
+            .expect("the sums give a square matrix")
             .into()
+    }
+
+    /// Strict stability of every member of `plane` in the network of
+    /// [`weights`](Self::weights), computed exactly: `N h_i = sum_{j != i}
+    /// C_ij xi_j` is an integer, so a member is strictly stable when every
+    /// `xi_i N h_i > 0`, without the rounding of large `f64` fields (the
+    /// sums grow with `|S_u|`). The reported aligned fields are `xi_i h_i`
+    /// in the units of the weights. Chunks are combined in chunk order.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `plane` has a different number of neurons or no members.
+    pub fn strict_stability(&self, plane: &Hyperplane) -> StrictStability {
+        let n = plane.neurons();
+        assert_eq!(self.sums.nrows(), n, "sums and hyperplane size");
+        let partials = plane.fold_members(
+            || (0u64, 0u64, i64::MAX, 0i128),
+            |(patterns, stable, min, sum), state| {
+                let mut all = true;
+                for i in 0..n {
+                    let field: i64 = (0..n)
+                        .filter(|&j| j != i)
+                        .map(|j| self.sums[[i, j]] * i64::from(state[j]))
+                        .sum();
+                    let aligned = i64::from(state[i]) * field;
+                    all &= aligned > 0;
+                    *min = (*min).min(aligned);
+                    *sum += i128::from(aligned);
+                }
+                *patterns += 1;
+                *stable += u64::from(all);
+            },
+        );
+        let (mut patterns, mut stable, mut min, mut sum) = (0u64, 0u64, i64::MAX, 0i128);
+        for (p, s, m, total) in partials {
+            patterns += p;
+            stable += s;
+            min = min.min(m);
+            sum += total;
+        }
+        assert!(patterns > 0, "the hyperplane has members");
+        let scale = n as f64;
+        StrictStability {
+            patterns,
+            stable,
+            min_aligned: min as f64 / scale,
+            mean_aligned: sum as f64 / (patterns as f64 * scale * scale),
+        }
     }
 }
 
@@ -63,6 +111,28 @@ mod tests {
     use crate::PatternSet;
     use crate::learning::{Hebb, LearningRule};
     use crate::weights::{Backend, WeightMatrix};
+
+    /// The exact check agrees with the check of the `f64` weights on a set
+    /// with small fields: the same counts, the same smallest and mean
+    /// aligned field up to rounding.
+    #[test]
+    fn exact_stability_agrees_with_the_floating_point_check() {
+        for weights in [
+            vec![1, 1, 1, 1, 1, 1, 1, 1, 2],
+            vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
+        ] {
+            let plane = Hyperplane::new(weights).unwrap();
+            let sum = HebbSum::of(&plane);
+            let exact = sum.strict_stability(&plane);
+            let float = StrictStability::of(&sum.weights(), &plane);
+            assert_eq!(
+                (exact.patterns, exact.stable),
+                (float.patterns, float.stable)
+            );
+            assert!((exact.min_aligned - float.min_aligned).abs() < 1e-9);
+            assert!((exact.mean_aligned - float.mean_aligned).abs() < 1e-9);
+        }
+    }
 
     /// The accumulated weights equal those of the Hebbian rule trained on
     /// the members as a pattern set.

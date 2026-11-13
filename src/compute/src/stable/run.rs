@@ -76,12 +76,12 @@ pub struct StableSearch {
 }
 
 impl StableSearch {
-    /// Counts `|S_u|` for every non-decreasing `u` of `N` weights from 1 to
-    /// `max_weight`, and checks the `verify` largest non-empty sets: the
-    /// Hebbian rule with the weights of the whole set ([`HebbSum`]), and
-    /// Oja's rule trained (dense weights) on the basis of the set
-    /// ([`Hyperplane::basis`]); both against every member
-    /// ([`StrictStability`]). The best set is the first checked one that is
+    /// Counts `|S_u|` for every candidate `u` ([`Hyperplane::candidates`]),
+    /// and checks the `verify` largest non-empty sets against every member:
+    /// the Hebbian rule with the weights of the whole set, exactly
+    /// ([`HebbSum::strict_stability`]), and Oja's rule trained (dense
+    /// weights) on the basis of the set ([`Hyperplane::basis`],
+    /// [`StrictStability`]). The best set is the first checked one that is
     /// strictly stable with both rules. Nothing is random, so the result
     /// depends only on the configuration.
     pub fn execute(config: &StableConfig) -> Result<Self> {
@@ -107,7 +107,7 @@ impl StableSearch {
             .filter(|(size, _)| *size > 0)
             .take(config.verify)
         {
-            let hebb = StrictStability::of(&HebbSum::of(plane).weights(), plane);
+            let hebb = HebbSum::of(plane).strict_stability(plane);
             let basis = plane.basis();
             let basis = PatternSet::from_patterns(config.width, config.height, &basis)?;
             let trained = config.oja.train(&basis, Backend::Dense)?;
@@ -202,7 +202,7 @@ mod tests {
             "width = 5\nheight = 3\nmax_weight = 2\nverify = 3\n",
         ))
         .unwrap();
-        assert_eq!(search.candidates.len(), 16);
+        assert_eq!(search.candidates.len(), 15);
         assert_eq!(search.candidates[1].size, 5192);
         let sizes: Vec<u64> = search.candidates.iter().map(|c| c.size).collect();
         assert!(sizes.windows(2).all(|w| w[0] >= w[1]));

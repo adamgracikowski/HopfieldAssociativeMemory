@@ -3,8 +3,9 @@
 //!
 //! For an integer vector `u` without zeros, `S_u` holds every bipolar state
 //! `xi` with `u . xi = 0`. Oja's subspace rule trained on a basis of `S_u`
-//! tends to the projection `P` onto `u^perp`, and with the zeroed diagonal
-//! every `xi` of `S_u` has the aligned field `xi_i h_i = 1 - P_ii > 0`. The
+//! tends to the projection `P` onto the span of `S_u`; when the members
+//! span the whole hyperplane `u^perp`, the zeroed diagonal gives every
+//! member the aligned field `xi_i h_i = 1 - P_ii = u_i^2 / |u|^2 > 0`. The
 //! search counts `|S_u|` for many `u` and checks the strict stability of
 //! the largest sets with both rules, without storing their members.
 

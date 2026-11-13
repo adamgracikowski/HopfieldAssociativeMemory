@@ -1171,7 +1171,7 @@ fn search_stable_writes_the_summary_and_the_datasets() {
     assert_eq!(summary["best"]["hebb"]["stable"], 6006);
     assert_eq!(summary["best"]["oja"]["stable"], 6006);
     assert_eq!(summary["verified"].as_array().unwrap().len(), 2);
-    assert_eq!(summary["candidates"].as_array().unwrap().len(), 16);
+    assert_eq!(summary["candidates"].as_array().unwrap().len(), 15);
     let data = dir.path().join("data");
     assert_eq!(npy_shape(&data.join("basis.npy")), [14, 3, 5]);
     assert_eq!(npy_shape(&data.join("sample.npy")), [24, 3, 5]);
