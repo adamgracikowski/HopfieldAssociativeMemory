@@ -74,6 +74,10 @@ def test_patterns_and_weights_write_figures(tmp_path):
     out = tmp_path / "patterns"
     assert main(["patterns", "small-7x7", "--out", str(out), "--registry", registry]) == 0
     assert out.with_suffix(".pdf").is_file() and out.with_suffix(".png").is_file()
+    narrow = tmp_path / "narrow"
+    args = ["--width", "0.5", "--numbers", "--registry", registry]
+    assert main(["patterns", "small-7x7", "--out", str(narrow), *args]) == 0
+    assert narrow.with_suffix(".png").is_file()
     out = tmp_path / "weights"
     assert main(["weights", str(FIXTURES / "train"), "--out", str(out)]) == 0
     assert out.with_suffix(".png").is_file()
@@ -107,6 +111,7 @@ def test_reports_registry_summary_and_metadata_errors(tmp_path, capsys):
 def test_rejects_too_small_numbers(tmp_path, capsys):
     for args in (
         ["patterns", "small-7x7", "--out", "x", "--columns", "0"],
+        ["patterns", "small-7x7", "--out", "x", "--width", "1.5"],
         ["frames", RUN, "--out", "x", "--max", "1"],
         ["animate", RUN, "--out", "x.gif", "--scale", "0"],
     ):

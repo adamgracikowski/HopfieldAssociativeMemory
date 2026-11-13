@@ -12,8 +12,9 @@
 #   uv run hopfield-analysis unstable ../../data/experiments/08-stability/results --dataset large-25x50 --learning hebb --out ../../data/experiments/08-stability/figures/unstable-large-25x50
 #   uv run hopfield-analysis unstable ../../data/experiments/08-stability/results --dataset letters-14x20 --learning hebb --columns 9 --out ../../data/experiments/08-stability/figures/unstable-letters-14x20
 # Patterns of the datasets (large-25x25 is the first six patterns of
-# large-25x25.plus), one figure per dataset with the given number of columns:
-#   for spec in small-7x7:5 letters-abc-8x12:3 animals-14x9:6 letters-14x20:9 OCRA-12x30-cut:7 large-25x25.plus:8 large-25x50:6; do uv run hopfield-analysis patterns ${spec%:*} --columns ${spec#*:} --out ../../data/experiments/08-stability/figures/patterns-${spec%:*}; done
+# large-25x25.plus), one figure per dataset with the given number of columns
+# and width (fraction of the text width), panels of one report figure:
+#   for spec in small-7x7:5:0.3 letters-abc-8x12:3:0.2 animals-14x9:6:0.46 OCRA-12x30-cut:7:0.45 large-25x50:6:0.53 letters-14x20:13:1 large-25x25.plus:15:1; do IFS=: read name columns width <<< "$spec"; uv run hopfield-analysis patterns $name --columns $columns --width $width --numbers --out ../../data/experiments/08-stability/figures/patterns-$name; done
 
 seed = 20261106
 datasets = [

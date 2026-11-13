@@ -175,6 +175,17 @@ def parser() -> argparse.ArgumentParser:
         default=6,
         help="largest number of panels in a row (default 6)",
     )
+    patterns.add_argument(
+        "--width",
+        type=fraction,
+        default=1.0,
+        help="figure width as a fraction of the report text width, in (0, 1] (default 1)",
+    )
+    patterns.add_argument(
+        "--numbers",
+        action="store_true",
+        help="title the panels with the pattern number alone",
+    )
     patterns.set_defaults(handler=_patterns)
 
     weights = commands.add_parser("weights", help="heat map of the weights of a train run")
@@ -342,6 +353,14 @@ def parser() -> argparse.ArgumentParser:
     return parser
 
 
+def fraction(text: str) -> float:
+    """Argument type of a number in ``(0, 1]``."""
+    value = float(text)
+    if not 0 < value <= 1:
+        raise argparse.ArgumentTypeError(f"must be in (0, 1], not {value}")
+    return value
+
+
 def levels(text: str) -> list[float]:
     """Argument type of a comma-separated list of damage levels."""
     try:
@@ -429,7 +448,12 @@ def _patterns(args: argparse.Namespace) -> int:
         registry = Registry.discover(Path.cwd())
     else:
         registry = Registry.from_file(args.registry)
-    figure = plot_patterns(registry.load(args.name), columns=args.columns)
+    figure = plot_patterns(
+        registry.load(args.name),
+        columns=args.columns,
+        width=args.width * style.TEXT_WIDTH,
+        numbers=args.numbers,
+    )
     return _save(figure, args.out)
 
 

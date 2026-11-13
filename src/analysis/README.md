@@ -41,11 +41,11 @@ uv run hopfield-analysis view <run> [--frame 0] [--out <out>]
 A dataset and a `compute train` run:
 
 ```bash
-uv run hopfield-analysis patterns <dataset> --out <out> [--registry <datasets.toml>] [--columns 6]
+uv run hopfield-analysis patterns <dataset> --out <out> [--registry <datasets.toml>] [--columns 6] [--width 1] [--numbers]
 uv run hopfield-analysis weights <train run> --out <out>
 ```
 
-- `patterns`: the patterns of a registered dataset as bitmaps; the registry is `data/datasets/datasets.toml` found from the current directory upwards unless `--registry` is given.
+- `patterns`: the patterns of a registered dataset as bitmaps; the registry is `data/datasets/datasets.toml` found from the current directory upwards unless `--registry` is given. `--width` sets the figure width as a fraction of the report text width, so a figure placed at that width in the report keeps 9 pt text, and `--numbers` titles the panels with the pattern number alone.
 - `weights`: the weight matrix as a heat map with a symmetric color scale; only for dense weights (`weights.npy`).
 
 An experiment (the results directory of `compute experiment`):

@@ -7,7 +7,7 @@
 #   cargo run --release -- experiment --config ../../data/experiments/09-groups/config.toml
 # Report figures, from src/analysis:
 #   uv run hopfield-analysis recovery ../../data/experiments/09-groups/results --out ../../data/experiments/09-groups/figures/recovery
-#   uv run hopfield-analysis patterns groups-25x25-d05 --columns 5 --out ../../data/experiments/09-groups/figures/patterns-d05
+#   uv run hopfield-analysis patterns groups-25x25-d05 --columns 15 --numbers --out ../../data/experiments/09-groups/figures/patterns-d05
 
 seed = 20261110
 datasets = [

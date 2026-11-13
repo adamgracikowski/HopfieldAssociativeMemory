@@ -64,3 +64,9 @@ def test_plot_patterns_has_a_titled_panel_per_pattern(registry):
     visible = [ax for ax in figure.axes if ax.get_visible()]
     assert [ax.get_title() for ax in visible] == [f"wzorzec {mu}" for mu in range(5)]
     assert len(figure.axes) == 6
+
+
+def test_plot_patterns_takes_a_width_and_number_titles(registry):
+    figure = plot_patterns(registry.load("small-7x7"), columns=5, width=2.5, numbers=True)
+    assert figure.get_figwidth() == 2.5
+    assert [ax.get_title() for ax in figure.axes] == [str(mu) for mu in range(5)]

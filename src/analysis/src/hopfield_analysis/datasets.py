@@ -139,26 +139,37 @@ class Registry:
         return patterns.astype(np.int8)
 
 
-def plot_patterns(patterns: np.ndarray, columns: int = 6) -> Figure:
+def plot_patterns(
+    patterns: np.ndarray,
+    columns: int = 6,
+    width: float = style.TEXT_WIDTH,
+    numbers: bool = False,
+) -> Figure:
     """Shows every pattern of a set as a bitmap in a grid.
+
+    A figure narrower than the text width, placed in the report at its own
+    size, keeps the 9 pt text of the other figures; the short titles let
+    narrow panels sit side by side without overlapping titles.
 
     Args:
         patterns: Patterns of shape ``(p, height, width)``.
         columns: Largest number of panels in a row.
+        width: Figure width in inches, the report text width by default.
+        numbers: Whether the panels are titled with the pattern number
+            alone instead of ``wzorzec 0``, ``wzorzec 1``, ...
 
     Returns:
-        The figure in the report style, panels titled ``wzorzec 0``,
-        ``wzorzec 1``, ...
+        The figure in the report style, one titled panel per pattern.
     """
-    count, height, width = patterns.shape
+    count, height, bitmap_width = patterns.shape
     columns = min(columns, count)
     rows = math.ceil(count / columns)
-    panel = style.TEXT_WIDTH / columns
-    figure = style.new_figure(height=rows * (panel * height / width + 0.3))
+    panel = width / columns
+    figure = style.new_figure(width=width, height=rows * (panel * height / bitmap_width + 0.3))
     axes = figure.subplots(rows, columns, squeeze=False)
     for ax in axes.flat[count:]:
         ax.set_visible(False)
     for mu, ax in enumerate(axes.flat[:count]):
         draw_bitmap(ax, patterns[mu])
-        ax.set_title(f"{labels.PATTERN} {mu}")
+        ax.set_title(str(mu) if numbers else f"{labels.PATTERN} {mu}")
     return figure
