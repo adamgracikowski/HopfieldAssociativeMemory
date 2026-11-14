@@ -8,7 +8,7 @@
 # Run from src/compute:
 #   cargo run --release -- recall --config ../../data/experiments/10-random/recall-random-hebb.toml --out ../../data/experiments/10-random/runs/recall-random-hebb
 # Report figure, from src/analysis:
-#   uv run hopfield-analysis frames ../../data/experiments/10-random/runs/recall-random-hebb --out ../../data/experiments/10-random/figures/recall-random-hebb
+#   uv run hopfield-analysis frames ../../data/experiments/10-random/runs/recall-random-hebb --max 5 --width 0.75 --out ../../data/experiments/10-random/figures/recall-random-hebb
 
 dataset = "letters-abc-8x12"
 seed = 191849100212383786
