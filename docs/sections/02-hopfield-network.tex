@@ -44,8 +44,7 @@ i przyjmuje stan zgodny ze znakiem tego pola:
 \end{equation}
 Gdy $h_i = 0$, neuron zachowuje dotychczasowy stan.
 
-Reguła~\eqref{eq:aktualizacja} może być stosowana na dwa sposoby. W trybie asynchronicznym, w którym model zaproponował Hopfield~\cite[s.~2555]{hopfield1982}, w każdym kroku zmienia się jeden neuron, a kolejny neuron widzi już jego nowy stan. W trybie synchronicznym wszystkie neurony liczą pola z tego samego stanu i zmieniają się jednocześnie. Stan spełniający $s = \operatorname{sgn}(Ws)$ nazywa się punktem stałym (stanem stabilnym) i nie zmienia się w żadnym z trybów. Celem uczenia jest dobranie wag tak, aby wzorce były punktami stałymi, a stany do nich podobne prowadziły do nich w kolejnych krokach. Sieć działa wtedy jako pamięć skojarzeniowa: z uszkodzonej wersji wzorca odtwarza oryginał.
-
+Reguła~\eqref{eq:aktualizacja} może być stosowana na dwa sposoby. W trybie asynchronicznym, w którym model zaproponował Hopfield~\cite[s.~2555]{hopfield1982}, w każdym kroku zmienia się jeden neuron, a kolejny neuron widzi już jego nowy stan. W trybie synchronicznym wszystkie neurony liczą pola z tego samego stanu i zmieniają się jednocześnie. Stan spełniający $s = \operatorname{sgn}(Ws)$ nazywa się punktem stałym (stanem stabilnym) i nie zmienia się w żadnym z trybów. Celem uczenia jest dobranie wag tak, aby wzorce były punktami stałymi, a stany do nich podobne prowadziły do nich w kolejnych krokach. Sieć działa wtedy jako pamięć skojarzeniowa: z uszkodzonej wersji wzorca odtwarza oryginał~\cite[s.~2554]{hopfield1982}.
 Dynamikę sieci opisuje funkcja energii
 \begin{equation}
     E(s) = -\frac{1}{2} \sum_{i=1}^{N} \sum_{j=1}^{N} w_{ij} s_i s_j = -\frac{1}{2} s^T W s
@@ -62,7 +61,6 @@ Reguła Hebba ustala wagę połączenia na podstawie tego, jak często dwa neuro
     \label{eq:hebb}
 \end{equation}
 Dodatni współczynnik $1/N$ nie zmienia znaku pola, więc nie wpływa na dynamikę~\cite[s.~318]{rojas1996}. Jeśli $\Xi$ oznacza macierz $p \times N$, której wierszami są wzorce, to $W = \frac{1}{N} \Xi^T \Xi - \frac{p}{N} I$, gdzie odjęty składnik zeruje przekątną.
-
 Podobieństwo dwóch wzorców mierzy ich nakładanie (ang. \textit{overlap})
 \begin{equation}
     m^{\mu\nu} = \frac{1}{N} \sum_{i=1}^{N} \xi^\mu_i \xi^\nu_i \in [-1, 1],
@@ -114,7 +112,6 @@ Poniższe wyprowadzenie jest własne. Jeśli uczenie startuje od wag Hebba $W(0)
     \label{eq:oja-widmo}
 \end{equation}
 Każde $f_k$ zbiega monotonicznie do 1, więc $W$ zbiega do rzutu ortogonalnego $P = \sum_k u_k u_k^T$ na podprzestrzeń wzorców. Start od zera jest punktem stałym równania~\eqref{eq:oja-ode} i nie prowadzi do uczenia, a start losowy daje w ogólności macierz niesymetryczną, która nie stabilizuje wzorców. Wersję dyskretną, liczoną w projekcie, opisano w rozdziale~\ref{sec:uczenie}.
-
 Granica reguły podprzestrzeni to macierz
 \begin{equation}
     P = \Xi^T \left(\Xi \Xi^T\right)^{-1} \Xi,
@@ -151,7 +148,6 @@ gdzie $r$ to liczba liniowo niezależnych wzorców. Ponieważ $\lVert P s \rVert
 Oprócz wzorców sieć ma zwykle inne punkty stałe, nazywane stanami pozornymi (ang. \textit{spurious states}). Funkcja $\operatorname{sgn}$ jest nieparzysta, więc negacja każdego punktu stałego też jest punktem stałym, a sieć zapamiętuje zawsze parę $\xi^\mu$ i $-\xi^\mu$~\cite[s.~510]{mackay2003}. W regule Hebba stabilne bywają także mieszaniny wzorców, na przykład stan $\operatorname{sgn}(\xi^1 + \xi^2 + \xi^3)$, który w każdym pikselu przyjmuje wartość większości z trzech wzorców~\cite{hopfield1983}.
 
 W trybie synchronicznym sieć może zamiast punktu stałego oscylować w cyklu długości 2. Para $\{s, -s\}$ tworzy cykl, gdy $s_i h_i < 0$ dla wszystkich neuronów, czyli gdy pole lokalne w każdym pikselu ma znak przeciwny do stanu.
-
 Przykładem jest sieć z dwoma neuronami o wagach
 \[
     W = \begin{pmatrix} 0 & -1 \\ -1 & 0 \end{pmatrix},
