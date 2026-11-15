@@ -64,4 +64,4 @@ Czas i pamięć uczenia oraz odtwarzania zmierzono dla 12 losowych wzorców przy
     \label{fig:benchmark}
 \end{figure}
 
-\noindent Wagi czynnikowe~\eqref{eq:wagi-czynnikowe} rosną liniowo z $N$ i przy $N = \num{60000}$ zajmują \qty{6.6}{MiB}. Szczyt pamięci przy uczeniu jest około \num{1.8} razy większy od rozmiaru wag. Uczenie trwa wtedy najwyżej około \qty{10}{ms} dla obu reguł, także dla 356 epok reguły Oji, bo koszt epoki nie zależy od $N$ (rozdział~\ref{sec:uczenie}). Pola wszystkich neuronów liczą się w około \qty{0.5}{ms}, a krok asynchroniczny na zdjęciach kotów trwa od \num{3.7} do \qty{11.0}{ms}.
+\noindent Wagi czynnikowe~\eqref{eq:wagi-czynnikowe} rosną liniowo z $N$ i przy $N = \num{60000}$ zajmują \qty{6.6}{MiB}. Szczyt pamięci przy uczeniu jest od \num{1.7} do \num{1.8} razy większy od rozmiaru wag. Uczenie trwa wtedy najwyżej około \qty{10}{ms} dla obu reguł, także dla 356 epok reguły Oji, bo koszt epoki nie zależy od $N$ (rozdział~\ref{sec:uczenie}). Pola wszystkich neuronów liczą się w około \qty{0.5}{ms}, a krok asynchroniczny na zdjęciach kotów trwa od \num{3.7} do \qty{11.0}{ms}.

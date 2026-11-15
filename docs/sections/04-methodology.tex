@@ -91,7 +91,7 @@ Do zadania dostarczono osiem zbiorów bitmap, pokazanych na Rysunku~\ref{fig:zbi
 \subsection{Zbiory grupowe i zdjęcia}
 \label{sec:zbiory-dodatkowe}
 
-Do porównania zbioru z grupami podobnych wzorców ze zbiorem zróżnicowanym przygotowano cztery zbiory grupowe. Każdy powstał z trzech prototypów, obrazków 0, 2 i 4 ze zbioru \mbox{\texttt{large-25x25}}. Dla każdego prototypu utworzono pięć wariantów, w których odwrócono $\operatorname{round}(dN)$ losowo wybranych pikseli. Nakładanie wariantu z prototypem wynosi więc dokładnie $1 - 2d$. Udział odwróconych pikseli wynosi $d = \num{0.02}$, $\num{0.05}$, $\num{0.1}$ albo $\num{0.2}$, a zbiory nazwano od tej wartości. Każdy zbiór grupowy ma tyle samo wzorców i neuronów co zróżnicowany zbiór \mbox{\texttt{large-25x25.plus}}, a różni się od niego tylko podobieństwem wzorców (Tabela~\ref{tab:zbiory}). Zbiór dla $d = \num{0.05}$ pokazano na Rysunku~\ref{fig:grupy}.
+Do porównania zbioru z grupami podobnych wzorców ze zbiorem zróżnicowanym przygotowano cztery zbiory grupowe. Każdy powstał z trzech prototypów, obrazków 0, 2 i 4 ze zbioru \mbox{\texttt{large-25x25}}. Dla każdego prototypu utworzono pięć wariantów, w których odwrócono $\operatorname{round}(dN)$ losowo wybranych pikseli. Nakładanie wariantu z prototypem wynosi więc $1 - 2 \operatorname{round}(dN)/N$, czyli w przybliżeniu $1 - 2d$. Udział odwróconych pikseli wynosi $d = \num{0.02}$, $\num{0.05}$, $\num{0.1}$ albo $\num{0.2}$, a zbiory nazwano od tej wartości. Każdy zbiór grupowy ma tyle samo wzorców i neuronów co zróżnicowany zbiór \mbox{\texttt{large-25x25.plus}}, a różni się od niego tylko podobieństwem wzorców (Tabela~\ref{tab:zbiory}). Zbiór dla $d = \num{0.05}$ pokazano na Rysunku~\ref{fig:grupy}.
 
 \begin{figure}[H]
     \centering

@@ -58,7 +58,7 @@ Program składa się z dwóch warstw. Warstwa obliczeniowa, napisana w języku R
 \subsection{Przechowywanie wag}
 \label{sec:wagi}
 
-Wagi gęste to pełna macierz $N \times N$ liczb zmiennoprzecinkowych podwójnej precyzji, która zajmuje $8N^2$ bajtów. Dla bitmap o wymiarach \mbox{300x200}, czyli $N = \num{60000}$, byłoby to około \num{28.8}~GB. Obie reguły dają jednak wagi, których wiersze są kombinacjami wzorców, więc wagi czynnikowe zapisują macierz w postaci
+Wagi gęste to pełna macierz $N \times N$ liczb zmiennoprzecinkowych podwójnej precyzji, która zajmuje $8N^2$ bajtów. Dla bitmap o wymiarach \mbox{300x200}, czyli $N = \num{60000}$, byłoby to około \qty{26.8}{GiB}. Obie reguły dają jednak wagi, których wiersze są kombinacjami wzorców, więc wagi czynnikowe zapisują macierz w postaci
 \begin{equation}
     W = A \Xi - \operatorname{diag}(d), \qquad d_i = \sum_{\mu=1}^{p} A_{i\mu} \xi^\mu_i,
     \label{eq:wagi-czynnikowe}
@@ -154,7 +154,7 @@ Przeglądarka wyświetla bieżącą klatkę jako bitmapę wraz z wykresami energ
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{13-occlusion/figures/viewer-occlusion-hebb.pdf}
-    \caption{Przeglądarka kroków dla odtwarzania zdjęcia kota z połową zasłoniętych wierszy (reguła Hebba, tryb asynchroniczny). Górny panel: klatka 20 z 77. Dolne wykresy: energia oraz nakładania stanu z wzorcem docelowym (niebieska linia), najbliższym stanowi końcowemu (pomarańczowa) i pozostałymi (szare), z pionową linią w bieżącej klatce.}
+    \caption{Przeglądarka kroków dla odtwarzania zdjęcia kota z połową zasłoniętych wierszy (reguła Hebba, tryb asynchroniczny). Górny wykres: klatka 20 (klatki \numrange{0}{76}). Dolne wykresy: energia oraz nakładania stanu z wzorcem docelowym (niebieska linia), najbliższym stanowi końcowemu (pomarańczowa) i pozostałymi (szare), z pionową linią w bieżącej klatce.}
     \label{fig:przegladarka}
 \end{figure}
 

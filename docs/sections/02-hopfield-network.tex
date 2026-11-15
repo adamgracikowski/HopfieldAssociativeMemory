@@ -78,7 +78,7 @@ Dla wzorców losowych składnik zakłócający ma w przybliżeniu rozkład norma
     P_\text{bit} = \Phi\left(-\sqrt{N/p}\right),
     \label{eq:p-bit}
 \end{equation}
-gdzie $\Phi$ to dystrybuanta standardowego rozkładu normalnego~\cite[s.~513]{mackay2003}. Stąd ograniczenia liczby wzorców, które sieć może zapamiętać. Większość z $p$ losowych wzorców da się dokładnie odtworzyć asymptotycznie do $p = N/(2 \log N)$~\cite[s.~461]{mceliece1987}. Gdy dopuszcza się niewielki odsetek błędnych pikseli, stany bliskie wzorcom pozostają stabilne do $p = \num{0.138} N$ (wynik Amita, Gutfreunda i Sompolinsky'ego przytoczony za MacKayem~\cite[s.~514--515]{mackay2003}).
+gdzie $\Phi$ to dystrybuanta standardowego rozkładu normalnego~\cite[s.~513]{mackay2003}. Stąd ograniczenia liczby wzorców, które sieć może zapamiętać. Większość z $p$ losowych wzorców da się dokładnie odtworzyć asymptotycznie do $p = N/(2 \ln N)$~\cite[s.~461]{mceliece1987}. Gdy dopuszcza się niewielki odsetek błędnych pikseli, stany bliskie wzorcom pozostają stabilne do $p = \num{0.138} N$ (wynik Amita, Gutfreunda i Sompolinsky'ego przytoczony za MacKayem~\cite[s.~514--515]{mackay2003}).
 
 Bitmapy z obrazami nie są losowe: mają duże nakładania i różną liczbę pikseli $+1$ i $-1$. Personnaz, Guyon i Dreyfus podkreślają, że reguła Hebba gwarantuje stabilność tylko wzorców ortogonalnych, a dla obrazów jej nie zapewnia~\cite[s.~L-362, L-364]{personnaz1985}. Duże nakładania zwiększają składnik zakłócający w~\eqref{eq:przesluch}, a bardzo podobne wzorce zlewają się w jeden stan stabilny~\cite[s.~2557]{hopfield1982}. Liczbę wzorców, które sieć może zapamiętać, obniża też korelacja sąsiednich pikseli, co Löwe wykazał dla wzorców jednowymiarowych~\cite[s.~1222]{lowe1998}.
 
