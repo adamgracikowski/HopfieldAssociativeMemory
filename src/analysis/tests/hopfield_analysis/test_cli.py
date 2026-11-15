@@ -18,6 +18,8 @@ def test_figure_commands_write_a_pdf_and_a_png(command, tmp_path, capsys):
 
 def test_frames_accepts_an_explicit_choice(tmp_path):
     assert main(["frames", RUN, "--out", str(tmp_path / "f"), "--frames", "0,9"]) == 0
+    narrow = ["--frames", "0,9", "--width", "0.4"]
+    assert main(["frames", RUN, "--out", str(tmp_path / "n"), *narrow]) == 0
     assert main(["frames", RUN, "--out", str(tmp_path / "f"), "--frames", "12"]) == 1
     with pytest.raises(SystemExit):
         main(["frames", RUN, "--out", str(tmp_path / "f"), "--frames", "0", "--max", "3"])
@@ -39,10 +41,25 @@ def test_view_opens_the_viewer_in_a_window(monkeypatch):
     shown = []
     monkeypatch.setattr(plt, "show", lambda: shown.append(plt.gcf()))
     assert main(["view", RUN]) == 0
-    [figure] = shown
-    assert len(figure.axes) == 4
-    assert figure.axes[0].get_title().startswith("klatka 0/9")
+    assert main(["view", RUN, "--frame", "3"]) == 0
+    first, third = shown
+    assert len(first.axes) == 4
+    assert first.axes[0].get_title().startswith("klatka 0/9")
+    assert third.axes[0].get_title().startswith("klatka 3/9")
     plt.close("all")
+
+
+def test_view_saves_the_viewer_at_a_frame_without_a_window(monkeypatch, tmp_path, capsys):
+    from matplotlib import pyplot as plt
+
+    monkeypatch.setattr(plt, "show", lambda: pytest.fail("a window was opened"))
+    out = tmp_path / "viewer"
+    assert main(["view", RUN, "--frame", "9", "--out", str(out)]) == 0
+    assert out.with_suffix(".pdf").read_bytes()[:5] == b"%PDF-"
+    assert out.with_suffix(".png").read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+    assert capsys.readouterr().out.count("written to") == 2
+    assert main(["view", RUN, "--frame", "10", "--out", str(out)]) == 1
+    assert "frame 10 does not exist, the run has 10 frames" in capsys.readouterr().err
 
 
 def test_reports_missing_or_invalid_inputs_without_a_traceback(tmp_path, capsys):
@@ -59,6 +76,10 @@ def test_patterns_and_weights_write_figures(tmp_path):
     out = tmp_path / "patterns"
     assert main(["patterns", "small-7x7", "--out", str(out), "--registry", registry]) == 0
     assert out.with_suffix(".pdf").is_file() and out.with_suffix(".png").is_file()
+    narrow = tmp_path / "narrow"
+    args = ["--width", "0.5", "--numbers", "--registry", registry]
+    assert main(["patterns", "small-7x7", "--out", str(narrow), *args]) == 0
+    assert narrow.with_suffix(".png").is_file()
     out = tmp_path / "weights"
     assert main(["weights", str(FIXTURES / "train"), "--out", str(out)]) == 0
     assert out.with_suffix(".png").is_file()
@@ -92,6 +113,7 @@ def test_reports_registry_summary_and_metadata_errors(tmp_path, capsys):
 def test_rejects_too_small_numbers(tmp_path, capsys):
     for args in (
         ["patterns", "small-7x7", "--out", "x", "--columns", "0"],
+        ["patterns", "small-7x7", "--out", "x", "--width", "1.5"],
         ["frames", RUN, "--out", "x", "--max", "1"],
         ["animate", RUN, "--out", "x.gif", "--scale", "0"],
     ):

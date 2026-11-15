@@ -36,6 +36,13 @@ def test_plot_frames_shows_a_captioned_panel_per_frame(recall):
     assert len(figure.axes) == 4
 
 
+def test_plot_frames_takes_the_given_width(recall):
+    """Two frames of the 14 x 9 fixture at 3 inches: panels 1.5 inches wide
+    and 1.5 * 9 / 14 inches high, plus 0.45 inches for the labels."""
+    figure = plot_frames(recall, [0, 9], width=3.0)
+    assert figure.get_size_inches() == pytest.approx((3.0, 1.5 * 9 / 14 + 0.45))
+
+
 def test_plot_frames_rounds_large_energies(recall):
     large = dataclasses.replace(recall, energy=recall.energy * 1000)
     figure = plot_frames(large, [9])

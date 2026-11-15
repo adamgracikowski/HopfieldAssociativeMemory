@@ -17,6 +17,8 @@
 \usepackage{array}
 \usepackage{enumitem}
 \usepackage[colorlinks=true, linkcolor=black, urlcolor=black, citecolor=black]{hyperref}
+% Łamanie długich adresów w dowolnym miejscu (tabela źródeł zdjęć)
+\usepackage{xurl}
 \usepackage{csquotes}
 \usepackage[backend=biber,style=numeric,sorting=none,maxbibnames=4]{biblatex}
 \addbibresource{references.bib}
@@ -108,18 +110,15 @@
 
 \emergencystretch=1.5em
 
-% Sekcje zaczynają się od nowej strony, dopóki nie wyłączymy tego przez \sekcjebezpodzialu
-\newif\ifsekcjanowastrona
-\sekcjanowastronatrue
-\newcommand{\sekcjebezpodzialu}{\sekcjanowastronafalse}
-\pretocmd{\section}{\ifsekcjanowastrona\clearpage\fi}{}{}
+% Pytanie z zadania w podsumowaniu: wyszarzone, odpowiedź zaczyna się w nowej linii
+\newcommand{\pytanie}[1]{{\hypersetup{linkcolor=consoleGray}\textcolor{consoleGray}{#1}}\par\noindent\ignorespaces}
 
 \lstset{
     basicstyle=\ttfamily, % Ustawienie czcionki monospaced
 }
 
 \newcommand{\nazwaprzedmiotu}{Sieci neuronowe}
-\newcommand{\tytulprojektu}{pamięć skojarzeniowa z użyciem sieci Hopfielda}
+\newcommand{\tytulprojektu}{Pamięć skojarzeniowa z użyciem sieci Hopfielda}
 \newcommand{\nazwadokumentu}{Raport}
 \newcommand{\prowadzacy}{dr inż. Maksymilian Bujok \\ mgr inż. Grzegorz Zakrzewski}
 %----------------------------------------------------------------------
@@ -141,16 +140,15 @@
     {\fontsize{12}{20}\selectfont Prowadzący: \\ \prowadzacy \par}
     
     \vfill
-    Oświadczam, że niniejsza praca, stanowiąca podstawę do uznania osiągnięcia efektów uczenia się z przedmiotu \textit{\nazwaprzedmiotu}, została wykonana samodzielnie. 
-
-    \vspace{1cm}
-    
     Warszawa, \today
     
 \end{titlepage}
 
 %----------------------------------------------------------------------
-% abstrakt
+% streszczenie i spis treści, każde na osobnej stronie
+
+\input{sections/00-abstract}
+\newpage
 
 \tableofcontents
 \newpage
@@ -158,12 +156,26 @@
 %----------------------------------------------------------------------
 % rozdziały
 
+\input{sections/01-introduction}
+\input{sections/02-hopfield-network}
+\input{sections/03-implementation}
+\input{sections/04-methodology}
+\input{sections/05-stability}
+\input{sections/06-recovery}
+\input{sections/07-random-input}
+\input{sections/08-constructed-sets}
+\input{sections/09-large-bitmaps}
+\input{sections/10-summary}
+
 %----------------------------------------------------------------------
 \newpage
 \printbibliography[heading=bibintoc]
 
 %----------------------------------------------------------------------
 \appendix
-% dodatkowa sekcja: jak odtworzyć wyniki
+\clearpage
+\input{sections/11-photo-sources}
+\clearpage
+\input{sections/12-reproduction}
 
 \end{document}

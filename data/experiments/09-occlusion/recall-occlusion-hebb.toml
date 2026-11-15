@@ -6,7 +6,7 @@
 # Run from src/compute:
 #   cargo run --release -- recall --config ../../data/experiments/09-occlusion/recall-occlusion-hebb.toml --out ../../data/experiments/09-occlusion/runs/recall-occlusion-hebb
 # Report figure, from src/analysis:
-#   uv run hopfield-analysis frames ../../data/experiments/09-occlusion/runs/recall-occlusion-hebb --out ../../data/experiments/09-occlusion/figures/recall-occlusion-hebb
+#   uv run hopfield-analysis frames ../../data/experiments/09-occlusion/runs/recall-occlusion-hebb --width 0.8 --out ../../data/experiments/09-occlusion/figures/recall-occlusion-hebb
 
 dataset = "large-25x25"
 seed = 20261110

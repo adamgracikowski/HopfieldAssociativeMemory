@@ -7,7 +7,7 @@
 # Run from src/compute:
 #   cargo run --release -- recall --config ../../data/experiments/10-random/recall-random-oja.toml --out ../../data/experiments/10-random/runs/recall-random-oja
 # Report figure, from src/analysis:
-#   uv run hopfield-analysis frames ../../data/experiments/10-random/runs/recall-random-oja --out ../../data/experiments/10-random/figures/recall-random-oja
+#   uv run hopfield-analysis frames ../../data/experiments/10-random/runs/recall-random-oja --max 5 --width 0.75 --out ../../data/experiments/10-random/figures/recall-random-oja
 
 dataset = "letters-abc-8x12"
 seed = 191849100212383786

@@ -59,7 +59,9 @@ def parse_frames(text: str, count: int) -> list[int]:
     return frames
 
 
-def plot_frames(recall: Recall, frames: Sequence[int], columns: int = 8) -> Figure:
+def plot_frames(
+    recall: Recall, frames: Sequence[int], columns: int = 8, width: float = style.TEXT_WIDTH
+) -> Figure:
     """Shows the chosen frames as bitmaps in a grid.
 
     Every panel has the frame number above and its energy below, with two
@@ -70,15 +72,20 @@ def plot_frames(recall: Recall, frames: Sequence[int], columns: int = 8) -> Figu
         recall: The run.
         frames: Frame numbers to show, in order.
         columns: Largest number of panels in a row.
+        width: Figure width in inches. A figure of a few frames drawn
+            narrower than the text width keeps the font size of the report
+            when it is included at that width.
 
     Returns:
         The figure in the report style.
     """
     columns = min(columns, len(frames))
     rows = math.ceil(len(frames) / columns)
-    height, width = recall.frames.shape[1:]
-    panel = style.TEXT_WIDTH / columns
-    figure = style.new_figure(height=rows * (panel * height / width + 0.45))
+    bitmap_height, bitmap_width = recall.frames.shape[1:]
+    panel = width / columns
+    figure = style.new_figure(
+        width=width, height=rows * (panel * bitmap_height / bitmap_width + 0.45)
+    )
     axes = figure.subplots(rows, columns, squeeze=False)
     for ax in axes.flat[len(frames) :]:
         ax.set_visible(False)

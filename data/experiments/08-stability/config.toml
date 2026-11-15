@@ -11,6 +11,16 @@
 #   uv run hopfield-analysis overlaps ../../data/experiments/08-stability/results --datasets large-25x25,large-25x50 --out ../../data/experiments/08-stability/figures/overlaps-large
 #   uv run hopfield-analysis unstable ../../data/experiments/08-stability/results --dataset large-25x50 --learning hebb --out ../../data/experiments/08-stability/figures/unstable-large-25x50
 #   uv run hopfield-analysis unstable ../../data/experiments/08-stability/results --dataset letters-14x20 --learning hebb --columns 9 --out ../../data/experiments/08-stability/figures/unstable-letters-14x20
+# Patterns of the datasets (large-25x25 is the first six patterns of
+# large-25x25.plus), one figure per dataset with the given number of columns
+# and width (fraction of the text width), panels of one report figure:
+#   uv run hopfield-analysis patterns small-7x7 --columns 5 --width 0.3 --numbers --out ../../data/experiments/08-stability/figures/patterns-small-7x7
+#   uv run hopfield-analysis patterns letters-abc-8x12 --columns 3 --width 0.2 --numbers --out ../../data/experiments/08-stability/figures/patterns-letters-abc-8x12
+#   uv run hopfield-analysis patterns animals-14x9 --columns 6 --width 0.46 --numbers --out ../../data/experiments/08-stability/figures/patterns-animals-14x9
+#   uv run hopfield-analysis patterns OCRA-12x30-cut --columns 7 --width 0.45 --numbers --out ../../data/experiments/08-stability/figures/patterns-OCRA-12x30-cut
+#   uv run hopfield-analysis patterns large-25x50 --columns 6 --width 0.53 --numbers --out ../../data/experiments/08-stability/figures/patterns-large-25x50
+#   uv run hopfield-analysis patterns letters-14x20 --columns 13 --width 1 --numbers --out ../../data/experiments/08-stability/figures/patterns-letters-14x20
+#   uv run hopfield-analysis patterns large-25x25.plus --columns 15 --width 1 --numbers --out ../../data/experiments/08-stability/figures/patterns-large-25x25.plus
 
 seed = 20261106
 datasets = [

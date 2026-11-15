@@ -27,25 +27,25 @@ Bitmaps show `1` black and `-1` white, as the previews of `compute convert-image
 A recall run (the output directory of `compute recall`):
 
 ```bash
-uv run hopfield-analysis frames <run> --out <out> [--max 8 | --frames 0,2,5]
+uv run hopfield-analysis frames <run> --out <out> [--max 8 | --frames 0,2,5] [--width 1]
 uv run hopfield-analysis run <run> --out <out>
 uv run hopfield-analysis animate <run> --out <file.gif> [--scale N] [--duration 300] [--hold 1500] [--max-frames 200]
-uv run hopfield-analysis view <run>
+uv run hopfield-analysis view <run> [--frame 0] [--out <out>]
 ```
 
-- `frames`: the frames as bitmaps in a grid, each with its number and energy; all frames if there are at most `--max`, otherwise `--max` evenly spaced ones including the first and the last, or the frames listed in `--frames`.
+- `frames`: the frames as bitmaps in a grid, each with its number and energy; all frames if there are at most `--max`, otherwise `--max` evenly spaced ones including the first and the last, or the frames listed in `--frames`; `--width` sets the figure width as a fraction of the report text width, so a figure of a few frames keeps the report font size when it is included at that width.
 - `run`: energy and overlaps with every pattern against the frame; the target (or the pattern nearest to the final state) in color, the other patterns gray.
 - `animate`: a looping GIF of the bitmaps, enlarged `--scale` times (by default the largest integer scale that keeps the longer side at most 256 pixels, but at least 1, so a 300 x 200 bitmap stays 300 x 200), each frame shown `--duration` ms and the last one `--hold` ms. Identical consecutive frames are merged into one with the sum of their times.
-- `view`: a window with the current frame, the energy and overlap plots with a marker at the frame and a slider; the arrow keys move by one frame, `Home` and `End` jump to the first and the last one (in this window these keys do not control the toolbar zoom history).
+- `view`: a window with the current frame, the energy and overlap plots with a marker at the frame and a slider; the arrow keys move by one frame, `Home` and `End` jump to the first and the last one (in this window these keys do not control the toolbar zoom history). The window opens at `--frame`; with `--out` the viewer at that frame is saved as a figure of the report text width instead.
 
 A dataset and a `compute train` run:
 
 ```bash
-uv run hopfield-analysis patterns <dataset> --out <out> [--registry <datasets.toml>] [--columns 6]
+uv run hopfield-analysis patterns <dataset> --out <out> [--registry <datasets.toml>] [--columns 6] [--width 1] [--numbers]
 uv run hopfield-analysis weights <train run> --out <out>
 ```
 
-- `patterns`: the patterns of a registered dataset as bitmaps; the registry is `data/datasets/datasets.toml` found from the current directory upwards unless `--registry` is given.
+- `patterns`: the patterns of a registered dataset as bitmaps; the registry is `data/datasets/datasets.toml` found from the current directory upwards unless `--registry` is given. `--width` sets the figure width as a fraction of the report text width, so a figure placed at that width in the report keeps 9 pt text, and `--numbers` titles the panels with the pattern number alone.
 - `weights`: the weight matrix as a heat map with a symmetric color scale; only for dense weights (`weights.npy`).
 
 An experiment (the results directory of `compute experiment`):

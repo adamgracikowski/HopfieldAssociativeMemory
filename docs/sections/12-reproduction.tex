@@ -1,0 +1,37 @@
+\section{Odtwarzanie wyników}
+\label{app:odtwarzanie}
+
+Wszystkie wyniki i rysunki można odtworzyć z plików konfiguracyjnych zapisanych w katalogach eksperymentów. Potrzebne są Rust w wersji 1.88.0, instalowany przez \texttt{rustup} na podstawie pliku \texttt{rust-toolchain.toml}, oraz narzędzie uv, które instaluje Pythona 3.13 i zależności w wersjach zapisanych w pliku \texttt{uv.lock}. Zbiory wzorców, także zbiory grupowe i bitmapy zdjęć, są dołączone do programu jako pliki, więc nie trzeba ich tworzyć od nowa. Polecenia potrzebne do odtworzenia wyników zebrano na Listingu~\ref{lst:polecenia}.
+
+\begin{code}[H]
+\hypersetup{linkcolor=consoleGray}
+\begin{Verbatim}[fontsize=\small, commandchars=\\\{\}]
+\txtGray{# 1. Eksperyment, w katalogu src/compute. Wyniki i metadane (pełna}
+\txtGray{#    konfiguracja, wersja programu) trafiają do katalogu results obok}
+\txtGray{#    pliku konfiguracji. Podpolecenia capacity, search-stable i benchmark}
+\txtGray{#    (Tabela \ref{tab:podpolecenia}) przyjmują tę samą opcję --config.}
+\txtYellow{cargo} run --release -- experiment --config \txtBlue{<konfiguracja>}
+
+\txtGray{# 2. Rysunki, w katalogu src/analysis, zapisywane w formatach PDF i PNG.}
+\txtGray{#    Polecenia rysunków eksperymentu podano w komentarzach na początku}
+\txtGray{#    jego pliku konfiguracji.}
+\txtYellow{uv} sync
+\txtYellow{uv} run hopfield-analysis \txtBlue{<rysunek>} \txtBlue{<wyniki>} --out \txtBlue{<plik>}
+
+\txtGray{# 3. Pojedyncze odtwarzanie z zapisem wszystkich klatek, a potem jego}
+\txtGray{#    klatki na rysunku i w przeglądarce (rozdział \ref{sec:wizualizacja}).}
+\txtYellow{cargo} run --release -- recall --config \txtBlue{<konfiguracja>} --out \txtBlue{<katalog>}
+\txtYellow{uv} run hopfield-analysis frames \txtBlue{<katalog>} --out \txtBlue{<plik>}
+\txtYellow{uv} run hopfield-analysis view \txtBlue{<katalog>}
+\end{Verbatim}
+    \caption{Polecenia odtwarzające eksperymenty, rysunki i pojedyncze przebiegi.}
+    \label{lst:polecenia}
+\end{code}
+
+\noindent Jako przykład na Listingu~\ref{lst:konfiguracja} pokazano konfigurację eksperymentu \texttt{cats-noise}. Zawiera ona ziarno, z którego wyprowadza się ziarna wszystkich prób, oba zbiory kotów, obie reguły uczenia, oba tryby dynamiki, poziomy szumu i liczbę prób na wzorzec. Opcja \texttt{stability\_fields} dodatkowo zapisuje pola wyrównane wszystkich wzorców.
+
+\begin{code}[H]
+    \lstinputlisting[style=config, firstline=14]{../data/experiments/13-noise/config.toml}
+    \caption{Konfiguracja eksperymentu \texttt{cats-noise} bez komentarzy.}
+    \label{lst:konfiguracja}
+\end{code}

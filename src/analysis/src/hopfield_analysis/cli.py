@@ -122,6 +122,12 @@ def parser() -> argparse.ArgumentParser:
         help="largest number of evenly spaced frames, at least 2 (default 8)",
     )
     choice.add_argument("--frames", help="comma-separated frame numbers, e.g. 0,2,5")
+    frames.add_argument(
+        "--width",
+        type=fraction,
+        default=1.0,
+        help="figure width as a fraction of the report text width, in (0, 1] (default 1)",
+    )
     frames.set_defaults(handler=_frames)
 
     run = commands.add_parser("run", help="energy and overlaps of a recall run")
@@ -151,6 +157,13 @@ def parser() -> argparse.ArgumentParser:
 
     view = commands.add_parser("view", help="step through the frames of a recall run in a window")
     view.add_argument("run", type=Path, help="output directory of `compute recall`")
+    view.add_argument("--frame", type=at_least(0), default=0, help="frame shown first (default 0)")
+    view.add_argument(
+        "--out",
+        type=Path,
+        help="output path without extension; writes the viewer at --frame to "
+        "<out>.pdf and <out>.png instead of opening a window",
+    )
     view.set_defaults(handler=_view)
 
     patterns = commands.add_parser("patterns", help="bitmaps of the patterns of a dataset")
@@ -167,6 +180,17 @@ def parser() -> argparse.ArgumentParser:
         type=at_least(1),
         default=6,
         help="largest number of panels in a row (default 6)",
+    )
+    patterns.add_argument(
+        "--width",
+        type=fraction,
+        default=1.0,
+        help="figure width as a fraction of the report text width, in (0, 1] (default 1)",
+    )
+    patterns.add_argument(
+        "--numbers",
+        action="store_true",
+        help="title the panels with the pattern number alone",
     )
     patterns.set_defaults(handler=_patterns)
 
@@ -335,6 +359,14 @@ def parser() -> argparse.ArgumentParser:
     return parser
 
 
+def fraction(text: str) -> float:
+    """Argument type of a number in ``(0, 1]``."""
+    value = float(text)
+    if not 0 < value <= 1:
+        raise argparse.ArgumentTypeError(f"must be in (0, 1], not {value}")
+    return value
+
+
 def levels(text: str) -> list[float]:
     """Argument type of a comma-separated list of damage levels."""
     try:
@@ -363,7 +395,7 @@ def _frames(args: argparse.Namespace) -> int:
         frames = select_frames(recall.count, args.max)
     else:
         frames = parse_frames(args.frames, recall.count)
-    return _save(plot_frames(recall, frames), args.out)
+    return _save(plot_frames(recall, frames, width=args.width * style.TEXT_WIDTH), args.out)
 
 
 def _run(args: argparse.Namespace) -> int:
@@ -384,25 +416,34 @@ def _animate(args: argparse.Namespace) -> int:
 
 
 def _view(args: argparse.Namespace) -> int:
-    """Opens the viewer in a window.
+    """Opens the viewer at ``--frame`` in a window, or saves it with ``--out``.
 
-    pyplot, and with it a GUI backend, is imported only here. The keys of the
-    viewer are taken from the toolbar shortcuts while the window is open, so
-    stepping through frames does not also undo a zoom. The viewer is
-    referenced until the window closes, because matplotlib keeps the
-    callbacks of its widgets only through weak references.
+    The saved figure has the report text width and shows the viewer as the
+    window does, slider included. pyplot, and with it a GUI backend, is
+    imported only for the window. The keys of the viewer are taken from the
+    toolbar shortcuts while the window is open, so stepping through frames
+    does not also undo a zoom. The viewer is referenced until the window
+    closes, because matplotlib keeps the callbacks of its widgets only
+    through weak references.
     """
-    import matplotlib as mpl
-    from matplotlib import pyplot as plt
-
     from hopfield_analysis.viewer import RunViewer, free_keymaps
 
     recall = Recall.load(args.run)
+    [frame] = parse_frames(str(args.frame), recall.count)
+    if args.out is not None:
+        figure = style.new_figure(height=style.TEXT_WIDTH)
+        RunViewer(figure, recall).set_frame(frame)
+        return _save(figure, args.out)
+
+    import matplotlib as mpl
+    from matplotlib import pyplot as plt
+
     style.apply()
     with mpl.rc_context(free_keymaps()):
         figure = plt.figure(figsize=(8, 8), layout="constrained")
         figure.canvas.manager.set_window_title(f"{recall.dataset}: {args.run}")
         viewer = RunViewer(figure, recall)
+        viewer.set_frame(frame)
         plt.show()
     del viewer
     return 0
@@ -413,7 +454,12 @@ def _patterns(args: argparse.Namespace) -> int:
         registry = Registry.discover(Path.cwd())
     else:
         registry = Registry.from_file(args.registry)
-    figure = plot_patterns(registry.load(args.name), columns=args.columns)
+    figure = plot_patterns(
+        registry.load(args.name),
+        columns=args.columns,
+        width=args.width * style.TEXT_WIDTH,
+        numbers=args.numbers,
+    )
     return _save(figure, args.out)
 
 
