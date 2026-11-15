@@ -1,0 +1,24 @@
+\section{Wstęp}
+\label{sec:wstep}
+
+Pamięć skojarzeniowa zapamiętuje zbiór wzorców i rozpoznaje każdy z nich także wtedy, gdy na wejście trafia jego zaszumiona wersja. W wariancie autoasocjacyjnym każdy wzorzec jest skojarzony sam ze sobą, więc zadaniem sieci jest poprawienie uszkodzonego wejścia~\cite[s.~311--312]{rojas1996}. Hopfield opisał taką pamięć jako adresowaną zawartością, która odtwarza cały zapamiętany element na podstawie jego dostatecznie dużego fragmentu~\cite[s.~2554]{hopfield1982}. Przykładem z tego projektu jest zdjęcie kota, którego połowę wierszy zasłonięto, a sieć odtworzyła je w całości (Rysunek~\ref{fig:koty-przebieg}).
+
+Sieć Hopfielda jest siecią rekurencyjną, która realizuje taką pamięć. Jej stan, czyli wektor wartości $\pm 1$ wszystkich neuronów, zmienia się krok po kroku, zwykle aż do osiągnięcia stanu stabilnego. Uczenie ma sprawić, że stanami stabilnymi są wzorce, a sieć dochodzi do nich z wejść, które są do nich podobne. Model opisano w rozdziale~\ref{sec:siec-hopfielda}.
+
+Celem projektu było zaimplementowanie sieci Hopfielda uczonej dwiema metodami: regułą Hebba i regułą Oji (Erkki Oja). Liczba neuronów jest konfigurowalna, a stan sieci jest pokazywany jako prostokątna bitmapa, co pozwala obejrzeć kolejne kroki dochodzenia do stanu stabilnego. Symulacja ma dwa warianty: synchroniczny, w którym wszystkie neurony zmieniają stan jednocześnie, i asynchroniczny, w którym zmieniają go po kolei. Raport opisuje nie tylko, jak działają obie reguły, ale też dlaczego działają.
+
+Zbadano następujące zagadnienia, ponumerowane tak samo jak odpowiedzi na końcu rozdziałów z wynikami:
+\begin{enumerate}
+    \item Ile wzorców uczących stabilizuje każda z reguł (rozdział~\ref{sec:stabilne-wzorce})?
+    \item Których z dostarczonych zbiorów sieć uczy się poprawnie, a których nie (rozdział~\ref{sec:stabilne-wzorce})?
+    \item Kiedy wzorce uczące nie są stanami stabilnymi i dlaczego, w odniesieniu do prac o sieci Hopfielda (rozdział~\ref{sec:dlaczego-hebb})?
+    \item Dlaczego skuteczność odzyskiwania znacząco różni się dla dwóch zbiorów prawie identycznych wzorów w wersjach \mbox{25x25} i \mbox{25x50} (rozdział~\ref{sec:zbiory-25x50})?
+    \item Jak skuteczność odzyskiwania wzorców z uszkodzonego wejścia zależy od liczności i rodzaju zbioru (rozdziały~\ref{sec:odzyskiwanie-szum} i~\ref{sec:odzyskiwanie-licznosc})?
+    \item Czy zbiór z grupami podobnych wzorców jest odzyskiwany inaczej niż zbiór zróżnicowany o podobnej liczności (rozdział~\ref{sec:odzyskiwanie-grupy})?
+    \item Jak nauczona sieć reaguje na losowe wejście (rozdział~\ref{sec:losowe-wejscie})?
+    \item Jaki możliwie liczny zbiór bitmap \mbox{5x5} ma wszystkie wzorce stabilne w nauczonej sieci (rozdział~\ref{sec:zbiory-stabilne})?
+    \item Jaki zbiór uczący i jakie wejście prowadzą do oscylacji między dwoma stanami (rozdział~\ref{sec:oscylacja})?
+    \item Jak sieć działa na dużych bitmapach, czyli zdjęciach kotów \mbox{300x200}, i ile czasu oraz pamięci wymaga (rozdział~\ref{sec:duze-bitmapy})?
+\end{enumerate}
+
+Rozdział~\ref{sec:siec-hopfielda} przedstawia model sieci i obie reguły uczenia razem z wyjaśnieniem, dlaczego działają. Rozdział~\ref{sec:implementacja} opisuje program, a rozdział~\ref{sec:metodyka} zbiory wzorców, sposoby uszkadzania wejścia i miary skuteczności. Rozdziały od~\ref{sec:stabilnosc} do~\ref{sec:duze-bitmapy} zawierają wyniki i kończą się odpowiedziami na powyższe pytania. Rozdział~\ref{sec:podsumowanie} zbiera odpowiedzi i wnioski. Dodatek~\ref{app:zrodla-zdjec} podaje źródła zdjęć kotów, a dodatek~\ref{app:odtwarzanie} opisuje, jak odtworzyć wyniki.
