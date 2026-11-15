@@ -54,10 +54,3 @@ Wpływ liczby wzorców na reakcję na losowe wejście pokazano na Rysunku~\ref{f
     \caption{Liczba różnych stanów pozornych (lewa kolumna) i odsetek wejść kończących w stanie pozornym (prawa kolumna) w zależności od liczby wzorców $p$ dla początkowych fragmentów zbiorów \texttt{large-25x25.plus} (górne wykresy) i \texttt{letters-14x20} (dolne wykresy).}
     \label{fig:losowe-licznosc}
 \end{figure}
-
-\subsection{Odpowiedź na pytanie}
-\label{sec:losowe-odpowiedz}
-
-\begin{enumerate}[start=7]
-    \item Losowe wejście kończy w jednym z minimów lokalnych energii. Przy regule Oji wzorce są minimami globalnymi, więc sieć zwykle odtwarza jeden z wzorców albo jego negację, każdy z podobną szansą, a pozostałe wejścia trafiają do wielu płytkich stanów pozornych. Przy regule Hebba najgłębsze są stany pozorne, często mieszaniny kilku wzorców, i to w nich kończy prawie każde losowe wejście. Wyjątkiem są silnie skorelowane litery \texttt{letters-14x20}, w których przy obu regułach sieć prawie nigdy nie trafia do wzorca, a w trybie synchronicznym przy regule Oji zwykle oscyluje.
-\end{enumerate}

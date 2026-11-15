@@ -76,11 +76,3 @@ Jako zbiór uczący wybrano cztery kształty T, L, H i +, a jako wejście szacho
     \caption{Oscylacja w trybie synchronicznym. Lewy wykres: zbiór uczący reguły Hebba. Prawy wykres: szachownica podana na wejście (klatka 0) i jej negacja po jednym kroku (klatka 1).}
     \label{fig:oscylacja}
 \end{figure}
-
-\subsection{Odpowiedzi na pytania}
-\label{sec:konstruowane-odpowiedz}
-
-\begin{enumerate}[start=8]
-    \item Zbiór $S_u$ wszystkich bitmap \mbox{5x5}, w których suma pierwszych 24 pikseli jest równa $-2 \xi_{25}$, ma \num{4992288} elementów. Każdy z nich jest ściśle stabilny zarówno w sieci nauczonej regułą Hebba na całym zbiorze, jak i w sieci nauczonej regułą Oji na jego bazie. Konstrukcja wynika z reguły rzutowej, która stabilizuje każdy wektor podprzestrzeni wzorców, a liczność zbioru jest bliska granicy dla hiperpłaszczyzn.
-    \item Zbiór uczący złożony z kształtów T, L, H i + (reguła Hebba) i wejście w postaci szachownicy, która ma małe nakładanie z każdym kształtem. Dzięki wyzerowanej przekątnej pole ma w każdym pikselu znak przeciwny do stanu, więc w trybie synchronicznym sieć oscyluje między szachownicą a jej negacją.
-\end{enumerate}

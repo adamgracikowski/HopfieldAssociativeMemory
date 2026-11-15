@@ -65,10 +65,3 @@ Czas i pamięć uczenia oraz odtwarzania zmierzono dla 12 losowych wzorców przy
 \end{figure}
 
 \noindent Wagi czynnikowe~\eqref{eq:wagi-czynnikowe} rosną liniowo z $N$ i przy $N = \num{60000}$ zajmują \qty{6.6}{MiB}. Szczyt pamięci przy uczeniu jest około \num{1.8} razy większy od rozmiaru wag. Uczenie trwa wtedy najwyżej około \qty{10}{ms} dla obu reguł, także dla 356 epok reguły Oji, bo koszt epoki nie zależy od $N$ (rozdział~\ref{sec:uczenie}). Pola wszystkich neuronów liczą się w około \qty{0.5}{ms}, a krok asynchroniczny na zdjęciach kotów trwa od \num{3.7} do \qty{11.0}{ms}.
-
-\subsection{Odpowiedź na pytanie}
-\label{sec:duze-odpowiedz}
-
-\begin{enumerate}[start=10]
-    \item Na zdjęciach o \num{60000} pikseli reguła Oji stabilizuje i odzyskuje wszystkie wzorce aż do szumu \num{0.45}, a przy zasłonięciu traci je dopiero przy kilkudziesięciu procentach zakrytych wierszy. Reguła Hebba mimo bardzo małego obciążenia stabilizuje tylko zdjęcia o małej sumie nakładań z pozostałymi, a pozostałe zdjęcia kończą w stanach pozornych. Sieć tej wielkości wymaga wag w postaci czynnikowej. Zajmują one kilka megabajtów zamiast \qty{26.8}{GiB}, a uczenie i odtwarzanie trwają milisekundy.
-\end{enumerate}

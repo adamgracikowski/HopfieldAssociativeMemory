@@ -87,13 +87,3 @@ Nakładania obu zbiorów pokazano na Rysunku~\ref{fig:nakladania-25x50}. Pary pr
     \caption{Odsetek odzyskanych wzorców w zależności od poziomu szumu dla zbiorów \texttt{large-*} (100 prób na wzorzec, słupki to 95-procentowe przedziały Wilsona). Linie obu trybów dla reguły Oji prawie się pokrywają.}
     \label{fig:odzyskiwanie-large}
 \end{figure}
-
-\subsection{Odpowiedzi na pytania}
-\label{sec:stabilnosc-odpowiedzi}
-
-\begin{enumerate}
-    \item Reguła Oji w wariancie podprzestrzeni stabilizuje wszystkie 74 wzorce dostarczonych zbiorów, reguła Hebba 12 z nich, a wariant jednoneuronowy żadnego.
-    \item Przy regule Oji sieć uczy się poprawnie wszystkich zbiorów. Przy regule Hebba żaden zbiór nie jest zapamiętany w całości, a większość wzorców jest stabilna tylko w \texttt{large-25x25} i \texttt{small-7x7}.
-    \item Wzorce nie są stabilne, gdy suma ich nakładań z pozostałymi wzorcami jest duża w porównaniu z sygnałem. Dzieje się tak w zbiorach ze wspólnym tłem lub wspólną częścią, nawet przy małym obciążeniu $p/N$. W zbiorze liter niestabilne są wyłącznie piksele, w których litera różni się od większości pozostałych liter. Reguła Oji usuwa ten efekt, bo zbiega do rzutu na podprzestrzeń wzorców.
-    \item Wspólna dolna połowa bitmap \mbox{25x50} zwiększa wszystkie nakładania zgodnie z~\eqref{eq:nakladanie-25x50}, więc przy regule Hebba żaden wzorzec nie jest stabilny i sieć nie odzyskuje żadnego wzorca. Przy regule Oji oba zbiory są odzyskiwane tak samo dobrze.
-\end{enumerate}
