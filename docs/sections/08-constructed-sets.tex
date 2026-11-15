@@ -6,14 +6,14 @@ Rozdział opisuje dwa zbiory skonstruowane na potrzeby zadania: możliwie liczny
 \subsection{Zbiór stabilnych wzorców}
 \label{sec:zbiory-stabilne}
 
-Punktem wyjścia jest reguła rzutowa~\eqref{eq:rzut}, czyli granica reguły Oji. Rzut $P$ spełnia $P \xi = \xi$ dla każdego wektora z podprzestrzeni wzorców, a nie tylko dla wzorców uczących. Po wyzerowaniu przekątnej stabilna jest więc każda bitmapa leżąca w tej podprzestrzeni, o ile $P_{ii} < 1$ (rozdział~\ref{sec:regula-oji}). Liczny zbiór stabilnych wzorców to zatem podprzestrzeń zawierająca jak najwięcej wektorów o współrzędnych $\pm 1$. Podprzestrzeń wymiaru 25 to cała przestrzeń, dla której $P = I$ i po wyzerowaniu przekątnej wszystkie wagi są zerowe. Dlatego szukano hiperpłaszczyzny wymiaru 24, czyli zbioru
+Punktem wyjścia jest reguła rzutowa~\eqref{eq:rzut}, czyli granica reguły Oji. Rzut $P$ spełnia $P \xi = \xi$ dla każdego wektora z podprzestrzeni wzorców, a nie tylko dla wzorców uczących. Po wyzerowaniu przekątnej stabilna jest więc każda bitmapa leżąca w tej podprzestrzeni, o ile $P_{ii} < 1$ (rozdział~\ref{sec:regula-oji}). Licznego zbioru stabilnych wzorców należy więc szukać w podprzestrzeni zawierającej jak najwięcej wektorów o współrzędnych $\pm 1$. Podprzestrzeń wymiaru 25 to cała przestrzeń, dla której $P = I$ i po wyzerowaniu przekątnej wszystkie wagi są zerowe. Dlatego szukano hiperpłaszczyzny wymiaru 24, czyli zbioru
 \begin{equation}
     S_u = \left\{\xi \in \{-1, 1\}^{25} : u \cdot \xi = 0\right\}
     \label{eq:hiperplaszczyzna}
 \end{equation}
 dla wektora $u$ o niezerowych współrzędnych. Zmiana znaku albo kolejności współrzędnych $u$ odpowiada odbiciu lub permutacji pikseli i nie zmienia ani liczności, ani stabilności zbioru, więc wystarczy rozważyć ciągi niemalejące o dodatnich wyrazach.
 
-Przeszukano wszystkie 349 takich ciągów o wyrazach od 1 do 3 i bez wspólnego dzielnika większego niż 1. Liczność $\lvert S_u \rvert$ policzono dokładnie dla każdego z nich, a stabilność pięciu najliczniejszych zbiorów sprawdzono, przeglądając wszystkie $2^{25}$ stanów. Wymagano stabilności ścisłej, czyli dodatniego pola wyrównanego $\xi_i h_i$ w każdym pikselu, bo przy zerowych polach stabilny byłby każdy stan, na przykład dla $W = 0$. Reguła Hebba uczyła się na całym zbiorze $S_u$, a reguła Oji na bazie złożonej z 24 liniowo niezależnych elementów $S_u$. Baza rozpina tę samą hiperpłaszczyznę, więc granica uczenia jest taka sama jak dla całego zbioru. Wyniki zebrano w Tabeli~\ref{tab:kandydaci}.
+Przeszukano wszystkie 349 takich ciągów o wyrazach od 1 do 3 i bez wspólnego dzielnika większego niż 1. Liczność $\lvert S_u \rvert$ policzono dokładnie dla każdego z nich, a stabilność pięciu najliczniejszych zbiorów sprawdzono, przeglądając wszystkie $2^{25}$ stanów. Wymagano stabilności ścisłej, czyli dodatniego pola wyrównanego $\xi_i h_i$ w każdym pikselu, bo przy zerowych polach stabilny byłby każdy stan, na przykład dla $W = 0$. Sieć uczono regułą Hebba na całym zbiorze $S_u$, a regułą Oji na bazie złożonej z 24 liniowo niezależnych elementów $S_u$. Baza rozpina tę samą hiperpłaszczyznę, więc granica uczenia jest taka sama jak dla całego zbioru. Wyniki zebrano w Tabeli~\ref{tab:kandydaci}.
 
 \begin{table}[H]
     \centering
@@ -41,12 +41,12 @@ Przy regule Hebba stabilność zależy od $u$ (Tabela~\ref{tab:kandydaci}). Dla 
     \xi_i h_i = \frac{\lvert S_u \rvert}{276 N} \left(10 - 3 \xi_i \xi_{25}\right) \quad \text{dla } i \le 24, \qquad \xi_{25} h_{25} = \frac{\lvert S_u \rvert}{6 N}.
     \label{eq:pole-su}
 \end{equation}
-Pole~\eqref{eq:pole-su} jest dodatnie dla każdego elementu $S_u$, a jego najmniejsza wartość $7 \lvert S_u \rvert / (276 N) = \num{5064.64}$ jest równa zmierzonej. Stabilność jest jednak własnością całego zbioru, a nie każdego jego podzbioru. Sieć nauczona regułą Hebba tylko na 24 bitmapach z Rysunku~\ref{fig:stabilne-probka} stabilizuje jedną z nich.
+Pole wyrównane~\eqref{eq:pole-su} jest dodatnie dla każdego elementu $S_u$, a jego najmniejsza wartość $7 \lvert S_u \rvert / (276 N) = \num{5064.64}$ jest równa zmierzonej. Stabilność jest jednak własnością całego zbioru, a nie każdego jego podzbioru. Sieć nauczona regułą Hebba tylko na 24 bitmapach z Rysunku~\ref{fig:stabilne-probka} stabilizuje jedną z nich.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{stable-5x5/figures/sample.pdf}
-    \caption{Przykładowe elementy zbioru $S_u$ dla $u = (1, \ldots, 1, 2)$. Waga 2 dotyczy prawego dolnego piksela.}
+    \caption{Przykładowe elementy zbioru $S_u$ dla $u = (1, \ldots, 1, 2)$. Współrzędna $u_{25} = 2$ odpowiada prawemu dolnemu pikselowi.}
     \label{fig:stabilne-probka}
 \end{figure}
 

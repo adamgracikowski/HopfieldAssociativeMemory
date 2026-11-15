@@ -6,7 +6,7 @@ Rozdział opisuje zbiory wzorców użyte w eksperymentach oraz wspólne dla wszy
 \subsection{Zbiory wzorców}
 \label{sec:zbiory}
 
-Do zadania dostarczono osiem zbiorów bitmap, pokazanych na Rysunku~\ref{fig:zbiory}. Zbiór \mbox{\texttt{small-7x7}} zawiera pięć prostych kształtów geometrycznych, \mbox{\texttt{letters-abc-8x12}} trzy małe litery a, b i c, \mbox{\texttt{animals-14x9}} sześć sylwetek zwierząt, a \mbox{\texttt{letters-14x20}} wszystkie 26 małych liter alfabetu łacińskiego. Zbiór \mbox{\texttt{OCRA-12x30-cut}} zawiera siedem wielkich liter kroju OCR-A przyciętych do \mbox{12x30} pikseli. Zbiór \mbox{\texttt{large-25x25}} to sześć większych obrazków (słońce, dom, szachownica, strzałka, pionowe pasy i napis z liter), a \mbox{\texttt{large-25x25.plus}} to te same obrazki i dziewięć kolejnych. Zbiór \mbox{\texttt{large-25x50}} zawiera obrazki z \mbox{\texttt{large-25x25}} w górnej połowie bitmapy, a dolna połowa jest w całości czarna. W nazwach zbiorów wymiary podano jako szerokość x wysokość, a piksel czarny odpowiada stanowi $+1$.
+Do zadania dostarczono osiem zbiorów bitmap, pokazanych na Rysunku~\ref{fig:zbiory}. Wzorce w każdym zbiorze numeruje się od 0, tak jak na rysunkach. Zbiór \mbox{\texttt{small-7x7}} zawiera pięć prostych kształtów geometrycznych, \mbox{\texttt{letters-abc-8x12}} trzy małe litery a, b i c, \mbox{\texttt{animals-14x9}} sześć sylwetek zwierząt, a \mbox{\texttt{letters-14x20}} wszystkie 26 małych liter alfabetu łacińskiego. Zbiór \mbox{\texttt{OCRA-12x30-cut}} zawiera siedem wielkich liter kroju OCR-A przyciętych do \mbox{12x30} pikseli. Zbiór \mbox{\texttt{large-25x25}} to sześć większych obrazków (słońce, dom, szachownica, strzałka, pionowe pasy i napis z liter), a \mbox{\texttt{large-25x25.plus}} to te same obrazki i dziewięć kolejnych. Zbiór \mbox{\texttt{large-25x50}} zawiera obrazki z \mbox{\texttt{large-25x25}} w górnej połowie bitmapy, a dolna połowa jest w całości czarna. W nazwach zbiorów wymiary podano jako szerokość x wysokość, a piksel czarny odpowiada stanowi $+1$.
 
 \begin{figure}[H]
     \centering
@@ -49,7 +49,7 @@ Do zadania dostarczono osiem zbiorów bitmap, pokazanych na Rysunku~\ref{fig:zbi
     \begin{subfigure}[b]{\textwidth}
         \centering
         \includegraphics[width=\linewidth]{{stability/figures/patterns-large-25x25.plus}.pdf}
-        \caption{\texttt{large-25x25.plus}, której pierwsze sześć wzorców tworzy zbiór \texttt{large-25x25}}
+        \caption{\texttt{large-25x25.plus}, którego pierwsze sześć wzorców tworzy zbiór \texttt{large-25x25}}
     \end{subfigure}
     \caption{Wzorce dostarczonych zbiorów. Nad każdą bitmapą podano numer wzorca w zbiorze.}
     \label{fig:zbiory}
@@ -86,7 +86,7 @@ Do zadania dostarczono osiem zbiorów bitmap, pokazanych na Rysunku~\ref{fig:zbi
     \end{tabular}
 \end{table}
 
-\noindent Wszystkie dostarczone zbiory mają obciążenie znacznie mniejsze niż granica $\num{0.138} N$ dla wzorców losowych, ale ich wzorce nie są losowe. Litery zajmują mały fragment bitmapy (od \qtyrange{8}{23}{\percent} pikseli czarnych w \mbox{\texttt{letters-14x20}}), więc dwie różne litery zgadzają się w większości pikseli wspólnego białego tła. Stąd średnie nakładanie $\num{0.806}$ w \mbox{\texttt{letters-abc-8x12}} i $\num{0.728}$ w \mbox{\texttt{letters-14x20}}, gdzie najbardziej podobna para liter ma $\lvert m \rvert = \num{0.986}$. Zbiory \mbox{\texttt{large-25x25}} i \mbox{\texttt{large-25x50}} zawierają te same obrazki, a mimo to średnie nakładanie w drugim jest około cztery razy większe, bo wspólna czarna połowa bitmapy jest identyczna we wszystkich wzorcach.
+\noindent Wszystkie dostarczone zbiory mają obciążenie $p/N$ mniejsze niż granica \num{0.138} dla wzorców losowych, ale ich wzorce nie są losowe. Litery zajmują mały fragment bitmapy (od \qty{8}{\percent} do \qty{23}{\percent} pikseli czarnych w \mbox{\texttt{letters-14x20}}), więc dwie różne litery zgadzają się w większości pikseli wspólnego białego tła. Stąd średnie nakładanie $\num{0.806}$ w \mbox{\texttt{letters-abc-8x12}} i $\num{0.728}$ w \mbox{\texttt{letters-14x20}}, gdzie najbardziej podobna para liter ma $\lvert m \rvert = \num{0.986}$. Zbiory \mbox{\texttt{large-25x25}} i \mbox{\texttt{large-25x50}} zawierają te same obrazki, a mimo to średnie nakładanie w drugim jest około czterech razy większe, bo wspólna czarna połowa bitmapy jest identyczna we wszystkich wzorcach.
 
 \subsection{Zbiory grupowe i zdjęcia}
 \label{sec:zbiory-dodatkowe}
@@ -96,24 +96,24 @@ Do porównania zbioru z grupami podobnych wzorców ze zbiorem zróżnicowanym pr
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{groups/figures/patterns-d05.pdf}
-    \caption{Zbiór \texttt{groups-25x25-d05}: wzorce 0-4, 5-9 i 10-14 to warianty obrazków 0, 2 i 4 ze zbioru \texttt{large-25x25} z \qty{5}{\percent} odwróconych pikseli.}
+    \caption{Zbiór \texttt{groups-25x25-d05}: wzorce \numrange{0}{4}, \numrange{5}{9} i \numrange{10}{14} to warianty obrazków 0, 2 i 4 ze zbioru \texttt{large-25x25} z \qty{5}{\percent} odwróconych pikseli.}
     \label{fig:grupy}
 \end{figure}
 
-\noindent Eksperyment na dużych bitmapach przeprowadzono na dwunastu zdjęciach kotów z serwisu Wikimedia Commons, wymienionych w dodatku~\ref{app:zrodla-zdjec}. Każde zdjęcie przycięto do proporcji 3:2, przeskalowano do \mbox{300x200} pikseli ($N = \num{60000}$) i zamieniono na odcienie szarości. Zbiór \mbox{\texttt{cats-300x200-median}} powstał przez progowanie na medianie jasności zdjęcia, więc każda bitmapa ma prawie dokładnie połowę pikseli czarnych. Zbiór \mbox{\texttt{cats-300x200-dither}} powstał przez rozpraszanie błędu metodą Floyda-Steinberga (ang. \textit{dithering}), które oddaje jasność gęstością czarnych pikseli. Jego wzorce mają mniejsze nakładania, ale różne udziały pikseli czarnych (Tabela~\ref{tab:zbiory}). W obu zbiorach piksel ciemny odpowiada stanowi $+1$.
+\noindent Eksperyment na dużych bitmapach przeprowadzono na dwunastu zdjęciach kotów z serwisu Wikimedia Commons, wymienionych w dodatku~\ref{app:zrodla-zdjec}. Każde zdjęcie przycięto do proporcji 3:2, przeskalowano do \mbox{300x200} pikseli ($N = \num{60000}$) i zamieniono na odcienie szarości. Zbiór \mbox{\texttt{cats-300x200-median}} powstał przez progowanie z progiem równym medianie jasności zdjęcia, więc każda bitmapa ma prawie dokładnie połowę pikseli czarnych. Zbiór \mbox{\texttt{cats-300x200-dither}} powstał przez rozpraszanie błędu metodą Floyda-Steinberga (ang. \textit{error diffusion}), które oddaje jasność gęstością czarnych pikseli. Jego wzorce mają mniejsze nakładania, ale różne udziały pikseli czarnych (Tabela~\ref{tab:zbiory}). W obu zbiorach piksel ciemny odpowiada stanowi $+1$.
 
 \subsection{Wejścia i uszkodzenia}
 \label{sec:uszkodzenia}
 
-Eksperymenty z odtwarzaniem składają się z prób. W jednej próbie każdy wzorzec zbioru po kolei jest celem: zostaje uszkodzony i podany sieci jako stan początkowy. Badano trzy rodzaje wejścia:
+Eksperymenty z odtwarzaniem składają się z prób. W jednej próbie każdy wzorzec zbioru po kolei jest celem jednego przebiegu: zostaje uszkodzony i podany sieci jako stan początkowy. Badano trzy rodzaje wejścia:
 \begin{itemize}
-    \item odwrócenie pikseli: zmienia się znak $\operatorname{round}(fN)$ losowo wybranych pikseli, gdzie $f \in [0; \num{0.5}]$ to poziom uszkodzenia (przy $f = \num{0.5}$ wejście jest średnio nieskorelowane z celem),
+    \item odwrócenie pikseli (dalej: szum): zmienia się znak $\operatorname{round}(fN)$ losowo wybranych pikseli, gdzie $f \in [0; \num{0.5}]$ to poziom uszkodzenia (przy $f = \num{0.5}$ wejście jest średnio nieskorelowane z celem),
     \item zasłonięcie: pas $\operatorname{round}(fH)$ kolejnych wierszy na całej szerokości bitmapy, w losowym miejscu, zostaje ustawiony na $-1$ (biały), gdzie $H$ to wysokość bitmapy,
     \item wejście losowe: każdy piksel jest równy $+1$ albo $-1$ z prawdopodobieństwem $1/2$, niezależnie od wzorców.
 \end{itemize}
 Poziom zasłonięcia jest ułamkiem wierszy, a nie pikseli, więc nie jest porównywalny między zbiorami o różnych wymiarach. Pas zasłaniający zmienia tylko piksele czarne, więc liczba faktycznie zmienionych pikseli zależy od wzorca.
 
-Eksperyment to siatka komórek, z których każda odpowiada jednej kombinacji zbioru, reguły uczenia, trybu dynamiki i poziomu uszkodzenia. W każdej komórce wykonuje się tę samą liczbę prób. Tryb synchroniczny bez uszkodzenia jest deterministyczny, więc w takiej komórce wykonuje się jedną próbę. Wejścia losuje się niezależnie od reguły i trybu (rozdział~\ref{sec:powtarzalnosc}), więc komórki różniące się tylko regułą lub trybem są porównywane na tych samych wejściach.
+Eksperyment to siatka komórek, z których każda odpowiada jednej kombinacji zbioru, reguły uczenia, trybu dynamiki i poziomu uszkodzenia. W każdej komórce wykonuje się tę samą liczbę prób, z wyjątkiem trybu synchronicznego bez uszkodzenia, który jest deterministyczny i ma jedną próbę. Wejścia losuje się niezależnie od reguły i trybu (rozdział~\ref{sec:powtarzalnosc}), więc komórki różniące się tylko regułą lub trybem są porównywane na tych samych wejściach.
 
 \subsection{Stany końcowe i miary skuteczności}
 \label{sec:metryki}
@@ -121,12 +121,12 @@ Eksperyment to siatka komórek, z których każda odpowiada jednej kombinacji zb
 Stan końcowy każdej próby trafia do jednej z pięciu klas: wzorzec (punkt stały równy któremuś wzorcowi zbioru), negacja wzorca, stan pozorny (każdy inny punkt stały), cykl długości 2 oraz brak zbieżności (osiągnięty limit kroków). Klasy są rozstrzygane przez dokładną równość stanów. Skuteczność oceniano następującymi miarami:
 \begin{itemize}
     \item stabilność wzorca: wzorzec jest punktem stałym, gdy dla każdego piksela pole wyrównane $\xi^\mu_i h_i$ (pole lokalne pomnożone przez stan piksela we wzorcu) jest nieujemne, a piksel z ujemnym polem wyrównanym nazywa się niestabilnym,
-    \item odsetek odzyskań: udział prób zakończonych punktem stałym równym celowi (bez uszkodzenia jest to odsetek stabilnych wzorców),
-    \item odsetek prób zakończonych najbliżej celu: udział prób, w których stan końcowy ma z celem nakładanie dodatnie i nie mniejsze niż wartość bezwzględna nakładania z każdym innym wzorcem (miara przydatna, gdy cel nie jest stabilny, ale sieć kończy w stanie do niego podobnym),
+    \item odsetek odzyskań: udział przebiegów zakończonych punktem stałym równym celowi (bez uszkodzenia jest to odsetek stabilnych wzorców),
+    \item odsetek przebiegów zakończonych najbliżej celu: udział przebiegów, w których stan końcowy ma z celem nakładanie dodatnie i nie mniejsze niż wartość bezwzględna nakładania z każdym innym wzorcem (miara przydatna, gdy cel nie jest stabilny, ale sieć kończy w stanie do niego podobnym),
     \item poziomy krytyczne $f_{0,9}$ i $f_{0,5}$: największy poziom uszkodzenia $f$, przy którym odsetek odzyskań wynosi co najmniej $\num{0.9}$ (odpowiednio $\num{0.5}$) dla $f$ i wszystkich mniejszych poziomów siatki (gdy warunek nie zachodzi już bez uszkodzenia, poziom krytyczny nie istnieje).
 \end{itemize}
 
-Odsetki podawane są z 95-procentowym przedziałem ufności Wilsona, danym wzorem~\eqref{eq:wilson}. Dla $k$ sukcesów w $n$ próbach, $\hat p = k/n$ i $z = \num{1.96}$ przedział ma środek i połowę szerokości
+Odsetki podawane są z 95-procentowym przedziałem ufności Wilsona, danym wzorem~\eqref{eq:wilson}. Dla $k$ sukcesów w $n$ próbach, przy $\hat p = k/n$ i $z = \num{1.96}$, przedział ma środek i połowę szerokości
 \begin{equation}
     \frac{\hat p + \frac{z^2}{2n}}{1 + \frac{z^2}{n}}, \qquad \frac{z}{1 + \frac{z^2}{n}} \sqrt{\frac{\hat p (1 - \hat p)}{n} + \frac{z^2}{4n^2}}.
     \label{eq:wilson}
@@ -140,7 +140,7 @@ Przeprowadzone eksperymenty zestawiono w Tabeli~\ref{tab:eksperymenty}. Nazwy od
 
 \begin{table}[H]
     \centering
-    \caption{Eksperymenty. Poziomy podano jako zakres i krok. Próby to liczba prób w komórce (w każdej próbie każdy wzorzec jest raz celem), a dla wejścia losowego liczba wejść w komórce.}
+    \caption{Eksperymenty. Poziomy podano jako zakres i krok. Próby to liczba prób w komórce (w każdej próbie każdy wzorzec jest raz celem), a dla wejścia losowego liczba wejść w komórce. Prefiks zbioru to jego pierwsze $p$ wzorców.}
     \label{tab:eksperymenty}
     \small
     \begin{tabularx}{\textwidth}{>{\ttfamily}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{4.1cm} r}
