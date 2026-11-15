@@ -17,6 +17,8 @@
 \usepackage{array}
 \usepackage{enumitem}
 \usepackage[colorlinks=true, linkcolor=black, urlcolor=black, citecolor=black]{hyperref}
+% Łamanie długich adresów w dowolnym miejscu (tabela źródeł zdjęć)
+\usepackage{xurl}
 \usepackage{csquotes}
 \usepackage[backend=biber,style=numeric,sorting=none,maxbibnames=4]{biblatex}
 \addbibresource{references.bib}
@@ -174,6 +176,9 @@
 
 %----------------------------------------------------------------------
 \appendix
-% dodatkowa sekcja: jak odtworzyć wyniki
+\clearpage
+\input{sections/11-photo-sources}
+\clearpage
+\input{sections/12-reproduction}
 
 \end{document}
