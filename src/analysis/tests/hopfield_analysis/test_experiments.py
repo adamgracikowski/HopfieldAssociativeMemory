@@ -16,7 +16,7 @@ from hopfield_analysis.experiments import (
     plot_recovery,
 )
 
-EXAMPLE = Path(__file__).parents[4] / "data" / "experiments" / "00-example" / "results"
+EXAMPLE = Path(__file__).parents[4] / "data" / "experiments" / "example" / "results"
 OCCLUSION = Path(__file__).parents[1] / "fixtures" / "occlusion"
 
 

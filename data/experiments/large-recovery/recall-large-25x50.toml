@@ -1,0 +1,22 @@
+# Recall of an unstable stored pattern: pattern 0 of large-25x50 trained
+# with the Hebbian rule, given without noise, synchronous updates. The
+# pattern is not a fixed point and the state moves to a spurious state.
+#
+# Run from src/compute:
+#   cargo run --release -- recall --config ../../data/experiments/large-recovery/recall-large-25x50.toml --out ../../data/experiments/large-recovery/runs/recall-large-25x50
+# Plot from src/analysis:
+#   uv run hopfield-analysis frames ../../data/experiments/large-recovery/runs/recall-large-25x50 --out ../../data/experiments/large-recovery/figures/recall-large-25x50
+
+dataset = "large-25x50"
+seed = 20261106
+
+[learning]
+rule = "hebb"
+
+[dynamics]
+mode = "synchronous"
+
+[input]
+source = "pattern"
+index = 0
+flips = 0

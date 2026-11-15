@@ -1,0 +1,23 @@
+# Recall from an occluded input: pattern 0 of large-25x25 with a band of
+# round(0.3 * 25) = 8 rows at a random position set to -1, trained with
+# the Hebbian rule, synchronous updates. The same seed gives the same input
+# for both rules.
+#
+# Run from src/compute:
+#   cargo run --release -- recall --config ../../data/experiments/occlusion/recall-occlusion-hebb.toml --out ../../data/experiments/occlusion/runs/recall-occlusion-hebb
+# Report figure, from src/analysis:
+#   uv run hopfield-analysis frames ../../data/experiments/occlusion/runs/recall-occlusion-hebb --width 0.8 --out ../../data/experiments/occlusion/figures/recall-occlusion-hebb
+
+dataset = "large-25x25"
+seed = 20261110
+
+[learning]
+rule = "hebb"
+
+[dynamics]
+mode = "synchronous"
+
+[input]
+source = "occlusion"
+index = 0
+rows = 8

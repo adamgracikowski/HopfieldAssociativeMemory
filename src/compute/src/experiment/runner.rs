@@ -326,7 +326,7 @@ mod tests {
     fn config(text: &str) -> ExperimentConfig {
         ExperimentConfig::parse(
             text,
-            Path::new("../../data/experiments/00-example/config.toml"),
+            Path::new("../../data/experiments/example/config.toml"),
         )
         .unwrap()
     }
@@ -468,7 +468,7 @@ mod tests {
                 );
                 let config = RunConfig::parse(
                     &text,
-                    Path::new("../../data/experiments/00-example/recall.toml"),
+                    Path::new("../../data/experiments/example/recall.toml"),
                 )
                 .unwrap();
                 let summary = RecallRun::execute(&config).unwrap().summary();
@@ -522,7 +522,7 @@ mod tests {
                     );
                     let config = RunConfig::parse(
                         &text,
-                        Path::new("../../data/experiments/00-example/recall.toml"),
+                        Path::new("../../data/experiments/example/recall.toml"),
                     )
                     .unwrap();
                     let summary = RecallRun::execute(&config).unwrap().summary();
@@ -599,7 +599,7 @@ mod tests {
                 );
                 let config = RunConfig::parse(
                     &text,
-                    Path::new("../../data/experiments/00-example/recall.toml"),
+                    Path::new("../../data/experiments/example/recall.toml"),
                 )
                 .unwrap();
                 let summary = RecallRun::execute(&config).unwrap().summary();
@@ -669,7 +669,7 @@ source = \"random\"
             );
             let config = RunConfig::parse(
                 &text,
-                Path::new("../../data/experiments/00-example/recall.toml"),
+                Path::new("../../data/experiments/example/recall.toml"),
             )
             .unwrap();
             let recall = RecallRun::execute(&config).unwrap();

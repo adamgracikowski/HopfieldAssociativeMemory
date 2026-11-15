@@ -10,7 +10,7 @@ Odsetek odzyskań przy odwróceniu losowych pikseli pokazano na Rysunku~\ref{fig
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{09-noise/figures/recovery.pdf}
+    \includegraphics[width=0.75\textwidth]{noise/figures/recovery.pdf}
     \caption{Odsetek odzyskanych wzorców w zależności od poziomu szumu dla ośmiu dostarczonych zbiorów (100 prób na wzorzec, słupki to 95-procentowe przedziały Wilsona).}
     \label{fig:odzyskiwanie-szum}
 \end{figure}
@@ -46,10 +46,10 @@ Poziomy krytyczne reguły Oji dla obu rodzajów uszkodzenia zebrano w Tabeli~\re
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{09-occlusion/figures/recall-occlusion-hebb.pdf}
+    \includegraphics[width=0.8\textwidth]{occlusion/figures/recall-occlusion-hebb.pdf}
 
     \vspace{0.3cm}
-    \includegraphics[width=0.4\textwidth]{09-occlusion/figures/recall-occlusion-oja.pdf}
+    \includegraphics[width=0.4\textwidth]{occlusion/figures/recall-occlusion-oja.pdf}
     \caption{Odtwarzanie wzorca 0 zbioru \texttt{large-25x25} z wejścia z zasłoniętymi 8 wierszami (118 zmienionych pikseli, tryb synchroniczny, to samo wejście w klatce 0). Górny wykres: reguła Hebba. Dolny wykres: reguła Oji.}
     \label{fig:zasloniecie-przebieg}
 \end{figure}
@@ -61,7 +61,7 @@ Wpływ liczby wzorców zbadano na początkowych fragmentach zbiorów \texttt{lar
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{09-load/figures/load.pdf}
+    \includegraphics[width=0.65\textwidth]{load/figures/load.pdf}
     \caption{Odsetek odzyskanych wzorców w zależności od liczby wzorców $p$ dla początkowych fragmentów zbiorów \texttt{large-25x25.plus} (górne wykresy) i \texttt{letters-14x20} (dolne wykresy), dla czterech poziomów szumu w trybie synchronicznym. Lewa kolumna: reguła Hebba. Prawa kolumna: reguła Oji.}
     \label{fig:licznosc}
 \end{figure}
@@ -73,7 +73,7 @@ Zbiory grupowe (rozdział~\ref{sec:zbiory-dodatkowe}, Rysunek~\ref{fig:grupy}) m
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{09-groups/figures/recovery.pdf}
+    \includegraphics[width=0.65\textwidth]{groups/figures/recovery.pdf}
     \caption{Odsetek odzyskanych wzorców w zależności od poziomu szumu dla zbiorów grupowych i zróżnicowanego zbioru \texttt{large-25x25.plus} o tej samej liczności (100 prób na wzorzec). Linie reguły Hebba w trybach synchronicznym i asynchronicznym się pokrywają.}
     \label{fig:odzyskiwanie-grupy}
 \end{figure}
@@ -84,7 +84,7 @@ Reguła Hebba nie stabilizuje żadnego wariantu i zlewa każdą grupę w jeden s
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{09-groups/figures/recall-groups-hebb.pdf}
+    \includegraphics[width=0.5\textwidth]{groups/figures/recall-groups-hebb.pdf}
     \caption{Odtwarzanie wariantu 0 zbioru \texttt{groups-25x25-d05} bez szumu przy regule Hebba (tryb synchroniczny). Stan w klatce 1 to punkt stały.}
     \label{fig:grupy-przebieg}
 \end{figure}

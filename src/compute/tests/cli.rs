@@ -938,7 +938,7 @@ fn experiment_requires_a_seed() {
 /// byte.
 #[test]
 fn example_experiment_matches_the_committed_results() {
-    let example = Path::new("../../data/experiments/00-example");
+    let example = Path::new("../../data/experiments/example");
     let committed = example.join("results");
     let dir = tempfile::tempdir().unwrap();
     for threads in ["1", "4"] {
@@ -1121,7 +1121,7 @@ fn checkerboard_oscillates_in_the_network_of_the_cycle_shapes() {
     let dir = tempfile::tempdir().unwrap();
     let out = dir.path().join("run");
     recall(
-        Path::new("../../data/experiments/11-cycle/recall-cycle.toml"),
+        Path::new("../../data/experiments/cycle/recall-cycle.toml"),
         &out,
     )
     .success();
@@ -1209,7 +1209,7 @@ fn same_file(out: &Path, expected: &Path, name: &str) -> bool {
 /// train Oja's subspace rule for many epochs and are too slow for a test).
 #[test]
 fn single_neuron_stability_matches_the_committed_results() {
-    let experiment_dir = Path::new("../../data/experiments/08-stability-single-neuron");
+    let experiment_dir = Path::new("../../data/experiments/stability-single-neuron");
     let committed = experiment_dir.join("results");
     let dir = tempfile::tempdir().unwrap();
     let out = dir.path().join("run");

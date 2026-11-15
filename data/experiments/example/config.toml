@@ -1,0 +1,24 @@
+# Example experiment: recovery of damaged patterns on two small datasets,
+# with both learning rules and both update modes.
+#
+# Run from src/compute:
+#   cargo run --release -- experiment --config ../../data/experiments/example/config.toml
+# Plot from src/analysis:
+#   uv run hopfield-analysis recovery ../../data/experiments/example/results --out ../../data/experiments/example/plots/recovery.png
+
+seed = 20261105
+datasets = ["small-7x7", "animals-14x9"]
+trials = 20
+
+[[learning]]
+rule = "hebb"
+
+[[learning]]
+rule = "oja"
+
+[dynamics]
+modes = ["synchronous", "asynchronous"]
+
+[input]
+source = "pattern"
+noise = [0.0, 0.1, 0.2, 0.3]

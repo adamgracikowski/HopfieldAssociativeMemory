@@ -1,0 +1,24 @@
+# Recovery of damaged patterns on the 25 x 25 and 25 x 50 sets: the same
+# shapes, the 25 x 50 patterns padded with a bottom half of +1.
+#
+# Run from src/compute:
+#   cargo run --release -- experiment --config ../../data/experiments/large-recovery/config.toml
+# Report figure, from src/analysis:
+#   uv run hopfield-analysis recovery ../../data/experiments/large-recovery/results --out ../../data/experiments/large-recovery/figures/recovery
+
+seed = 20261106
+datasets = ["large-25x25", "large-25x25.plus", "large-25x50"]
+trials = 100
+
+[[learning]]
+rule = "hebb"
+
+[[learning]]
+rule = "oja"
+
+[dynamics]
+modes = ["synchronous", "asynchronous"]
+
+[input]
+source = "pattern"
+noise = [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]

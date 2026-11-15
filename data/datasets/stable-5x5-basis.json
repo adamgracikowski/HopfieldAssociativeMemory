@@ -5,7 +5,7 @@
     "commit": "ef6dcb65f7aaaf07a333cbff48a486e7d9e41f22",
     "dirty": false
   },
-  "config": "../experiments/11-stable/config.toml",
+  "config": "../experiments/stable-5x5/config.toml",
   "weights": [
     1,
     1,
