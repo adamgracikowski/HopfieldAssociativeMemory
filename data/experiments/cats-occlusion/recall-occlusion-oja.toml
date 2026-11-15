@@ -8,6 +8,8 @@
 #   cargo run --release -- recall --config ../../data/experiments/cats-occlusion/recall-occlusion-oja.toml --out ../../data/experiments/cats-occlusion/runs/recall-occlusion-oja
 # Report figure, from src/analysis:
 #   uv run hopfield-analysis frames ../../data/experiments/cats-occlusion/runs/recall-occlusion-oja --max 5 --width 0.8 --out ../../data/experiments/cats-occlusion/figures/recall-occlusion-oja
+# README animation, from src/analysis:
+#   uv run hopfield-analysis animate ../../data/experiments/cats-occlusion/runs/recall-occlusion-oja --scale 2 --duration 150 --hold 2000 --out ../../data/experiments/cats-occlusion/figures/recall-occlusion-oja.gif
 
 dataset = "cats-300x200-median"
 seed = 20261113

@@ -9,6 +9,8 @@
 #   cargo run --release -- recall --config ../../data/experiments/cats-occlusion/recall-occlusion-hebb.toml --out ../../data/experiments/cats-occlusion/runs/recall-occlusion-hebb
 # Report figure, from src/analysis:
 #   uv run hopfield-analysis frames ../../data/experiments/cats-occlusion/runs/recall-occlusion-hebb --max 5 --width 0.8 --out ../../data/experiments/cats-occlusion/figures/recall-occlusion-hebb
+# README animation, from src/analysis:
+#   uv run hopfield-analysis animate ../../data/experiments/cats-occlusion/runs/recall-occlusion-hebb --scale 2 --duration 150 --hold 2000 --out ../../data/experiments/cats-occlusion/figures/recall-occlusion-hebb.gif
 # The step viewer at frame 20 (overlap with the target near its largest
 # value), for the implementation chapter:
 #   uv run hopfield-analysis view ../../data/experiments/cats-occlusion/runs/recall-occlusion-hebb --frame 20 --out ../../data/experiments/cats-occlusion/figures/viewer-occlusion-hebb
