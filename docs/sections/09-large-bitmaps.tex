@@ -6,7 +6,7 @@ Rozdział sprawdza, jak obie reguły radzą sobie ze zdjęciami kotów o $N = \n
 \subsection{Stabilność wzorców}
 \label{sec:duze-stabilnosc}
 
-Reguła Oji stabilizuje wszystkie 12 zdjęć w obu zbiorach, a reguła Hebba tylko 2 zdjęcia zbioru \texttt{cats-300x200-median} i 8 zdjęć zbioru \texttt{cats-300x200-dither}. Niestabilne piksele zbioru median pokazano na Rysunku~\ref{fig:koty-niestabilne}. Obciążenie $p/N = 2 \cdot 10^{-4}$ jest wielokrotnie mniejsze niż granica \num{0.138} dla wzorców losowych, więc o niepowodzeniu reguły Hebba decydują korelacje zdjęć, a nie ich liczba. Suma $\sum_{\mu \ne \nu} \lvert m^{\mu\nu} \rvert$ nakładań jednego zdjęcia z pozostałymi wynosi od \num{0.85} do \num{2.32} w zbiorze median i od \num{0.18} do \num{1.59} w zbiorze dither. Warunek wystarczający z rozdziału~\ref{sec:regula-hebba}, czyli suma mniejsza niż $1 - p/N$, jest spełniony dokładnie dla tych zdjęć, które są stabilne. Zbiór dither ma mniejsze nakładania i dlatego więcej stabilnych wzorców, mimo że udział czarnych pikseli jest w nim bardziej nierówny (Tabela~\ref{tab:zbiory}).
+Reguła Oji stabilizuje wszystkie 12 zdjęć w obu zbiorach, a reguła Hebba tylko 2 zdjęcia zbioru \texttt{cats-300x200-median} i 8 zdjęć zbioru \texttt{cats-300x200-dither}. Niestabilne piksele zbioru median pokazano na Rysunku~\ref{fig:koty-niestabilne}. Obciążenie $p/N = \num{2e-4}$ jest wielokrotnie mniejsze niż granica \num{0.138} dla wzorców losowych, więc o niepowodzeniu reguły Hebba decydują korelacje zdjęć, a nie ich liczba. Suma $\sum_{\mu \ne \nu} \lvert m^{\mu\nu} \rvert$ nakładań jednego zdjęcia z pozostałymi wynosi od \num{0.85} do \num{2.32} w zbiorze median i od \num{0.18} do \num{1.59} w zbiorze dither. Warunek wystarczający z rozdziału~\ref{sec:regula-hebba}, czyli suma mniejsza niż $1 - p/N$, jest spełniony dokładnie dla tych zdjęć, które są stabilne. Zbiór dither ma mniejsze nakładania i dlatego więcej stabilnych wzorców, mimo że udział czarnych pikseli jest w nim bardziej nierówny (Tabela~\ref{tab:zbiory}).
 
 \begin{figure}[H]
     \centering
@@ -38,9 +38,9 @@ Odsetek odzyskań przy odwróceniu losowych pikseli pokazano na Rysunku~\ref{fig
     \label{fig:koty-zasloniecie}
 \end{figure}
 
-\noindent Przy regule Oji w zbiorze dither od zasłonięcia \num{0.7} prawie wszystkie przebiegi kończą w negacji. W obu trybach łącznie w \num{2022} z \num{2190} takich przebiegów przy \num{0.7} i we wszystkich przy \num{0.8} jest to negacja wzorca 1. Wzorzec 1 jest najjaśniejszym zdjęciem zbioru (\qty{81.7}{\percent} pikseli czarnych), więc jego negacja jest prawie cała biała, tak jak pas zasłonięcia. Dla \num{0.888} możliwych położeń pasa przy zasłonięciu \num{0.7} i dla wszystkich przy \num{0.8} zasłonięte wejście ma największe nakładanie właśnie z $-\xi^1$, a nie z celem.
+\noindent Przy regule Oji w zbiorze dither od zasłonięcia \num{0.7} prawie wszystkie przebiegi kończą w negacji. W obu trybach łącznie w \num{2022} z \num{2190} takich przebiegów przy \num{0.7} i we wszystkich przy \num{0.8} jest to negacja wzorca 1. Wzorzec 1 jest najciemniejszym zdjęciem zbioru (\qty{81.7}{\percent} pikseli czarnych), więc jego negacja jest prawie cała biała, tak jak pas zasłonięcia. Dla \qty{88.8}{\percent} możliwych położeń pasa przy zasłonięciu \num{0.7} i dla wszystkich przy \num{0.8} zasłonięte wejście ma największe nakładanie właśnie z $-\xi^1$, a nie z celem.
 
-Przebieg odtwarzania jednego zdjęcia z połową zasłoniętych wierszy pokazano na Rysunku~\ref{fig:koty-przebieg}, a przebieg reguły Hebba także w przeglądarce na Rysunku~\ref{fig:przegladarka}. Reguła Hebba po 10 krokach kończy w stanie pozornym, którego nakładanie z celem wynosi tylko \num{0.396}, a z wzorcem 10 \num{0.665}. Reguła Oji odtwarza cel po 2 krokach, a energia końcowa $\num{-29993.87}$ jest bliska najmniejszej energii $-(N - r)/2 = \num{-29994}$ z~\eqref{eq:energia-rzut} dla $r = 12$.
+Przebieg odtwarzania jednego zdjęcia z połową zasłoniętych wierszy pokazano na Rysunku~\ref{fig:koty-przebieg}, a przebieg reguły Hebba także w przeglądarce na Rysunku~\ref{fig:przegladarka}. Przy regule Hebba sieć po 10 krokach kończy w stanie pozornym, którego nakładanie z celem wynosi tylko \num{0.396}, a ze wzorcem 10 aż \num{0.665}. Reguła Oji odtwarza cel po 2 krokach, a energia końcowa $\num{-29993.87}$ jest bliska najmniejszej energii $-(N - r)/2 = \num{-29994}$ z~\eqref{eq:energia-rzut} dla $r = 12$.
 
 \begin{figure}[H]
     \centering
@@ -55,7 +55,7 @@ Przebieg odtwarzania jednego zdjęcia z połową zasłoniętych wierszy pokazano
 \subsection{Czas i pamięć}
 \label{sec:czas-pamiec}
 
-Czas i pamięć uczenia oraz odtwarzania zmierzono dla 12 losowych wzorców przy $N$ od \num{1024} do \num{60000} i dla obu zbiorów kotów (Rysunek~\ref{fig:benchmark}). Każda wartość to mediana z 5 powtórzeń na komputerze z procesorem Intel Core i5-1145G7 (8 wątków) i \qty{15.4}{GB} pamięci RAM. Wagi gęste zajmują dokładnie $8N^2$ bajtów, więc pomiary zakończono na $N = \num{16384}$ (\qty{2}{GiB}). Przy $N = \num{60000}$ potrzebowałyby \qty{26.8}{GiB}, czyli więcej niż pamięć komputera. Czas uczenia, liczenia pól i kroku asynchronicznego rośnie dla nich w przybliżeniu jak $N^2$.
+Czas i pamięć uczenia oraz odtwarzania zmierzono dla 12 losowych wzorców przy $N$ od \num{1024} do \num{60000} i dla obu zbiorów kotów (Rysunek~\ref{fig:benchmark}). Każda wartość to mediana z 5 powtórzeń na komputerze z procesorem Intel Core i5-1145G7 (8 wątków) i \qty{15.4}{GB} pamięci RAM. Wagi gęste zajmują dokładnie $8N^2$ bajtów, więc pomiary wag gęstych zakończono przy $N = \num{16384}$ (\qty{2}{GiB}). Przy $N = \num{60000}$ potrzebowałyby \qty{26.8}{GiB}, czyli więcej niż pamięć komputera. Czas uczenia, liczenia pól i kroku asynchronicznego rośnie dla nich w przybliżeniu jak $N^2$.
 
 \begin{figure}[H]
     \centering
@@ -64,4 +64,4 @@ Czas i pamięć uczenia oraz odtwarzania zmierzono dla 12 losowych wzorców przy
     \label{fig:benchmark}
 \end{figure}
 
-\noindent Wagi czynnikowe~\eqref{eq:wagi-czynnikowe} rosną liniowo z $N$ i przy $N = \num{60000}$ zajmują \qty{6.6}{MiB}. Szczyt pamięci przy uczeniu jest od \num{1.7} do \num{1.8} razy większy od rozmiaru wag. Uczenie trwa wtedy najwyżej około \qty{10}{ms} dla obu reguł, także dla 356 epok reguły Oji, bo koszt epoki nie zależy od $N$ (rozdział~\ref{sec:uczenie}). Pola wszystkich neuronów liczą się w około \qty{0.5}{ms}, a krok asynchroniczny na zdjęciach kotów trwa od \num{3.7} do \qty{11.0}{ms}.
+\noindent Wagi czynnikowe~\eqref{eq:wagi-czynnikowe} rosną liniowo z $N$ i przy $N = \num{60000}$ zajmują \qty{6.6}{MiB}. Szczyt pamięci przy uczeniu jest od \num{1.7} do \num{1.8} razy większy od rozmiaru wag. Uczenie trwa wtedy około \qty{10}{ms} dla obu reguł, także dla 356 epok reguły Oji, bo koszt epoki nie zależy od $N$ (rozdział~\ref{sec:uczenie}). Obliczenie pól wszystkich neuronów trwa około \qty{0.5}{ms}, a krok asynchroniczny na zdjęciach kotów trwa od \num{3.7} do \qty{11.0}{ms}.

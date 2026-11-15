@@ -28,7 +28,7 @@ Sieć składa się z $N$ neuronów o stanach $s_i \in \{-1, 1\}$, połączonych 
         \path (n1) edge[draw=black, thick] node[above left, inner sep=1pt, text=black] {$w_{12} = w_{21}$} (n2);
     \end{tikzpicture}
     \fi
-    \caption{Sieć Hopfielda z $N = 5$ neuronami. Każda para neuronów jest połączona jedną symetryczną wagą i neurony nie mają połączeń zwrotnych ze sobą.}
+    \caption{Sieć Hopfielda z $N = 5$ neuronami. Każda para neuronów jest połączona jedną symetryczną wagą, a żaden neuron nie jest połączony sam ze sobą.}
     \label{fig:siec-hopfielda}
 \end{figure}
 
@@ -44,13 +44,13 @@ i przyjmuje stan zgodny ze znakiem tego pola:
 \end{equation}
 Gdy $h_i = 0$, neuron zachowuje dotychczasowy stan.
 
-Reguła~\eqref{eq:aktualizacja} może być stosowana na dwa sposoby. W trybie asynchronicznym, w którym model zaproponował Hopfield~\cite[s.~2555]{hopfield1982}, w każdym kroku zmienia się jeden neuron, a kolejny neuron widzi już jego nowy stan. W trybie synchronicznym wszystkie neurony liczą pola z tego samego stanu i zmieniają się jednocześnie. Stan spełniający $s = \operatorname{sgn}(Ws)$ nazywa się punktem stałym (stanem stabilnym) i nie zmienia się w żadnym z trybów. Celem uczenia jest dobranie wag tak, aby wzorce były punktami stałymi, a stany do nich podobne prowadziły do nich w kolejnych krokach. Sieć działa wtedy jako pamięć skojarzeniowa: z uszkodzonej wersji wzorca odtwarza oryginał~\cite[s.~2554]{hopfield1982}.
+Reguła~\eqref{eq:aktualizacja} może być stosowana na dwa sposoby. W trybie asynchronicznym, w którym model zaproponował Hopfield~\cite[s.~2555]{hopfield1982}, przy każdej aktualizacji zmienia stan jeden neuron, a kolejny neuron widzi już jego nowy stan. W trybie synchronicznym wszystkie neurony liczą pola z tego samego stanu i zmieniają się jednocześnie. Stan spełniający $s = \operatorname{sgn}(Ws)$ nazywa się punktem stałym (stanem stabilnym) i nie zmienia się w żadnym z trybów. Celem uczenia jest dobranie wag tak, aby wzorce były punktami stałymi, a stany do nich podobne prowadziły do nich w kolejnych krokach. Sieć działa wtedy jako pamięć skojarzeniowa: z uszkodzonej wersji wzorca odtwarza oryginał, o ile wejście leży w obszarze przyciągania wzorca (ang. \textit{basin of attraction}), czyli w zbiorze stanów, z których sieć dochodzi do tego wzorca~\cite[s.~2554]{hopfield1982}.
 Dynamikę sieci opisuje funkcja energii
 \begin{equation}
     E(s) = -\frac{1}{2} \sum_{i=1}^{N} \sum_{j=1}^{N} w_{ij} s_i s_j = -\frac{1}{2} s^T W s
     \label{eq:energia}
 \end{equation}
-wprowadzona przez Hopfielda~\cite[s.~2556]{hopfield1982}. W trybie asynchronicznym neuron zmienia stan tylko wtedy, gdy $s_i h_i < 0$, a energia zmienia się wtedy o $\Delta E = 2 s_i h_i < 0$. Energia maleje przy każdej zmianie, a stanów jest skończenie wiele, więc sieć zawsze dochodzi do punktu stałego, który jest minimum lokalnym energii. Rozumowanie wymaga symetrii wag i zerowej przekątnej. W trybie synchronicznym energia nie musi maleć, a sieć o symetrycznych wagach dochodzi do punktu stałego albo do cyklu długości 2, czyli oscylacji między dwoma stanami~\cite[s.~1581--1583]{bruck1990}.
+wprowadzona przez Hopfielda~\cite[s.~2556]{hopfield1982}. W trybie asynchronicznym neuron zmienia stan tylko wtedy, gdy $s_i h_i < 0$, a energia zmienia się przy tym o $\Delta E = 2 s_i h_i < 0$. Energia maleje przy każdej zmianie, a stanów jest skończenie wiele, więc sieć zawsze dochodzi do punktu stałego, który jest minimum lokalnym energii. Rozumowanie wymaga symetrii wag i zerowej przekątnej. W trybie synchronicznym energia nie musi maleć, a sieć o symetrycznych wagach dochodzi do punktu stałego albo do cyklu długości 2, czyli oscylacji między dwoma stanami~\cite[s.~1581--1583]{bruck1990}.
 
 \subsection{Reguła Hebba}
 \label{sec:regula-hebba}
@@ -63,7 +63,7 @@ Reguła Hebba ustala wagę połączenia na podstawie tego, jak często dwa neuro
 Dodatni współczynnik $1/N$ nie zmienia znaku pola, więc nie wpływa na dynamikę~\cite[s.~318]{rojas1996}. Jeśli $\Xi$ oznacza macierz $p \times N$, której wierszami są wzorce, to $W = \frac{1}{N} \Xi^T \Xi - \frac{p}{N} I$, gdzie odjęty składnik zeruje przekątną.
 Podobieństwo dwóch wzorców mierzy ich nakładanie (ang. \textit{overlap})
 \begin{equation}
-    m^{\mu\nu} = \frac{1}{N} \sum_{i=1}^{N} \xi^\mu_i \xi^\nu_i \in [-1, 1],
+    m^{\mu\nu} = \frac{1}{N} \sum_{i=1}^{N} \xi^\mu_i \xi^\nu_i \in [-1; 1],
     \label{eq:nakladanie}
 \end{equation}
 równe 1 dla wzorców identycznych, $-1$ dla wzorca i jego negacji oraz 0 dla wzorców ortogonalnych. Po podstawieniu~\eqref{eq:hebb} do~\eqref{eq:pole} pole lokalne w stanie $s = \xi^\nu$ rozkłada się na dwa składniki:
@@ -78,9 +78,9 @@ Dla wzorców losowych składnik zakłócający ma w przybliżeniu rozkład norma
     P_\text{bit} = \Phi\left(-\sqrt{N/p}\right),
     \label{eq:p-bit}
 \end{equation}
-gdzie $\Phi$ to dystrybuanta standardowego rozkładu normalnego~\cite[s.~513]{mackay2003}. Stąd ograniczenia liczby wzorców, które sieć może zapamiętać. Większość z $p$ losowych wzorców da się dokładnie odtworzyć asymptotycznie do $p = N/(2 \ln N)$~\cite[s.~461]{mceliece1987}. Gdy dopuszcza się niewielki odsetek błędnych pikseli, stany bliskie wzorcom pozostają stabilne do $p = \num{0.138} N$ (wynik Amita, Gutfreunda i Sompolinsky'ego przytoczony za MacKayem~\cite[s.~514--515]{mackay2003}).
+gdzie $\Phi$ to dystrybuanta standardowego rozkładu normalnego~\cite[s.~513]{mackay2003}. Stąd ograniczenia liczby wzorców, które sieć może zapamiętać. Większość z $p$ losowych wzorców da się dokładnie odtworzyć asymptotycznie do $p = N/(2 \ln N)$~\cite[s.~461, 470]{mceliece1987}. Gdy dopuszcza się niewielki odsetek błędnych pikseli, stany bliskie wzorcom pozostają stabilne do $p = \num{0.138} N$ (wynik Amita, Gutfreunda i Sompolinsky'ego przytoczony za MacKayem~\cite[s.~514--515]{mackay2003}).
 
-Bitmapy z obrazami nie są losowe: mają duże nakładania i różną liczbę pikseli $+1$ i $-1$. Personnaz, Guyon i Dreyfus podkreślają, że reguła Hebba gwarantuje stabilność tylko wzorców ortogonalnych, a dla obrazów jej nie zapewnia~\cite[s.~L-362, L-364]{personnaz1985}. Duże nakładania zwiększają składnik zakłócający w~\eqref{eq:przesluch}, a bardzo podobne wzorce zlewają się w jeden stan stabilny~\cite[s.~2557]{hopfield1982}. Liczbę wzorców, które sieć może zapamiętać, obniża też korelacja sąsiednich pikseli, co Löwe wykazał dla wzorców jednowymiarowych~\cite[s.~1222]{lowe1998}.
+Bitmapy z obrazami nie są losowe: mają duże nakładania i różną liczbę pikseli $+1$ i $-1$. Personnaz, Guyon i Dreyfus podkreślają, że reguła Hebba gwarantuje stabilność tylko wzorców ortogonalnych, a dla obrazów jej nie zapewnia~\cite[s.~L-362, L-364]{personnaz1985}. Duże nakładania zwiększają składnik zakłócający w~\eqref{eq:przesluch}, a bardzo podobne wzorce zlewają się w jeden stan stabilny~\cite[s.~2557]{hopfield1982}. Korelacja sąsiednich pikseli obniża też oszacowanie liczby wzorców, które sieć może zapamiętać, co Löwe pokazał dla wzorców jednowymiarowych~\cite[s.~1221--1222]{lowe1998}.
 
 \subsection{Reguła Oji}
 \label{sec:regula-oji}
@@ -90,11 +90,11 @@ Reguła Oji dotyczy jednego neuronu liniowego o wagach $w$ i wyjściu $y = w^T x
     \Delta w = \eta \, y \, (x - y w),
     \label{eq:oja-neuron}
 \end{equation}
-w której człon $-\eta y^2 w$ ogranicza wzrost wag. Wagi zbiegają do wektora własnego macierzy korelacji wejść $C = \mathbb{E}[x x^T]$ o największej wartości własnej~\cite[s.~268--270]{oja1982}, więc neuron wyznacza pierwszą składową główną danych (ang. \textit{principal component analysis}, PCA).
+w której człon $-\eta y^2 w$ ogranicza wzrost wag. Wagi zbiegają do wektora własnego macierzy korelacji wejść $C = \mathbb{E}[x x^T]$ o największej wartości własnej~\cite[s.~268--270]{oja1982}, więc neuron wyznacza pierwszą składową główną danych, tak jak analiza składowych głównych (ang. \textit{principal component analysis}, PCA).
 
 Najprostsze przeniesienie tej reguły do sieci Hopfielda uczy każdy wiersz macierzy $W$ regułą~\eqref{eq:oja-neuron} z wejściem $x = \xi^\mu / \sqrt{N}$. Wszystkie wiersze zbiegają wtedy do tego samego wektora własnego $c_1$~\cite[s.~465]{sanger1989}. Granicą jest macierz $\operatorname{sgn}(c_1) c_1^T$ rzędu 1, w której stabilne mogą być tylko stany $\pm \operatorname{sgn}(c_1)$ (wniosek własny). Ten wariant, nazywany dalej jednoneuronowym, pokazuje, że wyznaczenie składowej głównej to inne zadanie niż zapamiętanie wzorców.
 
-Pamięć skojarzeniową daje reguła podprzestrzeni, w której człon ograniczający wiąże ze sobą wszystkie wyjścia~\cite[s.~467]{sanger1989}:
+Pamięć skojarzeniową daje reguła podprzestrzeni, w której człon ograniczający wiąże ze sobą wszystkie wyjścia. Jej postać podaje Sanger~\cite[s.~467]{sanger1989}:
 \begin{equation}
     \Delta W = \eta \left(y x^T - y y^T W\right), \qquad y = W x, \qquad x = \xi^\mu / \sqrt{N}.
     \label{eq:oja-podprzestrzen}
@@ -111,15 +111,15 @@ Poniższe wyprowadzenie jest własne. Jeśli uczenie startuje od wag Hebba $W(0)
     \dot f_k = \lambda_k f_k \left(1 - f_k^2\right), \qquad f_k(0) > 0.
     \label{eq:oja-widmo}
 \end{equation}
-Każde $f_k$ zbiega monotonicznie do 1, więc $W$ zbiega do rzutu ortogonalnego $P = \sum_k u_k u_k^T$ na podprzestrzeń wzorców. Start od zera jest punktem stałym równania~\eqref{eq:oja-ode} i nie prowadzi do uczenia, a start losowy daje w ogólności macierz niesymetryczną, która nie stabilizuje wzorców. Wersję dyskretną, liczoną w projekcie, opisano w rozdziale~\ref{sec:uczenie}.
+Każde $f_k$ zbiega monotonicznie do 1, więc $W$ zbiega do rzutu ortogonalnego $P = \sum_k u_k u_k^T$ na podprzestrzeń wzorców. Zerowa macierz wag jest punktem stałym równania~\eqref{eq:oja-ode}, więc start od zera nie prowadzi do uczenia, a start losowy daje w ogólności macierz niesymetryczną, która nie stabilizuje wzorców. Wersję dyskretną, liczoną w projekcie, opisano w rozdziale~\ref{sec:uczenie}.
 Granica reguły podprzestrzeni to macierz
 \begin{equation}
     P = \Xi^T \left(\Xi \Xi^T\right)^{-1} \Xi,
     \label{eq:rzut}
 \end{equation}
-znana jako reguła rzutowa (ang. \textit{pseudo-inverse rule}). Rzut ortogonalny spełnia $P \xi^\mu = \xi^\mu$ dla każdego wzorca, więc każdy zbiór wzorców liniowo niezależnych jest zbiorem stanów stabilnych, bez względu na nakładania~\cite[s.~L-361--L-364]{personnaz1985}. Wyjaśnia to, dlaczego reguła Oji działa tam, gdzie zawodzi reguła Hebba (wyprowadzenie własne). W bazie $u_k$ macierz Hebba $S$ ma wartości własne $\lambda_k$, a macierz $P$ same jedynki. Gdy wzorce mają wspólną część, na przykład takie samo tło, największa wartość własna jest duża i jej kierunek dominuje pole lokalne w regule Hebba, a kierunki odróżniające podobne wzorce mają małe $\lambda_k$. Człon $-y y^T W$ w~\eqref{eq:oja-podprzestrzen} wyrównuje wszystkie wartości własne do 1, czyli usuwa z wag Hebba nierównomierność wynikającą z korelacji wzorców. Dla wzorców ortogonalnych obie reguły dają tę samą macierz.
+znana jako reguła rzutowa (ang. \textit{pseudo-inverse rule}). Rzut ortogonalny spełnia $P \xi^\mu = \xi^\mu$ dla każdego wzorca, więc każdy zbiór wzorców liniowo niezależnych jest zbiorem stanów stabilnych, bez względu na nakładania~\cite[s.~L-361--L-364]{personnaz1985}. Wyjaśnia to, dlaczego reguła Oji działa tam, gdzie zawodzi reguła Hebba (wyprowadzenie własne). W bazie $u_k$ macierz Hebba $S$ ma wartości własne $\lambda_k$, a macierz $P$ same jedynki. Gdy wzorce mają wspólną część, na przykład takie samo tło, największa wartość własna jest duża i jej kierunek dominuje w polu lokalnym reguły Hebba, a kierunki odróżniające podobne wzorce mają małe $\lambda_k$. Człon $-y y^T W$ w~\eqref{eq:oja-podprzestrzen} wyrównuje wszystkie wartości własne do 1, czyli usuwa z wag Hebba nierównomierność wynikającą z korelacji wzorców. Dla wzorców ortogonalnych obie reguły dają tę samą macierz.
 
-Macierz~\eqref{eq:rzut} ma niezerową przekątną, którą w projekcie zeruje się po zakończeniu uczenia, aby zachować założenia twierdzeń o zbieżności z rozdziału~\ref{sec:model}. Pole w stanie wzorca wynosi wtedy $h_i = (1 - P_{ii}) \xi^\mu_i$, gdzie $P_{ii} \in [0, 1]$, więc wzorzec pozostaje stabilny, o ile $P_{ii} < 1$ we wszystkich pikselach (wniosek własny). Energia~\eqref{eq:energia} przyjmuje postać
+Macierz~\eqref{eq:rzut} ma niezerową przekątną, którą w projekcie zeruje się po zakończeniu uczenia, aby zachować założenia twierdzeń o zbieżności z rozdziału~\ref{sec:model}. Pole w stanie wzorca wynosi wtedy $h_i = (1 - P_{ii}) \xi^\mu_i$, gdzie $P_{ii} \in [0; 1]$, więc wzorzec pozostaje stabilny, o ile $P_{ii} < 1$ we wszystkich pikselach (wniosek własny). Energia~\eqref{eq:energia} przyjmuje postać
 \begin{equation}
     E(s) = -\frac{1}{2} \left(\lVert P s \rVert^2 - r\right),
     \label{eq:energia-rzut}
@@ -145,7 +145,7 @@ gdzie $r$ to liczba liniowo niezależnych wzorców. Ponieważ $\lVert P s \rVert
 \subsection{Stany pozorne}
 \label{sec:stany-pozorne}
 
-Oprócz wzorców sieć ma zwykle inne punkty stałe, nazywane stanami pozornymi (ang. \textit{spurious states}). Funkcja $\operatorname{sgn}$ jest nieparzysta, więc negacja każdego punktu stałego też jest punktem stałym, a sieć zapamiętuje zawsze parę $\xi^\mu$ i $-\xi^\mu$~\cite[s.~510]{mackay2003}. W regule Hebba stabilne bywają także mieszaniny wzorców, na przykład stan $\operatorname{sgn}(\xi^1 + \xi^2 + \xi^3)$, który w każdym pikselu przyjmuje wartość większości z trzech wzorców~\cite{hopfield1983}.
+Oprócz wzorców i ich negacji sieć ma zwykle inne punkty stałe, nazywane stanami pozornymi (ang. \textit{spurious states}). Funkcja $\operatorname{sgn}$ jest nieparzysta, więc negacja każdego punktu stałego też jest punktem stałym, a sieć zapamiętuje zawsze parę $\xi^\mu$ i $-\xi^\mu$~\cite[s.~510]{mackay2003}. W regule Hebba stabilne bywają także mieszaniny wzorców, na przykład stan $\operatorname{sgn}(\xi^1 + \xi^2 + \xi^3)$, który w każdym pikselu przyjmuje wartość większości z trzech wzorców~\cite{hopfield1983}.
 
 W trybie synchronicznym sieć może zamiast punktu stałego oscylować w cyklu długości 2. Para $\{s, -s\}$ tworzy cykl, gdy $s_i h_i < 0$ dla wszystkich neuronów, czyli gdy pole lokalne w każdym pikselu ma znak przeciwny do stanu.
 Przykładem jest sieć z dwoma neuronami o wagach

@@ -10,7 +10,7 @@ Liczby stabilnych wzorców w ośmiu dostarczonych zbiorach podano w Tabeli~\ref{
 
 \begin{table}[H]
     \centering
-    \caption{Stabilne wzorce po uczeniu trzema regułami. Kolumna \enquote{niestabilne piksele} podaje łączną liczbę pikseli z ujemnym polem wyrównanym we wszystkich wzorcach zbioru przy regule Hebba. Ostatnia kolumna podaje liczbę wzorców spełniających warunek wystarczający $\sum_{\nu \ne \mu} \lvert m^{\mu\nu} \rvert < 1 - p/N$.}
+    \caption{Stabilne wzorce po uczeniu trzema wariantami reguł. Kolumna \enquote{niestabilne piksele} podaje łączną liczbę pikseli z ujemnym polem wyrównanym we wszystkich wzorcach zbioru przy regule Hebba. Ostatnia kolumna podaje liczbę wzorców spełniających warunek wystarczający $\sum_{\nu \ne \mu} \lvert m^{\mu\nu} \rvert < 1 - p/N$.}
     \label{tab:stabilne}
     \small
     \begin{tabular}{l r r r r r r}
@@ -42,7 +42,7 @@ Reguła Hebba stabilizuje łącznie 12 z 74 wzorców, a większość wzorców zb
 
 Według rozkładu~\eqref{eq:przesluch} wzorzec jest stabilny, gdy składnik zakłócający nie zmienia znaku pola w żadnym pikselu. Warunek wystarczający spełnia tylko 10 z 74 wzorców (Tabela~\ref{tab:stabilne}). Warunek nie jest konieczny, ale wzorce, które go nie spełniają, są stabilne tylko wyjątkowo.
 
-Najwyraźniej widać to na literach. Litera zajmuje niewielką część bitmapy, więc dwie różne litery zgadzają się w większości pikseli wspólnego białego tła. Wszystkie nakładania w \texttt{letters-14x20} są dodatnie (co najmniej \num{0.486}), a ich suma dla jednego wzorca wynosi od \num{14.9} do \num{19.8}, czyli kilkanaście razy więcej niż sygnał $1 - p/N \approx \num{0.91}$. Przy dodatnich nakładaniach składnik zakłócający $\sum_{\mu \ne \nu} \xi^\mu_i m^{\mu\nu}$ działa jak ważone głosowanie pozostałych liter i przeważa sygnał. Niestabilne mogą być więc tylko piksele, w których litera różni się od większości pozostałych. Niestabilne piksele wszystkich liter pokazano na Rysunku~\ref{fig:niestabilne-litery}. Każdy z 590 niestabilnych pikseli jest pikselem, w którym litera różni się od większości pozostałych 25 liter, a wszystkich takich pikseli jest 778.
+Najwyraźniej widać to na literach. Litery mają wspólne białe tło (rozdział~\ref{sec:zbiory}). Wszystkie nakładania w \texttt{letters-14x20} są dodatnie (co najmniej \num{0.486}), a ich suma dla jednego wzorca wynosi od \num{14.9} do \num{19.8}, czyli od 16 do 22 razy więcej niż sygnał $1 - p/N \approx \num{0.91}$. Przy dodatnich nakładaniach składnik zakłócający $\sum_{\mu \ne \nu} \xi^\mu_i m^{\mu\nu}$ działa jak ważone głosowanie pozostałych liter i przeważa nad sygnałem. Niestabilne mogą być więc tylko piksele, w których litera różni się od większości pozostałych. Niestabilne piksele wszystkich liter pokazano na Rysunku~\ref{fig:niestabilne-litery}. Każdy z 590 niestabilnych pikseli jest pikselem, w którym litera różni się od większości pozostałych 25 liter, a wszystkich takich pikseli jest 778.
 
 \begin{figure}[H]
     \centering
@@ -51,16 +51,16 @@ Najwyraźniej widać to na literach. Litera zajmuje niewielką część bitmapy,
     \label{fig:niestabilne-litery}
 \end{figure}
 
-\noindent Wpływ korelacji wzorców widać też w eksperymencie \texttt{capacity}, w którym stabilność sprawdzono dla rosnącej liczby wzorców (Rysunek~\ref{fig:pojemnosc}). Dla wzorców losowych odsetek stabilnych wzorców przy regule Hebba zgadza się z przybliżeniem $(1 - P_\text{bit})^N$ wynikającym z~\eqref{eq:p-bit}, a dane leżą nieco powyżej teorii, na przykład dla $N = 280$ i $p = 40$ wynoszą \num{0.442} wobec \num{0.319}. Wszystkie 50 zbiorów losowych jest w pełni stabilnych do $p = 12$ przy $N = 280$ i do $p = 25$ przy $N = 625$, czyli do $p/N \approx \num{0.04}$. Zbiory dostarczone tracą stabilność przy obciążeniu kilka razy mniejszym. W \texttt{letters-14x20} już od $p = 3$ ($p/N = \num{0.011}$) żaden wzorzec nie jest stabilny, podczas gdy losowe zbiory o tym samym $N$ i $p = 26$ mają średnio \num{0.898} stabilnych wzorców. W \texttt{large-25x25.plus} wszystkie wzorce są stabilne do $p = 5$. Reguła Oji stabilizuje wszystkie wzorce we wszystkich \num{3541} zbiorach tego eksperymentu.
+\noindent Wpływ korelacji wzorców widać też w eksperymencie \texttt{capacity}, w którym stabilność sprawdzono dla rosnącej liczby wzorców (Rysunek~\ref{fig:pojemnosc}). Dla wzorców losowych odsetek stabilnych wzorców przy regule Hebba ma przebieg zgodny z przybliżeniem $(1 - P_\text{bit})^N$ wynikającym z~\eqref{eq:p-bit}, ale leży powyżej niego, na przykład dla $N = 280$ i $p = 40$ wynoszą \num{0.442} wobec \num{0.319}. Wszystkie 50 zbiorów losowych jest w pełni stabilnych do $p = 12$ przy $N = 280$ i do $p = 25$ przy $N = 625$, czyli do $p/N \approx \num{0.04}$. Zbiory dostarczone tracą stabilność przy obciążeniu kilka razy mniejszym. W \texttt{letters-14x20} już od $p = 3$ ($p/N = \num{0.011}$) żaden wzorzec nie jest stabilny, podczas gdy losowe zbiory o tym samym $N$ i $p = 26$ mają średni odsetek stabilnych wzorców \num{0.898}. W \texttt{large-25x25.plus} wszystkie wzorce są stabilne do $p = 5$. Reguła Oji stabilizuje wszystkie wzorce we wszystkich \num{3541} zbiorach tego eksperymentu.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{capacity/figures/capacity.pdf}
-    \caption{Stabilność wzorców w funkcji obciążenia $p/N$ dla $N = 280$ (lewa kolumna) i $N = 625$ (prawa kolumna). Wzorce losowe to średnia z 50 zbiorów na każde $p$, a zbiory dostarczone to ich początkowe fragmenty o $p$ wzorcach. Górne wykresy: średni odsetek stabilnych wzorców. Dolne wykresy: odsetek niestabilnych neuronów. Linia przerywana to teoria~\eqref{eq:p-bit}, a pionowe linie to granice $p/N = 1/(2 \ln N)$ i $p/N = \num{0.138}$.}
+    \caption{Stabilność wzorców w funkcji obciążenia $p/N$ dla $N = 280$ (lewa kolumna) i $N = 625$ (prawa kolumna). Wzorce losowe to średnia z 50 zbiorów na każde $p$, a dla zbiorów dostarczonych użyto ich początkowych fragmentów o $p$ wzorcach. Górne wykresy: średni odsetek stabilnych wzorców. Dolne wykresy: odsetek niestabilnych pikseli. Linia przerywana to teoria~\eqref{eq:p-bit}, a pionowe linie to granice $p/N = 1/(2 \ln N)$ i $p/N = \num{0.138}$.}
     \label{fig:pojemnosc}
 \end{figure}
 
-\noindent Wyniki zgadzają się z literaturą przytoczoną w rozdziale~\ref{sec:regula-hebba}. Granice pojemności dotyczą wzorców losowych, a dla wzorców skorelowanych reguła Hebba nie gwarantuje stabilności~\cite[s.~L-364]{personnaz1985}. Podobne wzorce zlewają się w jeden stan stabilny~\cite[s.~2557]{hopfield1982}, co na literach prowadzi do jednego wspólnego stanu pozornego.
+\noindent Wyniki zgadzają się z literaturą przytoczoną w rozdziale~\ref{sec:regula-hebba}. Podane tam granice liczby wzorców dotyczą wzorców losowych, a dla wzorców skorelowanych reguła Hebba nie gwarantuje stabilności~\cite[s.~L-364]{personnaz1985}. Podobne wzorce zlewają się w jeden stan stabilny~\cite[s.~2557]{hopfield1982}, co na literach prowadzi do jednego wspólnego stanu pozornego.
 
 \subsection{Zbiory 25x25 i 25x50}
 \label{sec:zbiory-25x50}
@@ -75,11 +75,11 @@ Nakładania obu zbiorów pokazano na Rysunku~\ref{fig:nakladania-25x50}. Pary pr
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{stability/figures/overlaps-large.pdf}
-    \caption{Nakładania $m^{\mu\nu}$ par wzorców w zbiorach \texttt{large-25x25} (lewy wykres) i \texttt{large-25x50} (prawy wykres). Wartości po prawej stronie spełniają~\eqref{eq:nakladanie-25x50}.}
+    \caption{Nakładania $m^{\mu\nu}$ par wzorców w zbiorach \texttt{large-25x25} (lewy wykres) i \texttt{large-25x50} (prawy wykres). Wartości na prawym wykresie spełniają~\eqref{eq:nakladanie-25x50}.}
     \label{fig:nakladania-25x50}
 \end{figure}
 
-\noindent Różnica przenosi się na odzyskiwanie wzorców z uszkodzonego wejścia (Rysunek~\ref{fig:odzyskiwanie-large}). Przy regule Hebba sieć odzyskuje bez szumu 5 z 6 wzorców \texttt{large-25x25}, a przy rosnącym szumie coraz mniej, a w \texttt{large-25x50} nie odzyskuje żadnego wzorca na żadnym poziomie szumu, bo żaden wzorzec nie jest stabilny. Reguła Oji usuwa tę różnicę. Wszystkie trzy zbiory \texttt{large-*} są odzyskiwane w co najmniej \num{0.999} prób do szumu \num{0.35} i w co najmniej \num{0.988} prób przy szumie \num{0.4}. Odzyskiwanie wszystkich zbiorów opisano w rozdziale~\ref{sec:odzyskiwanie}.
+\noindent Różnica przenosi się na odzyskiwanie wzorców z uszkodzonego wejścia (Rysunek~\ref{fig:odzyskiwanie-large}). Przy regule Hebba sieć odzyskuje bez szumu 5 z 6 wzorców \texttt{large-25x25}, a przy rosnącym szumie coraz mniej. W \texttt{large-25x50} nie odzyskuje żadnego wzorca na żadnym poziomie szumu, bo żaden wzorzec nie jest stabilny. Reguła Oji usuwa tę różnicę. Wszystkie trzy zbiory \texttt{large-*} są odzyskiwane w co najmniej \qty{99.9}{\percent} przebiegów do szumu \num{0.35} i w co najmniej \qty{98.8}{\percent} przebiegów przy szumie \num{0.4}. Odzyskiwanie wszystkich zbiorów opisano w rozdziale~\ref{sec:odzyskiwanie}.
 
 \begin{figure}[H]
     \centering

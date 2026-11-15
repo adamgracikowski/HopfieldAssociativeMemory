@@ -1,6 +1,10 @@
 # HopfieldAssociativeMemory
 Hopfield associative memory network built from scratch for the Artificial Intelligence Methods course. Features Hebbian and Oja's learning rules for pattern recognition. Includes synchronous/asynchronous modes and step-by-step bitmap visualization.
 
+## Report
+
+The project report (in Polish) with the theory, the implementation, the experiments and their results: [`docs/report.pdf`](docs/report.pdf).
+
 ## Repository layout
 
 | Path | Contents |

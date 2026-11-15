@@ -6,7 +6,7 @@ Rozdział opisuje, jak skutecznie sieć odtwarza wzorzec z uszkodzonego wejścia
 \subsection{Szum i zasłonięcie}
 \label{sec:odzyskiwanie-szum}
 
-Odsetek odzyskań przy odwróceniu losowych pikseli pokazano na Rysunku~\ref{fig:odzyskiwanie-szum}. Przy regule Hebba jest on ograniczony odsetkiem stabilnych wzorców z Tabeli~\ref{tab:stabilne}. W zbiorach bez stabilnych wzorców wejścia z szumem kończą w tym samym stanie pozornym co wzorce bez szumu, więc do szumu \num{0.45} odsetek przebiegów kończących się najbliżej celu się nie zmienia.
+Odsetek odzyskań przy odwróceniu losowych pikseli pokazano na Rysunku~\ref{fig:odzyskiwanie-szum}. Przy regule Hebba jest on ograniczony odsetkiem stabilnych wzorców z Tabeli~\ref{tab:stabilne}. W zbiorach bez stabilnych wzorców wejścia z szumem kończą w tym samym stanie pozornym co wzorce bez szumu, więc do szumu \num{0.45} odsetek przebiegów zakończonych najbliżej celu pozostaje stały.
 
 \begin{figure}[H]
     \centering
@@ -15,7 +15,7 @@ Odsetek odzyskań przy odwróceniu losowych pikseli pokazano na Rysunku~\ref{fig
     \label{fig:odzyskiwanie-szum}
 \end{figure}
 
-\noindent Reguła Oji odzyskuje prawie wszystkie wzorce do szumu od \num{0.35} do \num{0.4} w zbiorach o $N \ge 360$, a przy szumie \num{0.5} wejście jest średnio niezależne od celu i odzyskań prawie nie ma. Najmniejszy obszar przyciągania ma silnie skorelowany zbiór \texttt{letters-14x20}. Błędy są tam jednak zwykle stanami najbliższymi celowi: poziom $f_{0,9}$ dla odsetka przebiegów kończących się najbliżej celu wynosi \num{0.2} (\num{0.15} w trybie asynchronicznym), a dla odzyskań 0 (\num{0.05}). Tryb asynchroniczny wypada przy dużym szumie zwykle nieco gorzej niż synchroniczny.
+\noindent Reguła Oji odzyskuje prawie wszystkie wzorce do szumu od \num{0.35} do \num{0.4} w zbiorach o $N \ge 360$, a przy szumie \num{0.5} wejście jest średnio niezależne od celu i odzyskań prawie nie ma. Najmniejsze obszary przyciągania mają wzorce silnie skorelowanego zbioru \texttt{letters-14x20}. Błędy są tam jednak zwykle stanami najbliższymi celowi: poziom $f_{0,9}$ dla odsetka przebiegów kończących się najbliżej celu wynosi \num{0.2} (\num{0.15} w trybie asynchronicznym), a dla odzyskań 0 (\num{0.05}). Tryb asynchroniczny wypada przy dużym szumie zwykle nieco gorzej niż synchroniczny.
 
 Poziomy krytyczne reguły Oji dla obu rodzajów uszkodzenia zebrano w Tabeli~\ref{tab:poziomy-krytyczne}. Zasłonięcie zmienia tylko czarne piksele pasa, więc przy tym samym poziomie zmienia mniej pikseli niż szum. Reguła Hebba traci przy nim odzyskania szybciej niż przy szumie, na przykład w \texttt{large-25x25} odsetek spada z \num{0.833} do \num{0.352} już przy poziomie \num{0.15}. Poziom zasłonięcia jest ułamkiem wysokości $H$ (rozdział~\ref{sec:uszkodzenia}), więc w \texttt{large-25x50} pas jest dwa razy wyższy niż w \texttt{large-25x25} i może zakryć także wspólną dolną połowę. Stąd niższe poziomy krytyczne tego zbioru przy zasłonięciu.
 
@@ -42,7 +42,7 @@ Poziomy krytyczne reguły Oji dla obu rodzajów uszkodzenia zebrano w Tabeli~\re
     \end{tabular}
 \end{table}
 
-\noindent Różnicę między regułami na jednym wejściu pokazuje Rysunek~\ref{fig:zasloniecie-przebieg}. Reguła Hebba kończy w stanie pozornym, który różni się od celu w 214 pikselach i jest najbliższy wzorcowi 3 ($m = \num{0.642}$).
+\noindent Różnicę między regułami na jednym wejściu pokazuje Rysunek~\ref{fig:zasloniecie-przebieg}. Przy regule Hebba sieć kończy w stanie pozornym, który różni się od celu w 214 pikselach i jest najbliższy wzorcowi 3 ($m = \num{0.642}$).
 
 \begin{figure}[H]
     \centering
@@ -57,7 +57,7 @@ Poziomy krytyczne reguły Oji dla obu rodzajów uszkodzenia zebrano w Tabeli~\re
 \subsection{Liczność zbioru}
 \label{sec:odzyskiwanie-licznosc}
 
-Wpływ liczby wzorców zbadano na początkowych fragmentach zbiorów \texttt{large-25x25.plus} i \texttt{letters-14x20}, przy stałym $N$ (Rysunek~\ref{fig:licznosc}). Przy regule Hebba odsetek odzyskań spada razem z liczbą stabilnych wzorców z rozdziału~\ref{sec:stabilnosc}. Dla liter sieć odzyskuje oba wzorce przy $p = 2$, a od $p = 5$ nie odzyskuje żadnego. Przy regule Oji obszar przyciągania obrazów kurczy się powoli. Odsetek odzyskań przy szumie \num{0.45} spada z \num{0.903} dla $p = 3$ do \num{0.608} dla $p = 15$, a poziom krytyczny $f_{0,9}$ wynosi \num{0.4} od $p = 6$ do $p = 15$. Dla liter kurczy się szybko, bo każda nowa litera jest silnie skorelowana z poprzednimi: $f_{0,9}$ spada z \num{0.35} przy $p = 2$ do 0 przy $p \ge 15$ (tryb synchroniczny). Liczność szkodzi więc mało, gdy wzorce są mało podobne, a bardzo przy wzorcach skorelowanych.
+Wpływ liczby wzorców zbadano na początkowych fragmentach zbiorów \texttt{large-25x25.plus} i \texttt{letters-14x20}, przy stałym $N$ (Rysunek~\ref{fig:licznosc}). Przy regule Hebba odsetek odzyskań spada razem z liczbą stabilnych wzorców z rozdziału~\ref{sec:stabilnosc}. Dla liter sieć odzyskuje oba wzorce przy $p = 2$, a od $p = 5$ nie odzyskuje żadnego. Przy regule Oji obszar przyciągania obrazów kurczy się powoli. Odsetek odzyskań przy szumie \num{0.45} spada z \num{0.903} dla $p = 3$ do \num{0.608} dla $p = 15$, a poziom krytyczny $f_{0,9}$ wynosi \num{0.4} od $p = 6$ do $p = 15$. Dla liter kurczy się szybko, bo każda nowa litera jest silnie skorelowana z poprzednimi: $f_{0,9}$ spada z \num{0.35} przy $p = 2$ do 0 przy $p \ge 15$ (tryb synchroniczny). Liczność zbioru szkodzi więc niewiele, gdy wzorce są mało podobne, a bardzo, gdy są skorelowane.
 
 \begin{figure}[H]
     \centering
@@ -78,7 +78,7 @@ Zbiory grupowe (rozdział~\ref{sec:zbiory-dodatkowe}, Rysunek~\ref{fig:grupy}) m
     \label{fig:odzyskiwanie-grupy}
 \end{figure}
 
-\noindent Reguła Oji odzyskuje wszystkie warianty bez szumu, ale im bardziej są podobne, tym mniejszy obszar przyciągania ma każdy z nich. Poziom krytyczny $f_{0,9}$ rośnie z \num{0.25} dla $d = \num{0.02}$ do \num{0.4} dla $d = \num{0.2}$, czyli do wartości dla \texttt{large-25x25.plus}. Przy szumie \num{0.35} sieć odzyskuje \num{0.574} wariantów najbardziej podobnych grup, a w zbiorze zróżnicowanym wszystkie. Błędy zostają w grupie. Do szumu \num{0.4} przebieg kończy się we wzorcu innej grupy tylko 2 razy na wszystkie przebiegi zbiorów grupowych.
+\noindent Reguła Oji odzyskuje wszystkie warianty bez szumu, ale im bardziej są podobne, tym mniejszy obszar przyciągania ma każdy z nich. Poziom krytyczny $f_{0,9}$ rośnie z \num{0.25} dla $d = \num{0.02}$ do \num{0.4} dla $d = \num{0.2}$, czyli do wartości dla \texttt{large-25x25.plus}. Przy szumie \num{0.35} sieć odzyskuje \qty{57.4}{\percent} wariantów najbardziej podobnych grup, a w zbiorze zróżnicowanym wszystkie. Błędy zostają w grupie. Do szumu \num{0.4} przebieg kończy się we wzorcu innej grupy tylko w 2 przebiegach spośród wszystkich przebiegów zbiorów grupowych.
 
 Reguła Hebba nie stabilizuje żadnego wariantu i zlewa każdą grupę w jeden stan, zgodnie z obserwacją Hopfielda o zlewaniu podobnych wzorców~\cite[s.~2557]{hopfield1982}. Przykład dla $d = \num{0.05}$ pokazano na Rysunku~\ref{fig:grupy-przebieg}. Wariant 0 podany bez szumu po jednym kroku przechodzi w stan równy w każdym pikselu większości pięciu wariantów grupy. Stan ten różni się od obrazu, z którego powstały warianty, tylko w 2 pikselach, a od samych wariantów w \numrange{29}{33} pikselach.
 

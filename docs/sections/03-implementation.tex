@@ -46,7 +46,7 @@ Program składa się z dwóch warstw. Warstwa obliczeniowa, napisana w języku R
         convert-images & konwersja zdjęć na bitmapy o pikselach $\pm 1$ \\
         generate & tworzenie zbiorów z grupami podobnych wzorców \\
         train & uczenie sieci i zapis wag oraz stabilności wzorców \\
-        recall & pojedyncze odtwarzanie z zapisem wszystkich odwiedzonych stanów \\
+        recall & pojedyncze odtwarzanie z zapisem kolejnych stanów \\
         experiment & siatka zbiorów, reguł, trybów i poziomów uszkodzenia z wieloma próbami \\
         capacity & stabilność wzorców przy rosnącej liczbie wzorców \\
         search-stable & wyszukiwanie licznego zbioru bitmap \mbox{5x5}, które są stabilne \\
@@ -63,17 +63,17 @@ Wagi gęste to pełna macierz $N \times N$ liczb zmiennoprzecinkowych podwójnej
     W = A \Xi - \operatorname{diag}(d), \qquad d_i = \sum_{\mu=1}^{p} A_{i\mu} \xi^\mu_i,
     \label{eq:wagi-czynnikowe}
 \end{equation}
-gdzie $A$ to macierz współczynników $N \times p$, a odjęta przekątna zeruje $w_{ii}$. Dla reguły Hebba $A = \Xi^T / N$. Wagi czynnikowe zajmują $O(Np)$ pamięci, a pola lokalne $h = A(\Xi s) - d \odot s$ liczy się w czasie $O(Np)$ zamiast $O(N^2)$. Program wybiera wagi gęste, gdy macierz mieści się w 256~MiB, czyli do $N = 5792$, a czynnikowe dla większych sieci.
+gdzie $A$ to macierz współczynników $N \times p$, a odjęta przekątna zeruje $w_{ii}$. Dla reguły Hebba $A = \Xi^T / N$. Wagi czynnikowe zajmują $O(Np)$ pamięci, a pola lokalne $h = A(\Xi s) - d \odot s$ liczy się w czasie $O(Np)$ zamiast $O(N^2)$. Program wybiera wagi gęste, gdy macierz mieści się w \qty{256}{MiB}, czyli do $N = 5792$, a czynnikowe dla większych sieci.
 
 \subsection{Uczenie}
 \label{sec:uczenie}
 
-Reguła Hebba wymaga jednego przejścia przez wzorce. Reguła Oji jest liczona wsadowo: w każdej epoce aktualizacja~\eqref{eq:oja-podprzestrzen} jest uśredniana po wszystkich wzorcach przy tych samych wagach. Wagi mają przez cały czas postać $W = \Xi^T M \Xi / N$ z symetryczną macierzą $M$ o wymiarach $p \times p$, a jedna epoka zmienia tę macierz o
+Reguła Hebba wymaga jednego przejścia przez wzorce. Wagi reguły Oji są liczone wsadowo: w każdej epoce aktualizacja~\eqref{eq:oja-podprzestrzen} jest uśredniana po wszystkich wzorcach przy tych samych wagach. Wagi mają przez cały czas postać $W = \Xi^T M \Xi / N$ z symetryczną macierzą $M$ o wymiarach $p \times p$, a jedna epoka zmienia tę macierz o
 \begin{equation}
     \Delta M = \frac{\eta}{p} \, M G \left(I - G M G M\right), \qquad G = \frac{1}{N} \Xi \Xi^T,
     \label{eq:oja-epoka}
 \end{equation}
-gdzie $G$ to macierz nakładań. Koszt epoki wynosi $O(p^3)$ i nie zależy od $N$, co pozwala uczyć sieć na zdjęciach o \num{60000} pikselach. Na kierunkach własnych~\eqref{eq:oja-epoka} jest dyskretną wersją~\eqref{eq:oja-widmo}, a ponieważ $\lambda_k \le p$, dla $\eta \le \num{0.5}$ każde $f_k$ zbiega do 1 monotonicznie (wyprowadzenie własne). Uczenie startuje od wag Hebba podzielonych przez $s$, które ogranicza z góry największą wartość własną $G$ (twierdzenie Gerszgorina). Bez tego skalowania silnie skorelowane zbiory mają na starcie $f_k \gg 1$ i uczenie jest rozbieżne. Po uczeniu wagi mają postać~\eqref{eq:wagi-czynnikowe} z $A = \Xi^T M / N$. Całe uczenie przedstawia Algorytm~\ref{alg:oja}, a jego parametry Tabela~\ref{tab:parametry-uczenia}.
+gdzie $G$ to macierz nakładań. Koszt epoki wynosi $O(p^3)$ i nie zależy od $N$, co pozwala uczyć sieć na zdjęciach o \num{60000} pikselach. Na kierunkach własnych równanie~\eqref{eq:oja-epoka} jest dyskretną wersją~\eqref{eq:oja-widmo}, a ponieważ $\lambda_k \le p$, dla $\eta \le \num{0.5}$ każde $f_k$ zbiega do 1 monotonicznie (wyprowadzenie własne). Uczenie startuje od wag Hebba podzielonych przez liczbę $s$, która ogranicza z góry największą wartość własną $G$ (twierdzenie Gerszgorina). Bez tego skalowania silnie skorelowane zbiory mają na starcie $f_k \gg 1$ i uczenie jest rozbieżne. Po uczeniu wagi mają postać~\eqref{eq:wagi-czynnikowe} z $A = \Xi^T M / N$. Całe uczenie przedstawia Algorytm~\ref{alg:oja}, a jego parametry Tabela~\ref{tab:parametry-uczenia}.
 
 \begin{algorithm}[H]
     \caption{Uczenie regułą Oji (wariant podprzestrzeni, wsadowo).}
@@ -145,11 +145,11 @@ Symulacja realizuje oba tryby z rozdziału~\ref{sec:model}. W trybie synchronicz
 \subsection{Wizualizacja}
 \label{sec:wizualizacja}
 
-Pojedyncze odtwarzanie (podpolecenie \texttt{recall}) zapisuje kolejne stany sieci jako klatki: w trybie synchronicznym po każdym kroku, a w asynchronicznym co zadaną liczbę aktualizacji, domyślnie co $N$. Klatka jest zapisywana tylko wtedy, gdy stan różni się od poprzedniej, a stan końcowy jest zapisywany zawsze. Do każdej klatki program zapisuje energię~\eqref{eq:energia}, liczbę zmienionych neuronów i nakładania~\eqref{eq:nakladanie} stanu ze wszystkimi wzorcami.
+Pojedyncze odtwarzanie (podpolecenie \texttt{recall}) zapisuje kolejne stany sieci jako klatki: w trybie synchronicznym po każdym kroku, a w asynchronicznym co zadaną liczbę aktualizacji, domyślnie co $N$. Klatka jest zapisywana tylko wtedy, gdy stan różni się od zapisanego w poprzedniej klatce, a stan końcowy jest zapisywany zawsze. Do każdej klatki program zapisuje energię~\eqref{eq:energia}, liczbę zmienionych neuronów i nakładania~\eqref{eq:nakladanie} stanu ze wszystkimi wzorcami.
 
-Warstwa prezentacji pokazuje taki przebieg jako siatkę wybranych klatek, wykres energii i nakładań, animację GIF albo w interaktywnej przeglądarce.
+Warstwa prezentacji pokazuje taki przebieg jako siatkę wybranych klatek, wykres energii i nakładań lub animację GIF albo w interaktywnej przeglądarce.
 
-Przeglądarka wyświetla bieżącą klatkę jako bitmapę wraz z wykresami energii i nakładań, na których zaznaczona jest bieżąca klatka. Klatki zmienia się suwakiem albo klawiszami strzałek, a klawisze \texttt{Home} i \texttt{End} przechodzą do pierwszej i ostatniej klatki. Przykładowy widok przeglądarki pokazano na Rysunku~\ref{fig:przegladarka}.
+Przeglądarka wyświetla bieżącą klatkę jako bitmapę wraz z wykresami energii i nakładań, na których zaznaczono jej położenie. Klatki zmienia się suwakiem albo klawiszami strzałek, a klawisze \texttt{Home} i \texttt{End} przenoszą do pierwszej i ostatniej klatki. Przykładowy widok przeglądarki pokazano na Rysunku~\ref{fig:przegladarka}.
 
 \begin{figure}[H]
     \centering
