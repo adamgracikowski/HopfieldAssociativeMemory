@@ -147,7 +147,7 @@ Running `recall` again with the same configuration and code gives identical file
 Runs a grid of datasets, learning rules, update modes and damage levels (noise or occlusion) with many trials in every cell, in parallel over the trials.
 
 ```bash
-cargo run --release -- experiment --config ../../data/experiments/00-example/config.toml
+cargo run --release -- experiment --config ../../data/experiments/example/config.toml
 ```
 
 The results go to `results/` next to the configuration, or to `--out <dir>`; the directory must be empty or not exist yet (`--force` as above). The configuration:
@@ -201,7 +201,7 @@ Running the experiment again gives identical `trials.parquet`, `summary.json`, `
 Counts the stable stored patterns as their number `p` grows, without running the dynamics: for the prefixes of registered datasets (the first 1, 2, ..., `p` patterns) and for sets of independent random patterns, in parallel over the sets.
 
 ```bash
-cargo run --release -- capacity --config ../../data/experiments/08-capacity/config.toml
+cargo run --release -- capacity --config ../../data/experiments/capacity/config.toml
 ```
 
 The results go to `results/` next to the configuration, or to `--out <dir>` (`--force` as above). The configuration:
@@ -237,7 +237,7 @@ Running it again gives identical `capacity.parquet` and `summary.json`; `metadat
 Measures the time and memory of training and recall for registered datasets and for random sets of growing `N`, with dense and factored weights, one measurement after another (only the local fields of a large network are computed in parallel).
 
 ```bash
-cargo run --release -- benchmark --config ../../data/experiments/13-benchmark/config.toml
+cargo run --release -- benchmark --config ../../data/experiments/benchmark/config.toml
 ```
 
 The results go to `results/` next to the configuration, or to `--out <dir>` (`--force` as above). The configuration:
@@ -273,7 +273,7 @@ The times depend on the machine and change from run to run; the steps, epochs an
 Searches large sets of bitmaps whose every pattern is a strict fixed point (every aligned field `xi_i h_i > 1e-10`, whatever `sgn(0)` means) of the network trained with each rule. The sets are the bipolar points of hyperplanes, `S_u = {xi in {-1, 1}^N : u . xi = 0}` for a vector `u` of positive integers: Oja's subspace rule tends to the projection `P` onto the span of its training set; when the members of `S_u` span the hyperplane `u^perp`, the zeroed diagonal gives every member the aligned field `1 - P_ii = u_i^2 / |u|^2 > 0`.
 
 ```bash
-cargo run --release -- search-stable --config ../../data/experiments/11-stable/config.toml
+cargo run --release -- search-stable --config ../../data/experiments/stable-5x5/config.toml
 ```
 
 The results go to `results/` next to the configuration, or to `--out <dir>` (`--force` as above). The configuration:

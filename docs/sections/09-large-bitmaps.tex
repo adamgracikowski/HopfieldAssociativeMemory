@@ -10,7 +10,7 @@ Reguła Oji stabilizuje wszystkie 12 zdjęć w obu zbiorach, a reguła Hebba tyl
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{13-noise/figures/unstable-median-hebb.pdf}
+    \includegraphics[width=0.8\textwidth]{cats-noise/figures/unstable-median-hebb.pdf}
     \caption{Niestabilne piksele zdjęć zbioru \texttt{cats-300x200-median} przy regule Hebba (zaznaczone na czerwono) i ich liczba pod każdym zdjęciem.}
     \label{fig:koty-niestabilne}
 \end{figure}
@@ -24,7 +24,7 @@ Odsetek odzyskań przy odwróceniu losowych pikseli pokazano na Rysunku~\ref{fig
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{13-noise/figures/recovery.pdf}
+    \includegraphics[width=0.75\textwidth]{cats-noise/figures/recovery.pdf}
     \caption{Odsetek odzyskanych wzorców w zależności od poziomu szumu dla zdjęć kotów (100 prób na wzorzec, słupki to 95-procentowe przedziały Wilsona).}
     \label{fig:koty-szum}
 \end{figure}
@@ -33,7 +33,7 @@ Odsetek odzyskań przy odwróceniu losowych pikseli pokazano na Rysunku~\ref{fig
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{13-occlusion/figures/classes.pdf}
+    \includegraphics[width=0.9\textwidth]{cats-occlusion/figures/classes.pdf}
     \caption{Klasy stanów końcowych w zależności od poziomu zasłonięcia dla zdjęć kotów. Górne wykresy: zbiór \texttt{cats-300x200-median}. Dolne wykresy: zbiór \texttt{cats-300x200-dither}.}
     \label{fig:koty-zasloniecie}
 \end{figure}
@@ -44,10 +44,10 @@ Przebieg odtwarzania jednego zdjęcia z połową zasłoniętych wierszy pokazano
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{13-occlusion/figures/recall-occlusion-hebb.pdf}
+    \includegraphics[width=0.8\textwidth]{cats-occlusion/figures/recall-occlusion-hebb.pdf}
 
     \vspace{0.2cm}
-    \includegraphics[width=0.8\textwidth]{13-occlusion/figures/recall-occlusion-oja.pdf}
+    \includegraphics[width=0.8\textwidth]{cats-occlusion/figures/recall-occlusion-oja.pdf}
     \caption{Odtwarzanie wzorca 8 zbioru \texttt{cats-300x200-median} z wejścia z zasłoniętymi 100 wierszami (tryb asynchroniczny, klatka co \num{6000} aktualizacji). Górny wykres: reguła Hebba. Dolny wykres: reguła Oji.}
     \label{fig:koty-przebieg}
 \end{figure}
@@ -59,7 +59,7 @@ Czas i pamięć uczenia oraz odtwarzania zmierzono dla 12 losowych wzorców przy
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{13-benchmark/figures/benchmark.pdf}
+    \includegraphics[width=0.8\textwidth]{benchmark/figures/benchmark.pdf}
     \caption{Czas uczenia, czas obliczenia pól $h = Wx$ dla wszystkich neuronów, czas kroku asynchronicznego i pamięć wag w zależności od liczby neuronów (skale logarytmiczne, mediany z 5 powtórzeń). Trójkąty oznaczają zbiory kotów.}
     \label{fig:benchmark}
 \end{figure}

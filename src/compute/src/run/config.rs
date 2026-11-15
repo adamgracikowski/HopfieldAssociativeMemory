@@ -247,7 +247,7 @@ mod tests {
     fn finds_the_registry_from_the_config_directory() {
         let config = RunConfig::parse(
             "dataset = \"small-7x7\"\n[learning]\nrule = \"hebb\"",
-            Path::new("../../data/experiments/00-example/config.toml"),
+            Path::new("../../data/experiments/example/config.toml"),
         )
         .unwrap();
         let registry = config.open_registry().unwrap();

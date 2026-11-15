@@ -264,7 +264,7 @@ mod tests {
     "#;
 
     fn parse(text: &str) -> Result<ExperimentConfig> {
-        ExperimentConfig::parse(text, Path::new("data/experiments/00-example/config.toml"))
+        ExperimentConfig::parse(text, Path::new("data/experiments/example/config.toml"))
     }
 
     fn invalid_message(text: &str) -> String {
@@ -296,7 +296,7 @@ mod tests {
         assert_eq!(config.dynamics.zero_field, ZeroField::Keep);
         assert_eq!(config.dynamics.max_steps, 1000);
         assert_eq!(config.damage_levels(), [Some(0.0), Some(0.1), Some(0.2)]);
-        assert_eq!(config.directory(), Path::new("data/experiments/00-example"));
+        assert_eq!(config.directory(), Path::new("data/experiments/example"));
         let json = serde_json::to_value(&config).unwrap();
         assert_eq!(json["dynamics"]["order"], "permutation");
         assert_eq!(json["input"]["source"], "pattern");
@@ -461,7 +461,7 @@ mod tests {
     fn finds_the_registry_from_the_config_directory() {
         let config = ExperimentConfig::parse(
             CONFIG,
-            Path::new("../../data/experiments/00-example/config.toml"),
+            Path::new("../../data/experiments/example/config.toml"),
         )
         .unwrap();
         let registry = config.open_registry().unwrap();

@@ -95,16 +95,16 @@ description = "Twelve cat photos, Floyd-Steinberg dithering (sources and license
 file = "stable-5x5-basis.npy"
 width = 5
 height = 5
-description = "Basis of 24 bitmaps of the set S_u = {xi : u . xi = 0}, u = (1, ..., 1, 2), whose 4992288 members are all strictly stable with both rules; the training set of Oja's rule (search: data/experiments/11-stable/config.toml)."
+description = "Basis of 24 bitmaps of the set S_u = {xi : u . xi = 0}, u = (1, ..., 1, 2), whose 4992288 members are all strictly stable with both rules; the training set of Oja's rule (search: data/experiments/stable-5x5/config.toml)."
 
 [datasets.stable-5x5-sample]
 file = "stable-5x5-sample.npy"
 width = 5
 height = 5
-description = "24 members spread evenly over the set S_u = {xi : u . xi = 0}, u = (1, ..., 1, 2), of 4992288 bitmaps strictly stable with both rules (search: data/experiments/11-stable/config.toml)."
+description = "24 members spread evenly over the set S_u = {xi : u . xi = 0}, u = (1, ..., 1, 2), of 4992288 bitmaps strictly stable with both rules (search: data/experiments/stable-5x5/config.toml)."
 
 [datasets.cycle-5x5]
 file = "cycle-5x5.csv"
 width = 5
 height = 5
-description = "Four 5x5 shapes, the letters T, L, H and a plus sign; with the Hebbian rule the checkerboard input (overlap 1/25 with every shape) makes the synchronous dynamics alternate between the checkerboard and its negation (data/experiments/11-cycle)."
+description = "Four 5x5 shapes, the letters T, L, H and a plus sign; with the Hebbian rule the checkerboard input (overlap 1/25 with every shape) makes the synchronous dynamics alternate between the checkerboard and its negation (data/experiments/cycle)."

@@ -1,0 +1,35 @@
+# Recovery of stored patterns from inputs with a band of rows at a random
+# position covered with the background (-1): every CSV dataset, both
+# learning rules and update modes, round(f * H) covered rows for f from 0 to
+# 0.75 in steps of 0.15 (different numbers of rows down to H = 7).
+#
+# Run from src/compute:
+#   cargo run --release -- experiment --config ../../data/experiments/occlusion/config.toml
+# Report figure, from src/analysis:
+#   uv run hopfield-analysis recovery ../../data/experiments/occlusion/results --out ../../data/experiments/occlusion/figures/recovery
+
+seed = 20261110
+datasets = [
+    "small-7x7",
+    "letters-abc-8x12",
+    "animals-14x9",
+    "letters-14x20",
+    "OCRA-12x30-cut",
+    "large-25x25",
+    "large-25x25.plus",
+    "large-25x50",
+]
+trials = 100
+
+[[learning]]
+rule = "hebb"
+
+[[learning]]
+rule = "oja"
+
+[dynamics]
+modes = ["synchronous", "asynchronous"]
+
+[input]
+source = "occlusion"
+occlusion = [0.0, 0.15, 0.3, 0.45, 0.6, 0.75]
