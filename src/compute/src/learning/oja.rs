@@ -171,8 +171,7 @@ mod tests {
     use ndarray::Axis;
     use strum::IntoEnumIterator;
 
-    /// Two 5x5 patterns: `a` is all ones, `b` has ones at pixels 0-14 and
-    /// -1 at pixels 15-24; their overlap is `a . b = 5`.
+    /// 5x5 set: `a` all ones, `b` -1 at pixels 15-24; `a . b = 5`.
     fn two_patterns() -> PatternSet {
         let data = Array2::from_shape_fn((2, 25), |(mu, i)| match mu {
             0 => 1,
@@ -193,8 +192,8 @@ mod tests {
         PatternSet::new(5, 5, data).unwrap()
     }
 
-    /// Six 5x5 patterns that differ from all ones in one pixel each, so
-    /// the largest eigenvalue of `G` is close to `p = 6`.
+    /// Six 5x5 patterns, each all ones but one pixel: `G = Xi Xi^T / N` has
+    /// off-diagonal 0.84 and eigenvalues 5.2 and 0.16 (five times).
     fn correlated_patterns() -> PatternSet {
         let data = Array2::from_shape_fn((6, 25), |(mu, i)| if i == mu { -1 } else { 1 });
         PatternSet::new(5, 5, data).unwrap()
@@ -282,20 +281,17 @@ mod tests {
         }
     }
 
-    /// Hand computation for `two_patterns`, `eta = 0.1`, `p = 2`, `N = 25`.
-    /// `G = Xi Xi^T / N = [[1, 0.2], [0.2, 1]]` has eigenvalues 1.2 (for
-    /// `a + b`) and 0.8 (for `a - b`), and the Gershgorin scale is
-    /// `s = 1.2`. The subspace rule keeps `W = Xi^T M Xi / N` and acts on
-    /// each eigenvalue: with `f = lambda m`,
-    /// `f <- f + (eta / p) lambda f (1 - f^2)`, starting from
-    /// `f = lambda / s`. After one epoch:
-    /// - `f1 = 1` stays 1, so `m1 = 1 / 1.2`,
+    /// `two_patterns`, `eta = 0.1`, `p = 2`, `N = 25`:
+    /// `G = Xi Xi^T / N = [[1, 0.2], [0.2, 1]]`, eigenvalues 1.2 (`a + b`)
+    /// and 0.8 (`a - b`), Gershgorin scale `s = 1.2`. With
+    /// `W = Xi^T M Xi / N` and `f = lambda m` per eigenvalue,
+    /// `f <- f + (eta / p) lambda f (1 - f^2)` from `f = lambda / s`:
+    /// - `f1 = 1` stays, `m1 = 1 / 1.2`,
     /// - `f2 = 2/3 + 0.05 * 0.8 * (2/3) * (1 - 4/9) = 18.4 / 27`,
     ///   `m2 = f2 / 0.8 = 23 / 27`.
     ///
-    /// Pixels 0-14 are `(1, 1)` in both patterns, along `a + b`, so
-    /// `w_ij = 2 m1 / 25 = 1/15` there; pixels 15-24 are `(1, -1)`, so
-    /// `w_ij = 2 m2 / 25 = 46 / 675`; the cross block is 0.
+    /// Pixels 0-14 (`(1, 1)`): `w_ij = 2 m1 / 25 = 1/15`; pixels 15-24
+    /// (`(1, -1)`): `w_ij = 2 m2 / 25 = 46 / 675`; across: 0.
     #[test]
     fn subspace_rule_after_one_epoch_matches_hand_computation() {
         let w = oja(OjaVariant::Subspace, 1)
@@ -313,12 +309,10 @@ mod tests {
         assert_eq!(w[[3, 3]], 0.0);
     }
 
-    /// The converged subspace rule is the projector
-    /// `P = Xi^T (Xi Xi^T)^-1 Xi`: `f = 1`, so `m1 = 1 / 1.2` and
-    /// `m2 = 1 / 0.8`, giving `w_ij = 1/15` on pixels 0-14 (diagonal
-    /// included before zeroing), 0.1 on pixels 15-24 and 0 across. Each
-    /// pattern is mapped to itself, and after zeroing the diagonal its local
-    /// field is `(1 - P_ii) xi_i`, so both patterns are stable.
+    /// Converged, `f = 1`: `m1 = 1 / 1.2`, `m2 = 1 / 0.8`, so the projector
+    /// `P = Xi^T (Xi Xi^T)^-1 Xi` has `1/15` on pixels 0-14 (diagonal
+    /// included), 0.1 on pixels 15-24 and 0 across. With the diagonal zeroed
+    /// the field of a pattern is `(1 - P_ii) xi_i`, so both are stable.
     #[test]
     fn subspace_rule_converges_to_the_projection_rule() {
         let set = two_patterns();
@@ -343,9 +337,8 @@ mod tests {
         }
     }
 
-    /// The small eigenvalues of `G` (about 0.16 here) are learned slowly,
-    /// at a rate of about `(eta / p) lambda` per epoch, so this set needs
-    /// thousands of epochs.
+    /// The eigenvalues 0.16 of `G` are learned at about `(eta / p) lambda`
+    /// per epoch: thousands of epochs.
     #[test]
     fn strongly_correlated_patterns_do_not_diverge() {
         let set = correlated_patterns();
@@ -384,8 +377,6 @@ mod tests {
         assert!(w.diag().iter().all(|&d| d == 0.0));
     }
 
-    /// Every row of the single-neuron rule converges to a unit eigenvector,
-    /// so the row norms of the full matrix tend to 1.
     #[test]
     fn single_neuron_rule_normalizes_every_row() {
         let set = three_patterns();

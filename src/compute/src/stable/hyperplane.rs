@@ -309,8 +309,8 @@ mod tests {
         }
     }
 
-    /// `u = (1, ..., 1, 2)` with 25 weights: the 24 ones must sum to `-2
-    /// xi_25`, so 11 or 13 of them are `+1`: `2 * C(24, 11) = 2 * 2496144`.
+    /// `u = (1, ..., 1, 2)` with 25 weights: the 24 ones sum to `-2 xi_25`,
+    /// so 11 or 13 of them are `+1`: `2 * C(24, 11) = 2 * 2496144`.
     #[test]
     fn counts_the_large_hyperplane_without_enumerating_it() {
         let mut weights = vec![1; 24];
@@ -339,8 +339,8 @@ mod tests {
         assert!(Hyperplane::new(vec![]).is_err());
     }
 
-    /// The basis has `N - 1` independent members of `S_u`, and a sample is
-    /// spread over the members in index order.
+    /// The basis has `N - 1` members of `S_u`; a sample of `k` takes every
+    /// `size / k`-th member.
     #[test]
     fn finds_a_basis_and_a_sample_of_members() {
         let plane = Hyperplane::new(vec![1, 1, 1, 1, 1, 1, 1, 1, 2]).unwrap();

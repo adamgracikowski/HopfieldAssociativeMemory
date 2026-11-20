@@ -193,9 +193,7 @@ mod tests {
                           [dynamics]\nmodes = [\"synchronous\", \"asynchronous\"]\n\
                           [input]\nsource = \"random\"\n";
 
-    /// `small-7x7` has `p = 5` patterns of `N = 49` neurons. The counts of
-    /// every cell add up to its 40 runs, the class counts agree with the
-    /// summary, and the rows of a cell are ordered by count.
+    /// `small-7x7`: `N = 49`, `p = 5`, 40 runs per cell.
     #[test]
     fn has_a_row_per_distinct_final_state() {
         let run = run(CONFIG);
@@ -253,11 +251,8 @@ mod tests {
         assert_eq!(mixture.len() - mixture.null_count(), exact);
     }
 
-    /// Damaged copies of the `p = 5` patterns with 4 trials per target give
-    /// `4 * 5 = 20` runs per cell, except `5` in the synchronous cell
-    /// without noise, which runs one trial per target. The first run of
-    /// every row is a run of its cell with a target, and the table has the
-    /// noise level of the cell and that target in every row.
+    /// 4 trials x 5 targets = 20 runs per cell, 5 (one trial) in the two
+    /// synchronous cells without noise.
     #[test]
     fn keeps_the_noise_level_and_target_of_damaged_inputs() {
         let run = run(&CONFIG.replace("trials = 40", "trials = 4").replace(
@@ -294,8 +289,6 @@ mod tests {
         }
     }
 
-    /// Without the option the run keeps no attractors and the table is
-    /// empty.
     #[test]
     fn is_empty_without_the_option() {
         let run = run(&CONFIG.replace("attractors = true\n", ""));

@@ -297,12 +297,10 @@ mod tests {
         BenchmarkConfig::parse(CONFIG, Path::new("../../data/experiments/x/config.toml")).unwrap()
     }
 
-    /// `small-7x7` (`N = 49`) and the random set of `N = 64` are measured
-    /// with both backends, the one of `N = 128 > dense_limit` only with
-    /// factored weights: `(2 + 2 + 1) * 2 rules * 2 repeats = 20`
-    /// measurements. Dense weights of `N = 64` take `8 * 64^2 = 32768`
-    /// bytes, factored ones of `p = 3` patterns `3 * 64 + 8 * 64 * 3 + 8 *
-    /// 64 = 192 + 1536 + 512 = 2240` bytes.
+    /// Sets of `N = 49` and 64 with both backends, `N = 128 > dense_limit`
+    /// only factored: `(2 + 2 + 1) * 2 rules * 2 repeats = 20` measurements.
+    /// Weights of `N = 64`: dense `8 * 64^2 = 32768` bytes, factored
+    /// (`p = 3`) `3 * 64 + 8 * 64 * 3 + 8 * 64 = 2240` bytes.
     #[test]
     fn measures_every_set_backend_rule_and_repeat() {
         let run = BenchmarkRun::execute(&config(), &NoProbe, |_, _| {}).unwrap();
@@ -358,9 +356,6 @@ mod tests {
         assert!(oja.epochs > 0);
     }
 
-    /// Both backends of the same set, rule and repeat start from the same
-    /// input and reach the same final state, so they take the same number
-    /// of steps.
     #[test]
     fn backends_run_the_same_dynamics() {
         let run = BenchmarkRun::execute(&config(), &NoProbe, |_, _| {}).unwrap();

@@ -68,8 +68,7 @@ mod tests {
     use crate::weights::Backend;
     use ndarray::array;
 
-    /// Orthogonal patterns of `N = 4` neurons: with Hebbian weights every
-    /// pattern has `h = xi (N - 2) / N = xi / 2` and is stable.
+    /// Orthogonal patterns with Hebbian weights have `h = xi / 2`.
     #[test]
     fn orthogonal_patterns_are_stable() {
         let set = PatternSet::new(4, 1, array![[1, 1, 1, 1], [1, -1, 1, -1]]).unwrap();
@@ -81,9 +80,8 @@ mod tests {
         }
     }
 
-    /// The same orthogonal patterns: `h_i = xi_i / 2`, so every aligned
-    /// field `xi_i h_i = xi_i^2 / 2 = 1/2`, the signal `1 - p/N = 1 - 2/4`
-    /// with no crosstalk (`m = 0`).
+    /// Orthogonal patterns: every aligned field is the signal
+    /// `1 - p/N = 1/2`, with no crosstalk.
     #[test]
     fn aligned_fields_of_orthogonal_patterns_are_the_signal() {
         let set = PatternSet::new(4, 1, array![[1, 1, 1, 1], [1, -1, 1, -1]]).unwrap();
@@ -97,11 +95,10 @@ mod tests {
         }
     }
 
-    /// Patterns `(1, 1, 1)` and `(1, 1, -1)` of `N = 3`: Hebbian weights
-    /// `w_01 = 2/3`, `w_02 = w_12 = 0`. Pattern 0 has `h = (2/3, 2/3, 0)`,
-    /// aligned `(2/3, 2/3, 0)`; pattern 1 the same fields, aligned
-    /// `(2/3, 2/3, 0)` too (`-1 * 0`). Neuron 2 has a zero field: stable with
-    /// `keep`; with `plus-one` the `-1` of pattern 1 would change.
+    /// Patterns `(1, 1, 1)` and `(1, 1, -1)`: `w_01 = 2/3`, `w_02 = w_12 = 0`,
+    /// so both have aligned fields `(2/3, 2/3, 0)`. Neuron 2 has a zero
+    /// field: stable with `keep`, while `plus-one` changes the `-1` of
+    /// pattern 1.
     #[test]
     fn stability_follows_the_aligned_fields() {
         let set = PatternSet::new(3, 1, array![[1, 1, 1], [1, 1, -1]]).unwrap();
@@ -120,8 +117,6 @@ mod tests {
         );
     }
 
-    /// On a correlated set the count of negative aligned fields is the
-    /// number of unstable neurons, for the Hebbian and Oja weights.
     #[test]
     fn negative_aligned_fields_are_unstable_neurons() {
         let set = PatternSet::new(

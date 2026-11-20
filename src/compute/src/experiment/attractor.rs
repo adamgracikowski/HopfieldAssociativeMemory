@@ -131,7 +131,7 @@ mod tests {
     use crate::weights::DenseWeights;
     use ndarray::array;
 
-    /// Two neurons with `w_01 = w_10 = 0.5` (Hebbian weights of `(1, 1)`).
+    /// Hebbian weights of `(1, 1)`: `w_01 = w_10 = 0.5`.
     fn weights() -> Weights {
         Weights::from(DenseWeights::new(array![[0.0, 0.5], [0.5, 0.0]]).unwrap())
     }
@@ -157,11 +157,9 @@ mod tests {
         trial.run_with_state(&weights(), &set(), &dynamics).unwrap()
     }
 
-    /// From `(1, 1)` no pixel changes; from `(-1, -1)` neither (`h = (-0.5,
-    /// -0.5)`), a fixed point equal to the negation. With one flipped pixel,
-    /// `(1, -1)` has `h = (-0.5, 0.5)` and goes to `(-1, 1)` and back: a
-    /// cycle whose final state is either `(-1, 1)` or `(1, -1)`, depending
-    /// on the pixel, both represented by the smaller `(-1, 1)`.
+    /// `(1, 1)` and its negation `(-1, -1)` are fixed points; one flipped
+    /// pixel gives the 2-cycle of `(1, -1)` and `(-1, 1)`, represented by the
+    /// smaller `(-1, 1)` whichever state it ends in.
     #[test]
     fn groups_runs_by_final_state() {
         let mut runs = vec![run(0, 0, 0), run(2, 0, 0)];
@@ -199,7 +197,6 @@ mod tests {
         assert_eq!(attractors[0].mixture, None);
     }
 
-    /// Two runs of the same count keep the order of their first runs.
     #[test]
     fn breaks_ties_by_the_first_run() {
         let runs = vec![run(2, 0, 0), run(0, 0, 1)];

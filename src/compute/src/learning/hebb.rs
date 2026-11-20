@@ -48,8 +48,8 @@ mod tests {
     use rand::SeedableRng;
     use rand_chacha::ChaCha8Rng;
 
-    /// 5x5 set: `a` is all ones, `b` has -1 at pixels 0-9, `c` has 1 at
-    /// pixels 0, 5, 10, 15, 20 (the first column).
+    /// 5x5 set: `a` all ones, `b` -1 at pixels 0-9, `c` 1 in the first
+    /// column.
     fn three_patterns() -> PatternSet {
         let data = Array2::from_shape_fn((3, 25), |(mu, i)| match mu {
             0 => 1,
@@ -61,7 +61,7 @@ mod tests {
         PatternSet::new(5, 5, data).unwrap()
     }
 
-    /// `w_ij = (a_i a_j + b_i b_j + c_i c_j) / 25`, computed by hand:
+    /// `w_ij = (a_i a_j + b_i b_j + c_i c_j) / 25`:
     /// - `w[0][1]`: `1 + (-1)(-1) + (1)(-1) = 1`, so 0.04,
     /// - `w[0][5]`: `1 + 1 + 1 = 3`, so 0.12,
     /// - `w[0][10]`: `1 + (-1)(1) + 1 = 1`, so 0.04,
@@ -129,9 +129,8 @@ mod tests {
         }
     }
 
-    /// For orthogonal patterns the local field of a stored pattern is
-    /// `h = (1 - p/N) xi`: the self term minus the removed diagonal, with no
-    /// crosstalk. Here `p = 2`, `N = 4`, so `h = xi / 2`.
+    /// Orthogonal patterns have no crosstalk: `h = (1 - p/N) xi = xi / 2`
+    /// for `p = 2`, `N = 4` (the removed diagonal takes `p/N`).
     #[test]
     fn orthogonal_patterns_are_fixed_points() {
         let set = PatternSet::new(4, 1, array![[1, 1, 1, 1], [1, -1, 1, -1]]).unwrap();

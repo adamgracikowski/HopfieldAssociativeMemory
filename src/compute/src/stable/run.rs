@@ -184,12 +184,12 @@ mod tests {
         StableConfig::parse(text, Path::new("../../data/experiments/x/config.toml")).unwrap()
     }
 
-    /// 5 x 3 bitmaps (`N = 15`) with weights 1 and 2: the largest set is
+    /// 5 x 3 bitmaps (`N = 15`), weights 1 and 2: the largest set is
     /// `u = (1, ..., 1, 2)` with `2 C(14, 6) = 6006` members (the fourteen
-    /// ones sum to `-2 xi_15`), strictly stable with both rules. The next
-    /// one, `u = (1, ..., 1, 2, 2, 2)`, has `220 + 2376 + 2376 + 220 = 5192`
-    /// members (`a` of the twelve ones and `b` of the three twos with sign
-    /// `+1`, `a + 2b = 9`).
+    /// ones sum to `-2 xi_15`), strictly stable with both rules. The next,
+    /// `u = (1, ..., 1, 2, 2, 2)`, has `220 + 2376 + 2376 + 220 = 5192`
+    /// members (`a` of the twelve ones and `b` of the three twos are `+1`,
+    /// `a + 2b = 9`).
     #[test]
     fn finds_the_largest_stable_hyperplane_set() {
         let search = StableSearch::execute(&config(
@@ -213,9 +213,8 @@ mod tests {
         assert_eq!(search.basis.as_ref().unwrap().width(), 5);
     }
 
-    /// The Hebbian rule fails on the same kind of set when it is small: for
-    /// `N = 9`, `u = (1, ..., 1, 2)`, no member is strictly stable, so the
-    /// search finds no set stable with both rules.
+    /// `N = 9`, `u = (1, ..., 1, 2)`: `2 C(8, 3) = 112` members, none
+    /// strictly stable with the Hebbian rule.
     #[test]
     fn reports_no_best_set_when_the_hebbian_rule_fails() {
         let search = StableSearch::execute(&config(
@@ -229,11 +228,9 @@ mod tests {
         assert!(search.basis.is_none() && search.sample.is_none());
     }
 
-    /// Oja's rule on the basis of `S_u` tends to the projection onto
-    /// `u^perp`: `P = I - u u^T / |u|^2`, here with the diagonal set to
-    /// zero, so the aligned field of every member is `1 - P_ii = u_i^2 /
-    /// |u|^2`, smallest `1 / 12` for `u = (1, ..., 1, 2)` with `|u|^2 = 8 +
-    /// 4 = 12`.
+    /// Oja's rule on the basis of `S_u` tends to `P = I - u u^T / |u|^2`
+    /// with zero diagonal: aligned fields `1 - P_ii = u_i^2 / |u|^2`,
+    /// smallest `1 / 12` for `u = (1, ..., 1, 2)`, `|u|^2 = 8 + 4`.
     #[test]
     fn oja_learns_the_projection_onto_the_hyperplane() {
         let plane = Hyperplane::new(vec![1, 1, 1, 1, 1, 1, 1, 1, 2]).unwrap();

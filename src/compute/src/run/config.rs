@@ -205,8 +205,6 @@ mod tests {
         }
     }
 
-    /// The serialized configuration holds every setting, including the
-    /// defaults, and reads back to the same values.
     #[test]
     fn round_trips_through_json() {
         let config = parse(CONFIG).unwrap();

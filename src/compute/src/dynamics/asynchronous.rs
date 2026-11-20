@@ -163,12 +163,9 @@ mod tests {
         PatternSet::from_patterns(n, 1, &patterns).unwrap()
     }
 
-    /// Hebbian weights of `(1, 1)`, `w_01 = w_10 = 0.5`, from `(1, -1)` in
-    /// sequential order: neuron 0 has `h_0 = 0.5 * -1 < 0` and flips to
-    /// `-1`; then neuron 1 has `h_1 = 0.5 * -1 < 0` and stays `-1`. The
-    /// second sweep changes nothing, so `(-1, -1)`, the negated pattern, is
-    /// a fixed point after one step with one change. Energy
-    /// `-w_01 x_0 x_1` falls from `0.5` to `-0.5`.
+    /// Hebbian weights of `(1, 1)`, sequential order from `(1, -1)`: neuron 0
+    /// flips (`h_0 = -0.5`), neuron 1 stays (`h_1 = -0.5`), so `(-1, -1)` is
+    /// a fixed point after one step with one change; energy 0.5 -> -0.5.
     #[test]
     fn two_neurons_reach_the_negated_pattern() {
         let set = PatternSet::new(2, 1, array![[1, 1]]).unwrap();
@@ -184,12 +181,9 @@ mod tests {
         assert_eq!(history.changes(), [0, 1]);
     }
 
-    /// The asymmetric `W = [[0, -1], [1, 0]]` of Rojas (1996, p. 344) gives
-    /// `h_0 = -x_1`, `h_1 = x_0`. In sequential order from `(1, 1)` every
-    /// update flips a neuron: `(-1, 1)`, `(-1, -1)` in the first sweep,
-    /// `(1, -1)`, `(1, 1)` in the second. The network cycles, so 2 sweeps
-    /// end at the limit with 4 changes. A frame per update gives 1 + 4
-    /// frames, a frame per sweep 1 + 2.
+    /// With `W = [[0, -1], [1, 0]]` every sequential update from `(1, 1)`
+    /// flips a neuron, so 2 sweeps end at the limit with 4 changes: 1 + 4
+    /// frames with a frame per update, 1 + 2 with a frame per sweep.
     #[test]
     fn asymmetric_weights_cycle_until_the_step_limit() {
         let weights = Weights::from(DenseWeights::new(array![[0.0, -1.0], [1.0, 0.0]]).unwrap());
@@ -218,10 +212,9 @@ mod tests {
         assert_eq!(history.changes(), [0, 2, 2]);
     }
 
-    /// The same cycle with a frame every 4 updates: after two sweeps the
-    /// state is back at `(1, 1)` after 4 flips, so no new frame is recorded.
-    /// With a frame every 3 updates the frame after 3 flips is `(1, -1)`,
-    /// at distance 1 from the start, and the final `(1, 1)` follows at
+    /// With `W = [[0, -1], [1, 0]]` from `(1, 1)` the state is back at
+    /// `(1, 1)` after 4 flips: a frame every 4 updates records nothing new,
+    /// a frame every 3 updates records `(1, -1)` and then `(1, 1)`, each at
     /// distance 1.
     #[test]
     fn frames_record_the_distance_to_the_previous_frame() {
@@ -259,9 +252,8 @@ mod tests {
         }
     }
 
-    /// The two-neuron Hebbian network from `(1, -1)` reaches `(-1, -1)` in
-    /// the first sweep; with a limit of one step the check at the limit
-    /// finds a fixed point.
+    /// Hebbian weights of `(1, 1)` reach the fixed point `(-1, -1)` from
+    /// `(1, -1)` in the first sweep, so a limit of one step reports it.
     #[test]
     fn a_fixed_point_at_the_step_limit_is_recognized() {
         let set = PatternSet::new(2, 1, array![[1, 1]]).unwrap();
@@ -276,8 +268,6 @@ mod tests {
         assert_eq!(outcome.steps, 1);
     }
 
-    /// Symmetric weights with zero diagonal: the energy never increases
-    /// between updates and the run ends in a fixed point.
     #[test]
     fn energy_never_increases_with_symmetric_weights() {
         let mut rng = ChaCha8Rng::seed_from_u64(1);

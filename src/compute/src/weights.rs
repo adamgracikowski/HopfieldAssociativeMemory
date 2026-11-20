@@ -161,9 +161,8 @@ mod tests {
     use rand::SeedableRng;
     use rand_chacha::ChaCha8Rng;
 
-    /// `N = 4` neurons and `p = 2` patterns: dense weights take
-    /// `8 * 4^2 = 128` bytes, factored ones `2 * 4 + 8 * 4 * 2 + 8 * 4 =
-    /// 8 + 64 + 32 = 104` bytes.
+    /// `N = 4`, `p = 2`: dense `8 * 4^2 = 128` bytes, factored
+    /// `2 * 4 + 8 * 4 * 2 + 8 * 4 = 8 + 64 + 32 = 104` bytes.
     #[test]
     fn counts_the_bytes_of_the_stored_arrays() {
         let set = PatternSet::new(4, 1, array![[1, -1, 1, -1], [1, 1, -1, -1]]).unwrap();
@@ -196,9 +195,6 @@ mod tests {
         assert_eq!(weights.energy(array![-1, -1].view()), -0.5);
     }
 
-    /// Above [`PARALLEL_MIN_NEURONS`] the fields are computed in parallel;
-    /// they must not depend on the number of threads and must match the
-    /// single fields.
     #[test]
     fn parallel_fields_do_not_depend_on_the_thread_count() {
         let mut rng = ChaCha8Rng::seed_from_u64(1);

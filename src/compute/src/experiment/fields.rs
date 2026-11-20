@@ -81,9 +81,8 @@ mod tests {
     use arrow_array::Array;
     use std::path::Path;
 
-    /// `small-7x7` has `p = 5` patterns of `N = 49` neurons: 245 rows per
-    /// rule. Row `mu * 49 + i` of a training holds neuron `i` of pattern
-    /// `mu`, and the negative fields of a pattern are its unstable neurons.
+    /// `small-7x7` (`p = 5`, `N = 49`): 245 rows per rule, row `mu * 49 + i`
+    /// for neuron `i` of pattern `mu`.
     #[test]
     fn has_a_row_per_pattern_and_neuron_of_every_training() {
         let text = "seed = 1\ndatasets = [\"small-7x7\"]\ntrials = 1\nstability_fields = true\n\

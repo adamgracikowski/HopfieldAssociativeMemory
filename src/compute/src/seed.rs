@@ -87,7 +87,6 @@ mod tests {
         }
     }
 
-    /// The two streams of a seed differ, and each repeats for the same seed.
     #[test]
     fn streams_are_independent_and_repeatable() {
         let seed = Seed(42);

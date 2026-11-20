@@ -119,10 +119,10 @@ mod tests {
         Mixture::closest(state.view(), &overlaps, set)
     }
 
-    /// `xi^1 - xi^2 + xi^3 = (1, 3, -1, 1, 1, 3, -1, 1)`, so the mixture is
-    /// `s = (1, 1, -1, 1, 1, 1, -1, 1)` with overlaps `4/8, -4/8, 4/8`.
-    /// Flipping pixel 0 gives overlaps `2/8, -6/8, 2/8`: the same three
-    /// patterns with the same signs, at distance 1.
+    /// `xi^0 - xi^1 + xi^2 = (1, 3, -1, 1, 1, 3, -1, 1)` gives the mixture
+    /// `(1, 1, -1, 1, 1, 1, -1, 1)`, overlaps `4/8, -4/8, 4/8`. Flipping
+    /// pixel 0 (overlaps `2/8, -6/8, 2/8`) keeps the patterns and signs at
+    /// distance 1.
     #[test]
     fn finds_a_mixture_of_three_patterns() {
         let set = hadamard();
@@ -149,13 +149,12 @@ mod tests {
         );
     }
 
-    /// With five orthogonal rows both sizes 3 and 5 are candidates. The sign
-    /// of the sum of all five, `(1, 1, 1, 1, 1, -1, -1, -1)`, has overlaps
-    /// `1/4` with rows 0-3 and `3/4` with row 4; the 3-mixture of rows 0, 1
-    /// and 4 gives `(1, 1, 1, 1, 1, -1, 1, -1)`, distance 1, so the exact
-    /// 5-mixture wins. The sign of the sum of rows 0-2, `(1, 1, 1, -1, 1,
-    /// 1, 1, -1)`, has overlaps `1/2, 1/2, 1/2, -1/2, 0`: its 3-mixture is
-    /// exact and wins the tie with any 5-mixture.
+    /// Five orthogonal rows. The sign of the sum of all five,
+    /// `(1, 1, 1, 1, 1, -1, -1, -1)`, has overlaps `1/4` with rows 0-3 and
+    /// `3/4` with row 4; the 3-mixture of rows 0, 1, 4 is at distance 1, so
+    /// the exact 5-mixture wins. The sign of the sum of rows 0-2,
+    /// `(1, 1, 1, -1, 1, 1, 1, -1)`, is an exact 3-mixture and wins the tie
+    /// with any 5-mixture.
     #[test]
     fn prefers_the_closer_and_then_the_smaller_mixture() {
         let rows: Array2<i8> = array![

@@ -106,9 +106,6 @@ mod tests {
     use crate::learning::{Hebb, LearningRule};
     use crate::weights::{Backend, WeightMatrix};
 
-    /// The exact check agrees with the check of the `f64` weights on a set
-    /// with small fields: the same counts, the same smallest and mean
-    /// aligned field up to rounding.
     #[test]
     fn exact_stability_agrees_with_the_floating_point_check() {
         for weights in [
@@ -128,8 +125,6 @@ mod tests {
         }
     }
 
-    /// The accumulated weights equal those of the Hebbian rule trained on
-    /// the members as a pattern set.
     #[test]
     fn equals_the_hebbian_rule_on_the_whole_set() {
         let plane = Hyperplane::new(vec![1, 2, 1, 1, 3, 2, 1, 1]).unwrap();

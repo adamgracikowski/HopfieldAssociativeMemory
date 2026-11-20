@@ -107,13 +107,9 @@ impl CapacitySummary {
 mod tests {
     use super::*;
 
-    /// `N = 100`, `p = 10`: `sqrt(N / p) = 3.162278` and
-    /// `Phi(-3.162278) = 7.827e-4` (`erfc(2.236068) / 2`, checked with
-    /// Python's `math.erfc`), so a pattern is stable with probability
-    /// `(1 - 7.827e-4)^100 = 0.924686`. Hopfield (1982) reports a bit error
-    /// of 0.0091 for the same `N` and `p` with `0/1` neurons, where he
-    /// estimates the signal as `N / 2` and the noise as
-    /// `sqrt((p - 1) N / 2)`, a ratio of `2.357` instead of `3.162`.
+    /// `N = 100`, `p = 10`: `Phi(-sqrt(N / p)) = erfc(2.236068) / 2 =
+    /// 7.827e-4` (Python's `math.erfc`), so a pattern is stable with
+    /// probability `(1 - 7.827e-4)^100 = 0.924686`.
     #[test]
     fn theory_of_ten_patterns_of_a_hundred_neurons() {
         let theory = Theory::new(100, 10);
@@ -124,13 +120,12 @@ mod tests {
         );
     }
 
-    /// Three random sets of `p = 2` patterns of `N = 4` neurons with 2, 1
-    /// and 0 stable patterns and 0, 3 and 3 unstable neurons. Stable
-    /// fractions `1, 0.5, 0`: mean `0.5`, sample std
-    /// `sqrt((0.25 + 0 + 0.25) / 2) = sqrt(0.25) = 0.5`. Unstable neurons
-    /// per `p N = 8`: `0, 0.375, 0.375`, mean `0.25`, sample std
-    /// `sqrt((0.0625 + 0.015625 + 0.015625) / 2) = sqrt(0.046875)`. One set
-    /// of three has all patterns stable.
+    /// Three sets of `p = 2`, `N = 4` with 2, 1, 0 stable patterns and 0, 3,
+    /// 3 unstable neurons:
+    /// - stable fractions `1, 0.5, 0`: mean 0.5, std `sqrt(0.5 / 2) = 0.5`,
+    /// - unstable neurons per `p N = 8`: `0, 0.375, 0.375`, mean 0.25, std
+    ///   `sqrt((0.0625 + 0.015625 + 0.015625) / 2) = sqrt(0.046875)`,
+    /// - all patterns stable in one set of three.
     #[test]
     fn aggregates_the_sets_of_a_group() {
         use crate::capacity::{CapacityRow, Task};
@@ -174,7 +169,6 @@ mod tests {
         assert_eq!(summary.theory, Some(Theory::new(4, 2)));
     }
 
-    /// More patterns, more crosstalk: the bit error grows with `p`.
     #[test]
     fn theory_bit_error_grows_with_the_load() {
         let errors: Vec<f64> = [5, 10, 20, 40]

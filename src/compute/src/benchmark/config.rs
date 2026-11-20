@@ -214,8 +214,8 @@ mod tests {
         assert!(config.measures(Backend::Factored, 1_000_000));
     }
 
-    /// With dense weights only and `dense_limit = 64`, sets of 49 and 128
-    /// neurons give a measurement, sets of 128 neurons alone none.
+    /// Dense weights only, `dense_limit = 64`: `[49, 128]` passes
+    /// (49 <= 64); `[128]` alone measures nothing.
     #[test]
     fn rejects_a_benchmark_that_measures_nothing() {
         let config = parse(&CONFIG.replace("[\"dense\", \"factored\"]", "[\"dense\"]")).unwrap();

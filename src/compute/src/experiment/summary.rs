@@ -274,15 +274,14 @@ mod tests {
         assert_eq!(Moments::of([]), None);
     }
 
-    /// Four runs of target 1 (`N = 49`) with the final overlap `m` with the
-    /// target and the nearest pattern: `m = 1`, nearest `(1, 1)` (in the
-    /// target); `m = 41/49`, nearest `(0, 45/49)` (another pattern closer);
-    /// `m = -45/49`, nearest `(1, -45/49)` (the negated target); `m =
-    /// 39/49`, nearest `(0, 39/49)` (a tie with pattern 0). The first and
-    /// the last end nearest the target, only the first one in it. The final
-    /// distances `0, 4, 47, 5` have mean 14, squared deviations `196 + 100 +
-    /// 1089 + 81 = 1466`, sample variance `488.667` and deviation
-    /// `22.105806`.
+    /// Target 1, `N = 49`; final `m` with the target, nearest `(pattern, m)`:
+    /// - `1`, `(1, 1)`: recovered,
+    /// - `41/49`, `(0, 45/49)`: another pattern closer,
+    /// - `-45/49`, `(1, -45/49)`: the negated target,
+    /// - `39/49`, `(0, 39/49)`: a tie, nearest the target.
+    ///
+    /// Final distances `0, 4, 47, 5`: mean 14, squared deviations
+    /// `196 + 100 + 1089 + 81 = 1466`, deviation `sqrt(1466 / 3) = 22.105806`.
     #[test]
     fn summarizes_the_nearest_target_and_the_final_distance() {
         use crate::dynamics::Termination;

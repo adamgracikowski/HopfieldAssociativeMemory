@@ -150,9 +150,8 @@ mod tests {
         assert_eq!(summary.max_abs_overlap(), Some((0.5, 0, 2)));
     }
 
-    /// Overlaps of the three patterns: `m^{01} = 0`, `m^{02} = 0.5`,
-    /// `m^{12} = -0.5`, so the sums are `0 + 0.5`, `0 + 0.5` and
-    /// `0.5 + 0.5`.
+    /// `m^{01} = 0`, `m^{02} = 0.5`, `m^{12} = -0.5`: sums `0 + 0.5`,
+    /// `0 + 0.5`, `0.5 + 0.5`.
     #[test]
     fn sums_absolute_overlaps_with_the_other_patterns() {
         assert_eq!(summary().overlap_sums(), [0.5, 0.5, 1.0]);

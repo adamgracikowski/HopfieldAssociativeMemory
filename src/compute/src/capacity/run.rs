@@ -239,8 +239,6 @@ mod tests {
         assert_eq!(run.source_name(&last.task), "random");
     }
 
-    /// The full prefix of a dataset is the dataset: its stability equals a
-    /// direct check of the whole set.
     #[test]
     fn full_prefix_matches_the_whole_dataset() {
         let config = config(CONFIG);
@@ -268,9 +266,7 @@ mod tests {
         assert_eq!(in_pool(1), in_pool(4));
     }
 
-    /// Both rules of a random set see the same patterns (same seed), and
-    /// Oja's subspace rule, which converges to the projection rule, keeps
-    /// every one of `p <= 15` random patterns of `N = 100` stable.
+    /// Random sets of `p <= 15` patterns of `N = 100`.
     #[test]
     fn rules_share_random_sets_and_oja_keeps_them_stable() {
         let run = CapacityRun::execute(&config(CONFIG)).unwrap();

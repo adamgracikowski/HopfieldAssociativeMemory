@@ -126,9 +126,9 @@ mod tests {
         assert_eq!(ExperimentInput::flips(1.0, 49), 49);
     }
 
-    /// Occlusion levels `0.15, 0.3, 0.45, 0.6, 0.75` of 7 rows are `1.05,
-    /// 2.1, 3.15, 4.2, 5.25`, rounded to 1-5 rows; of a 25 x 25 bitmap
-    /// `0.3 * 25 = 7.5` rounds to 8 rows, 200 pixels.
+    /// Levels `0.15, 0.3, 0.45, 0.6, 0.75` of 7 rows are
+    /// `1.05, 2.1, 3.15, 4.2, 5.25`, rounded to 1-5 rows; of a 25 x 25
+    /// bitmap `0.3 * 25 = 7.5` rounds to 8 rows, 200 pixels.
     #[test]
     fn rounds_the_number_of_rows() {
         let rows: Vec<usize> = [0.0, 0.15, 0.3, 0.45, 0.6, 0.75, 1.0]
