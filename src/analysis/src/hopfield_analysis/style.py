@@ -50,9 +50,8 @@ def apply() -> None:
     """Registers the bundled fonts and sets the style parameters.
 
     Artists read the parameters when they are created, so this runs before a
-    figure is made (see :func:`new_figure`). Calling it again is harmless.
-    The warning of fontTools about the timestamps of the font files, issued
-    whenever it subsets them for a PDF, is silenced; its other messages stay.
+    figure is made (see :func:`new_figure`); calling it again is harmless.
+    Silences only the timestamp warning of :data:`FONT_TIMESTAMP_LOGGER`.
     """
     registered = {entry.fname for entry in font_manager.fontManager.ttflist}
     for path in sorted(FONT_DIR.glob("*.otf")):
@@ -63,14 +62,9 @@ def apply() -> None:
 
 
 def new_figure(width: float = TEXT_WIDTH, height: float = 2.6) -> Figure:
-    """Creates a figure in the report style, with constrained layout.
+    """Creates a ``width x height`` inch figure in the report style, with constrained layout.
 
-    Args:
-        width: Width in inches, the report text width by default.
-        height: Height in inches.
-
-    Returns:
-        A figure that is not attached to any GUI backend.
+    The figure is not attached to any GUI backend.
     """
     apply()
     return Figure(figsize=(width, height), layout="constrained")
@@ -108,17 +102,9 @@ def finish(figure: Figure) -> None:
 def save(figure: Figure, stem: Path) -> list[Path]:
     """Saves ``figure`` as ``<stem>.pdf`` and ``<stem>.png`` (300 dpi).
 
-    Images (bitmaps, heat maps) are resampled differently per format. The
-    PDF embeds them without resampling (interpolation ``none``), so every
-    pixel of a large bitmap is kept and stays sharp when zoomed in; an
-    image shown larger than its own resolution at 300 dpi is embedded with
-    every pixel repeated an integer number of times (see
-    :func:`pixel_repeats`), because PDF viewers smooth an enlarged embedded
-    image and would blur a small bitmap or heat map. The PNG uses ``auto``:
-    nearest neighbour when a small bitmap is enlarged at least 3 times,
-    smoothing when a large one is shrunk, which keeps thin lines instead of
-    dropping whole rows and columns. The data and interpolation of the
-    images are restored afterwards.
+    The PDF embeds images unresampled (small ones with repeated pixels, see
+    :func:`pixel_repeats`, since PDF viewers blur an enlarged image); the PNG
+    uses interpolation ``auto``. Image settings are restored afterwards.
 
     Args:
         figure: The figure.
@@ -160,9 +146,7 @@ def pixel_repeats(image: AxesImage) -> tuple[int, int]:
 
     The image keeps its extent, so repeating its pixels only raises the
     resolution of the embedded raster: ``ceil(shown pixels at 300 dpi /
-    image pixels)`` per axis, at least 1. A 14 x 20 bitmap shown 0.66 inch
-    wide gets ``ceil(198 / 14) = 15`` columns per pixel; a bitmap with more
-    pixels than its size at 300 dpi gets 1.
+    image pixels)`` per axis, at least 1.
 
     Args:
         image: An image of a figure drawn at least once (its position is

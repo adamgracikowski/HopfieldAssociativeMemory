@@ -2,8 +2,7 @@
 
 A benchmark directory holds ``benchmark.parquet`` (one row per measurement:
 set, backend, learning rule and repeat) and ``metadata.json``. The times are
-wall-clock times of the machine that ran it; this module only aggregates and
-plots them.
+wall-clock times of the machine that ran it.
 """
 
 from pathlib import Path
@@ -25,28 +24,17 @@ DATASET_MARKERS = ["^", "v", "D", "P"]
 
 
 def load_benchmark(results: Path) -> pl.DataFrame:
-    """Reads the table of a benchmark.
-
-    Args:
-        results: Directory written by ``compute benchmark``.
+    """Reads ``benchmark.parquet`` from the results directory of a benchmark.
 
     Returns:
-        One row per measurement with the columns described in
-        ``src/compute/README.md`` (``source``, ``neurons``, ``patterns``,
-        ``backend``, ``learning``, ``repeat``, ``epochs``, ``train_seconds``,
-        ``weights_bytes``, ``train_peak_bytes``, ``fields_seconds``,
-        ``sweep_seconds``,
-        ``sync_seconds``, ``sync_steps``, ``async_seconds``,
-        ``async_sweeps``, ``recall_peak_bytes``).
+        One row per measurement with the columns documented on
+        ``BenchmarkTable`` in ``src/compute/src/benchmark/table.rs``.
     """
     return pl.read_parquet(results / BENCHMARK_FILE)
 
 
 def medians(table: pl.DataFrame) -> pl.DataFrame:
     """The median of every measurement over the repeats.
-
-    Args:
-        table: Table from :func:`load_benchmark`.
 
     Returns:
         One row per (source, ``N``, ``p``, backend, rule), in the order of
@@ -77,18 +65,13 @@ def plot_benchmark(table: pl.DataFrame) -> Figure:
     """Plots the time and memory of training and recall against ``N``.
 
     Four log-log panels: the time of training, of the local fields of one
-    state (the main cost of a synchronous step), of one asynchronous sweep,
-    and the memory: the bytes of the weights (solid) and the peak growth of
-    the heap during training (dashed), with the size ``8 N^2`` of a dense
-    matrix as a dotted reference. Every (backend, rule) of the random sets
-    is a line, in the order of the random sets in the table, the registered
-    datasets are markers in the color of their (backend, rule).
+    state and of one asynchronous sweep, and the memory of the weights (solid)
+    with the peak heap growth of training (dashed) and the ``8 N^2`` bytes of
+    a dense matrix (dotted). Every (backend, rule) is a line over the random
+    sets, with markers of the same color for the registered datasets.
 
     Args:
         table: Table from :func:`load_benchmark`.
-
-    Returns:
-        The figure in the report style with Polish labels.
 
     Raises:
         ValueError: If the table is empty.

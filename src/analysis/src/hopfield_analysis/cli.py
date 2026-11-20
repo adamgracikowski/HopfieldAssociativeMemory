@@ -75,9 +75,6 @@ def main(argv: Sequence[str] | None = None) -> int:
 def describe(error: Exception) -> str:
     """One-line description of an error caused by a missing or invalid input.
 
-    Args:
-        error: The error.
-
     Returns:
         For a file error the reason and the file, e.g.
         ``No such file or directory: `run/history.npy```; for a missing key of
@@ -418,13 +415,8 @@ def _animate(args: argparse.Namespace) -> int:
 def _view(args: argparse.Namespace) -> int:
     """Opens the viewer at ``--frame`` in a window, or saves it with ``--out``.
 
-    The saved figure has the report text width and shows the viewer as the
-    window does, slider included. pyplot, and with it a GUI backend, is
-    imported only for the window. The keys of the viewer are taken from the
-    toolbar shortcuts while the window is open, so stepping through frames
-    does not also undo a zoom. The viewer is referenced until the window
-    closes, because matplotlib keeps the callbacks of its widgets only
-    through weak references.
+    The viewer is referenced until the window closes, because matplotlib
+    keeps the callbacks of its widgets only through weak references.
     """
     from hopfield_analysis.viewer import RunViewer, free_keymaps
 

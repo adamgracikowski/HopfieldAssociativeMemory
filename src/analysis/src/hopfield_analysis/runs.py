@@ -40,11 +40,7 @@ def select_frames(count: int, maximum: int) -> list[int]:
 
 
 def parse_frames(text: str, count: int) -> list[int]:
-    """Parses a comma-separated list of frame numbers such as ``0,2,5``.
-
-    Args:
-        text: The list.
-        count: Number of frames of the run.
+    """Parses comma-separated frame numbers such as ``0,2,5`` of a run with ``count`` frames.
 
     Returns:
         The frame numbers in the given order.
@@ -72,12 +68,8 @@ def plot_frames(
         recall: The run.
         frames: Frame numbers to show, in order.
         columns: Largest number of panels in a row.
-        width: Figure width in inches. A figure of a few frames drawn
-            narrower than the text width keeps the font size of the report
-            when it is included at that width.
-
-    Returns:
-        The figure in the report style.
+        width: Figure width in inches; a narrower one keeps the report font size
+            (see :func:`hopfield_analysis.datasets.plot_patterns`).
     """
     columns = min(columns, len(frames))
     rows = math.ceil(len(frames) / columns)
@@ -101,15 +93,8 @@ def plot_frames(
 def plot_run(recall: Recall) -> Figure:
     """Plots the energy and the overlaps with every pattern against the frame.
 
-    Args:
-        recall: The run.
-
-    Returns:
-        The figure in the report style: energy on the left, overlaps on the
-        right. The target pattern (or, without a target, the pattern nearest
-        to the final state) is drawn in color, the other patterns as thin
-        gray lines with one legend entry, so the figure stays readable for
-        many patterns. The legend is below the panels.
+    The target pattern (or, without a target, the pattern nearest to the
+    final state) is drawn in color, the other patterns as thin gray lines.
     """
     figure = style.new_figure(height=2.6)
     energy_ax, overlap_ax = figure.subplots(1, 2)
@@ -167,10 +152,7 @@ def animate(
         max_frames: Largest number of frames, chosen with :func:`select_frames`.
 
     Returns:
-        The written file. Pillow stores identical consecutive images as one
-        frame with the sum of their display times, so the GIF can have fewer
-        frames than chosen (e.g. every second frame of a two-cycle); the
-        animation still shows the same sequence for the same time.
+        The written file (identical consecutive frames are merged).
     """
     if scale is None:
         scale = max(1, GIF_SIDE // max(recall.frames.shape[1:]))
