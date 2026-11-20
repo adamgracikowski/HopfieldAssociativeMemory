@@ -3,7 +3,7 @@
 # build-tex.sh - compile a LaTeX document to PDF and clean up build artifacts.
 #
 # Usage:
-#   scripts/build-tex.sh <file.tex> [output.pdf] [--keep]
+#   docs/scripts/build-tex.sh <file.tex> [output.pdf] [--keep]
 #
 # Arguments:
 #   <file.tex>    source document (relative or absolute path)
@@ -13,22 +13,11 @@
 #   --keep        keep the .latexbuild/ directory (useful for debugging)
 #   -h, --help    show this help
 #
-# Examples:
-#   scripts/build-tex.sh docs/report.tex
-#   scripts/build-tex.sh docs/report.tex report.pdf
+# Example:
+#   docs/scripts/build-tex.sh docs/report.tex
 #
-# How it works:
-#   1. Changes into the directory of the .tex file, so relative paths to the
-#      bibliography (.bib) and images (\includegraphics) resolve as usual.
-#   2. Runs latexmk with -outdir=.latexbuild. latexmk runs biber/bibtex and
-#      repeats pdflatex until cross-references and citations are stable.
-#   3. Copies the PDF next to the .tex file under the requested name and
-#      removes .latexbuild/, so only the sources and the PDF remain.
-#
-# On failure the script prints the LaTeX errors, saves the full log as
-# <output>.log next to the .tex file and exits with a non-zero code.
-# Undefined citations/references and biber warnings are reported but do not
-# fail the build.
+# Runs latexmk in the directory of the .tex file. On failure prints the LaTeX
+# errors and saves the full log as <output>.log next to the .tex file.
 #
 # Requirements: bash (Git Bash on Windows), latexmk with pdflatex and biber
 # on PATH (e.g. MiKTeX or TeX Live), perl (needed by latexmk).
@@ -38,7 +27,7 @@ set -euo pipefail
 BUILD_DIR=".latexbuild"
 
 usage() {
-    sed -n '3,15p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '3,23p' "$0" | sed 's/^# \{0,1\}//'
     exit "${1:-2}"
 }
 

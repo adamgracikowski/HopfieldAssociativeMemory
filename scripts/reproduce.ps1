@@ -3,21 +3,10 @@
     Recompute the experiments and redraw their figures.
 
 .DESCRIPTION
-    PowerShell counterpart of scripts/reproduce.sh. The commands come from the
-    comments of the experiment configurations (data/experiments/<name>/*.toml),
-    so every result and figure is produced by the same command that is
-    documented next to its configuration:
-
-    1. Every "#   cargo run ..." comment line is run from src/compute with
-       --force added, because the output directories already exist.
-    2. Every "#   uv run hopfield-analysis ..." comment line is run from
-       src/analysis after "uv sync --locked".
-
-    The computations are deterministic, so afterwards "git status" shows only
-    the metadata.json files (creation time and build commit) and the figure
-    PDFs (their creation date). The benchmark
-    measures this machine and is skipped unless -Benchmark is given; its
-    figure is still drawn from the committed measurements.
+    PowerShell counterpart of scripts/reproduce.sh. Runs every "#   cargo run"
+    line of data/experiments/<name>/*.toml from src/compute (with --force),
+    then every "#   uv run" line from src/analysis. The benchmark is skipped
+    unless -Benchmark is given.
 
     Requirements: rustup (the toolchain of src/compute/rust-toolchain.toml)
     and uv on PATH. If script execution is blocked, run it with:
@@ -31,7 +20,8 @@
     Also rerun the benchmark measurements.
 
 .PARAMETER FiguresOnly
-    Only redraw the figures from the committed results.
+    Only redraw the figures; the recall figures need runs/ from an earlier
+    full run.
 
 .EXAMPLE
     pwsh -File scripts/reproduce.ps1

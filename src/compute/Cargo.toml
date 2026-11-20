@@ -3,7 +3,7 @@ name = "compute"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.88"
-description = "Hopfield associative memory network built from scratch for the Artificial Intelligence Methods course. Features Hebbian and Oja's learning rules for pattern recognition. Includes synchronous/asynchronous modes and step-by-step bitmap visualization."
+description = "Hopfield associative memory: Hebbian and Oja's learning rules, synchronous and asynchronous dynamics, experiment runner."
 
 [lib]
 name = "compute"

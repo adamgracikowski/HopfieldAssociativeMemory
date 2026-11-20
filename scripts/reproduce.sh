@@ -9,25 +9,12 @@
 #   experiment       names of the experiment directories in data/experiments
 #                    (default: all)
 #   --benchmark      also rerun the benchmark measurements
-#   --figures-only   only redraw the figures from the committed results
+#   --figures-only   only redraw the figures; the recall figures need runs/
+#                    from an earlier full run
 #   -h, --help       show this help
 #
-# Examples:
-#   scripts/reproduce.sh
-#   scripts/reproduce.sh --figures-only stability noise
-#
-# How it works: the commands come from the comments of the experiment
-# configurations (data/experiments/<name>/*.toml), so every result and figure
-# is produced by the command documented next to its configuration.
-#   1. Every "#   cargo run ..." comment line is run from src/compute with
-#      --force added, because the output directories already exist.
-#   2. Every "#   uv run hopfield-analysis ..." comment line is run from
-#      src/analysis after "uv sync --locked".
-# The computations are deterministic, so afterwards "git status" shows only
-# the metadata.json files (creation time and build commit) and the figure PDFs
-# (their creation date). The benchmark measures this machine and is skipped
-# unless --benchmark is given; its figure is still drawn from the committed
-# measurements.
+# Runs every "#   cargo run" line of data/experiments/<name>/*.toml from
+# src/compute (with --force), then every "#   uv run" line from src/analysis.
 #
 # Requirements: rustup (the toolchain of src/compute/rust-toolchain.toml) and
 # uv on PATH.
@@ -46,7 +33,7 @@ for arg in "$@"; do
     case "$arg" in
         --benchmark) benchmark=true ;;
         --figures-only) figures_only=true ;;
-        -h|--help) sed -n '3,31p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help) sed -n '3,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
         -*) echo "unknown option: $arg" >&2; exit 1 ;;
         *)
             if [[ ! -d "$experiments_dir/$arg" ]]; then

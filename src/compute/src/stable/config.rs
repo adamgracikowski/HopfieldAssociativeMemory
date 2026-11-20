@@ -103,7 +103,7 @@ impl StableConfig {
         let candidates = Hyperplane::candidate_count(neurons, config.max_weight);
         if candidates > MAX_CANDIDATES {
             return Err(config.invalid(format!(
-                "`max_weight` = {} gives {candidates} candidates for N = {neurons}; at most                  {MAX_CANDIDATES} are searched",
+                "`max_weight` = {} gives {candidates} candidates for N = {neurons}; at most {MAX_CANDIDATES} are searched",
                 config.max_weight
             )));
         }
