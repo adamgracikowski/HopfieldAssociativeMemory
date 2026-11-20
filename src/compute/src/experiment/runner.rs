@@ -66,38 +66,24 @@ pub struct ExperimentRun {
     pub learning: Vec<String>,
     /// Trainings ordered by dataset, then rule.
     pub trainings: Vec<Training>,
-    /// The [aligned fields](Stability::aligned_fields) (`p x N`) of every
-    /// training, in the order of `trainings`, if the configuration asks for
-    /// `stability_fields`; otherwise empty.
+    /// [Aligned fields](Stability::aligned_fields) (`p x N`) of every
+    /// training with `stability_fields`; otherwise empty.
     pub fields: Vec<Array2<f64>>,
     /// Cells of the grid.
     pub cells: Vec<Cell>,
     /// Results ordered by cell, then trial, then target.
     pub results: Vec<TrialResult>,
-    /// The distinct final states of every cell, ordered by cell, then
-    /// [rank](Attractor::rank), if the configuration asks for
-    /// `attractors`; otherwise empty.
+    /// Distinct final states ordered by cell, then
+    /// [rank](Attractor::rank), with `attractors`; otherwise empty.
     pub attractors: Vec<Attractor>,
 }
 
 impl ExperimentRun {
-    /// Loads the datasets, checks that their noise levels give different
-    /// numbers of flipped pixels and, for every (dataset, rule) pair in turn,
-    /// trains the network, checks pattern stability, passes the training to
-    /// `on_training` and runs the trials of the pair's cells in parallel.
-    /// With `attractors` the cells run one after another, each with its
-    /// trials in parallel, and the final states of a cell are grouped into
-    /// attractors as soon as it ends, so only one cell's states are held in
-    /// memory.
-    ///
-    /// Every trial draws only from its own [`Seed`], derived from the
-    /// experiment seed, the dataset name in the registry (the same for all
-    /// prefixes of a dataset, so a target gets the same damaged input in
-    /// each of them), the input source, the number of
-    /// damaged pixels, the target and the trial number, and the results are
-    /// collected in task order, so they do not depend on the number of
-    /// threads. The seed does not depend on the rule or the mode: all of
-    /// them start from the same initial states.
+    /// Loads the datasets, checks that their damage levels give distinct
+    /// damaged-pixel counts, trains every (dataset, rule) pair, reports it to
+    /// `on_training` and runs its trials in parallel (with `attractors`, cell
+    /// by cell). Trial seeds depend on the dataset registry name, source,
+    /// damaged pixels, target and trial, not on the prefix, rule or mode.
     pub fn execute(
         config: &ExperimentConfig,
         mut on_training: impl FnMut(&Training),
@@ -212,15 +198,8 @@ impl ExperimentRun {
             .collect()
     }
 
-    /// Writes `metadata.json`, [`SUMMARY_FILE`] (`{"cells": [...]}` with the
-    /// [`CellSummary`] of every cell), [`DATASETS_FILE`]
-    /// (`{"datasets": [...]}` with the [`DatasetStatistics`] of every
-    /// dataset), [`TRIALS_FILE`] (the [`TrialTable`]) and, if the run kept
-    /// them, [`FIELDS_FILE`] (the [`FieldTable`]) and [`ATTRACTORS_FILE`]
-    /// (the [`AttractorTable`]); an old file of a table the run did not keep
-    /// is removed, so a reused directory holds only tables of this run. All
-    /// files but the metadata depend only on the
-    /// configuration and the code, not on the time or the number of threads.
+    /// Writes metadata, summary, datasets and trial table, plus the field and
+    /// attractor tables if configured (removing stale ones otherwise).
     pub fn write(&self, config: &ExperimentConfig, out: &OutputDir) -> Result<()> {
         out.write_json(METADATA_FILE, &ExperimentMetadata::new(config, self))?;
         out.write_json(
@@ -249,9 +228,7 @@ impl ExperimentRun {
     }
 }
 
-/// The trials of cell `index`: for every trial number every target (all
-/// stored patterns, or one random state). A
-/// [deterministic](Cell::is_deterministic) cell has only trial 0.
+/// The trials of cell `index`; a deterministic cell has only trial 0.
 fn trials(
     config: &ExperimentConfig,
     index: usize,

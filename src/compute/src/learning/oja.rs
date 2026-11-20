@@ -15,48 +15,25 @@ use super::{LearningRule, Trained};
 use crate::weights::{Backend, DenseWeights, FactoredWeights, WeightMatrix, Weights};
 use crate::{Error, PatternSet, Result};
 
-/// Oja's rule in batch mode: in every epoch the update is averaged over all
-/// normalized patterns `x = xi / sqrt(N)`.
-///
-/// Learning starts from the Hebbian weights divided by
-/// `s = max(1, max_mu sum_nu |G[mu][nu]|)`, a Gershgorin bound on the largest
-/// eigenvalue of `G = Xi Xi^T / N`, so every eigenvalue of the start is at
-/// most 1. Without this, the cubic term of the rule overshoots and diverges
-/// for strongly correlated sets, whose Hebbian eigenvalues reach `p`.
-///
-/// The weights keep the form `W = A Xi` (`A`: `N x p`, `Xi`: `p x N`),
-/// because the start and every update are combinations of the patterns, so
-/// learning runs on small matrices for both backends (see
-/// [`OjaVariant`]): the subspace rule on `M` with `A = Xi^T M / N` at
-/// `O(p^3)` per epoch, the single-neuron rule on `A` at `O(N p^2)`.
-/// The diagonal is zeroed only after learning, which keeps this form.
+/// Oja's rule in batch mode on the normalized patterns `xi / sqrt(N)`,
+/// started from Hebbian weights scaled by a Gershgorin bound so it does not
+/// diverge. Weights keep the form `W = A Xi`; the diagonal is zeroed after
+/// learning.
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Oja {
     /// Form of the rule.
     pub variant: OjaVariant,
-    /// Learning rate `eta` for the normalized patterns. With the scaled
-    /// start, every direction of the subspace rule evolves as
-    /// `f <- f + k f (1 - f^2)` with `k = eta lambda / p <= eta`, which
-    /// converges to 1 monotonically for `eta <= 0.5`.
+    /// Learning rate `eta`; the subspace rule converges monotonically for
+    /// `eta <= 0.5`.
     pub eta: f64,
     /// Largest number of epochs.
     pub max_epochs: usize,
-    /// Learning stops when the relative change of the weights in an epoch,
-    /// divided by the learning rate, `||dW||_F / (eta ||W||_F)`, falls below
-    /// this value. The measure does not depend on `N` or `eta`. A direction
-    /// with a small eigenvalue `lambda` of the pattern overlap matrix still
-    /// converges only at a rate of about `eta lambda / p` per epoch, so its
-    /// remaining error can be larger.
+    /// Stop when `||dW||_F / (eta ||W||_F)` in an epoch falls below this.
     pub tolerance: f64,
 }
 
 impl Default for Oja {
-    /// Subspace rule, `eta = 0.5` (the largest rate with monotone
-    /// convergence), at most 100000 epochs, tolerance `1e-6`. The subspace
-    /// rule learns small eigenvalues of the pattern overlap matrix slowly
-    /// (about `p / (eta lambda_min)` epochs per e-fold, hundreds of thousands
-    /// for `letters-14x20`), and its epochs cost only `O(p^3)`.
     fn default() -> Self {
         Self {
             variant: OjaVariant::Subspace,
@@ -68,9 +45,8 @@ impl Default for Oja {
 }
 
 impl Oja {
-    /// Runs the rule on `set` and returns the coefficients of `W = A Xi`
-    /// with the number of epochs and the convergence flag, or
-    /// [`Error::LearningDiverged`] if the weights stop being finite.
+    /// Runs the rule on `set`; [`Error::LearningDiverged`] if the weights
+    /// stop being finite.
     pub fn fit(&self, set: &PatternSet) -> Result<OjaFit> {
         self.validate()?;
         let n = set.neurons() as f64;
@@ -114,10 +90,8 @@ impl Oja {
         }
     }
 
-    /// Adds the update returned by `step` to `state` once per epoch until
-    /// the returned relative change `||dW||_F / ||W||_F`, divided by `eta`,
-    /// falls below the tolerance or the epoch limit is reached. Returns the
-    /// number of epochs and whether the tolerance was reached.
+    /// Applies `step` once per epoch until convergence or the epoch limit;
+    /// returns the epochs and whether it converged.
     fn iterate(
         &self,
         state: &mut Array2<f64>,
@@ -161,9 +135,7 @@ impl Oja {
 }
 
 impl LearningRule for Oja {
-    /// Runs [`fit`](Oja::fit) and stores `W = A Xi` with zero diagonal in
-    /// the factored backend, or expands it into the dense one, keeping the
-    /// number of epochs and the convergence flag.
+    /// Stores the [`fit`](Oja::fit) with zero diagonal in the backend.
     fn train(&self, set: &PatternSet, backend: Backend) -> Result<Trained> {
         let fit = self.fit(set)?;
         let factored = FactoredWeights::new(set, fit.coefficients)?;
@@ -179,17 +151,13 @@ impl LearningRule for Oja {
     }
 }
 
-/// Frobenius norm of weights `W = A Xi` computed from two `p x p`
-/// matrices: `||W||_F^2 = tr(A^T A Xi Xi^T) = sum (S * G)` with
-/// `S = A^T A` (`coefficient_gram`) and `G = Xi Xi^T` (`pattern_gram`).
-/// The subspace rule, with `A = Xi^T M / N`, passes `S = M G M` and
-/// `G = Xi Xi^T / N`, which give the same product.
+/// `||W||_F` of `W = A Xi` as `sqrt(sum(S * G))`, `S = A^T A`, `G = Xi Xi^T`.
 fn frobenius_norm(coefficient_gram: &Array2<f64>, pattern_gram: &Array2<f64>) -> f64 {
     (coefficient_gram * pattern_gram).sum().max(0.0).sqrt()
 }
 
-/// `max(1, max_mu sum_nu |G[mu][nu]|)`, an upper bound on the largest
-/// eigenvalue of the Hebbian weights (Gershgorin), used to scale the start.
+/// `max(1, max_mu sum_nu |G[mu][nu]|)`, a Gershgorin bound on the largest
+/// Hebbian eigenvalue.
 fn start_scale(gram: &Array2<f64>) -> f64 {
     gram.rows()
         .into_iter()

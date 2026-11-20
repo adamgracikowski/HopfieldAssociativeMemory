@@ -12,33 +12,9 @@ use crate::weights::Backend;
 use crate::{Error, Result};
 
 /// Settings of an experiment, read from a TOML file. The grid is the product
-/// of the axes `datasets`, `learning`, `dynamics.modes` and `input.noise`;
-/// each of its cells runs `trials` trials:
-///
-/// ```toml
-/// seed = 7
-/// datasets = ["small-7x7", { name = "animals-14x9", patterns = 3 }]
-/// backend = "auto"         # optional, `auto` by default
-/// trials = 100
-/// stability_fields = false # optional, writes stability.parquet when true
-/// attractors = false       # optional, writes attractors.parquet when true
-///
-/// [[learning]]
-/// rule = "hebb"
-/// [[learning]]
-/// rule = "oja"
-///
-/// [dynamics]               # optional, see `ExperimentDynamics`
-/// modes = ["synchronous", "asynchronous"]
-///
-/// [input]
-/// source = "pattern"
-/// noise = [0.0, 0.1, 0.2]
-/// ```
-///
-/// The registry is `registry` if given (relative to the directory of the
-/// configuration file), otherwise `data/datasets/datasets.toml` found from
-/// that directory upwards.
+/// of the axes `datasets`, `learning`, `dynamics.modes` and the damage levels
+/// (`input.noise` or `input.occlusion`); each cell runs `trials` trials.
+/// See the Configuration section of `src/compute/README.md`.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct ExperimentConfig {
@@ -60,17 +36,12 @@ pub struct ExperimentConfig {
     /// Update modes and shared dynamics settings.
     #[serde(default)]
     pub dynamics: ExperimentDynamics,
-    /// Initial states and noise levels.
+    /// Initial states and damage levels.
     pub input: ExperimentInput,
-    /// Whether to write the aligned local field of every neuron of every
-    /// stored pattern (`stability.parquet`); off by default, because the
-    /// table has `p N` rows per learning rule.
+    /// Write `stability.parquet` (`p N` rows per rule).
     #[serde(default)]
     pub stability_fields: bool,
-    /// Whether to write the distinct final states of every cell
-    /// (`attractors.parquet`); off by default, because the table holds a
-    /// state of `N` pixels for every distinct final state and the run keeps
-    /// the `N`-pixel final states of all trials of one cell in memory.
+    /// Write `attractors.parquet`; keeps one cell's final states in memory.
     #[serde(default)]
     pub attractors: bool,
     #[serde(skip)]
@@ -133,11 +104,8 @@ impl ExperimentConfig {
         Ok(())
     }
 
-    /// Checks that the damage levels give different damage on dataset
-    /// `name` with `width x height` bitmaps: different numbers of flipped
-    /// pixels, or of covered rows. Two levels with the same damage would
-    /// give identical cells, because a trial's seed depends on the number of
-    /// damaged pixels, not on the level.
+    /// Checks that the damage levels give distinct damage on a `width x height`
+    /// dataset; equal damage would give identical cells (same trial seeds).
     pub fn check_damage_levels(&self, name: &str, width: usize, height: usize) -> Result<()> {
         let Some((kind, levels)) = self.input.levels() else {
             return Ok(());

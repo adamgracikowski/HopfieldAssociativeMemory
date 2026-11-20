@@ -76,7 +76,7 @@ impl Source {
     }
 
     /// SHA-1 checksum of the file at `path` as 40 lowercase hexadecimal
-    /// digits, computed while reading the file in chunks.
+    /// digits.
     pub fn checksum(path: &Path) -> Result<String> {
         let io_error = |source| Error::Io {
             path: path.to_owned(),

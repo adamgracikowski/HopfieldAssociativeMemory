@@ -14,8 +14,6 @@ use crate::{PatternSet, Result};
 
 /// A rule that computes the weights storing the patterns of a set.
 pub trait LearningRule {
-    /// Weights storing the patterns of `set`, kept in `backend`
-    /// ([`Backend::Auto`] is resolved by the number of neurons), with the
-    /// number of epochs and whether learning converged.
+    /// Weights storing the patterns of `set`, kept in `backend`.
     fn train(&self, set: &PatternSet, backend: Backend) -> Result<Trained>;
 }

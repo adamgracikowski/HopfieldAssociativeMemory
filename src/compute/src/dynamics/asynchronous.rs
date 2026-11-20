@@ -18,21 +18,10 @@ pub(super) struct Asynchronous<'w> {
 }
 
 impl Asynchronous<'_> {
-    /// Runs from `initial` until a fixed point or `max_steps` sweeps.
-    ///
-    /// The fields come from a [`FieldTracker`], so an update costs `O(N)`
-    /// for dense and `O(p)` for factored weights. A sweep without changes
-    /// ends the run when every neuron was updated in it; for the `random`
-    /// order, which may skip neurons, every neuron is checked first, and an
-    /// unchanged sweep that is not a fixed point still counts as a step. At
-    /// the step limit the state is checked for a fixed point as well.
-    ///
-    /// A frame is recorded every `record_every` updates if the state
-    /// differs from the previous frame, and once more at the end if the
-    /// final state has not been recorded yet. Its change count is the
-    /// Hamming distance to the previous frame, which can be smaller than
-    /// the number of flips in between when a neuron flips back (random
-    /// order, asymmetric weights or frames longer than a sweep).
+    /// Runs from `initial` until a fixed point or `max_steps` sweeps. A frame
+    /// is recorded every `record_every` updates and at the end if the state
+    /// changed; its change count is the Hamming distance to the previous
+    /// frame.
     pub(super) fn run<R: Rng + ?Sized>(
         &self,
         initial: PatternView<'_>,
@@ -110,9 +99,7 @@ struct Frame {
 }
 
 impl Frame {
-    /// Records `state` if it differs from the last frame, with its energy
-    /// and the Hamming distance to the last frame. The distance is computed
-    /// only after a flip, so frames without flips cost nothing.
+    /// Records `state` if it differs from the last frame.
     fn record_if_changed(
         &mut self,
         state: PatternView<'_>,

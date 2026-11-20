@@ -21,9 +21,7 @@ pub enum PatternSource {
     },
 }
 
-/// One pattern set of a capacity run: `patterns` patterns from `source`,
-/// with the trial number and, for random patterns, the seed that draws
-/// them.
+/// One pattern set of a capacity run.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Task {
     /// Origin of the patterns.
@@ -47,10 +45,8 @@ impl Task {
         }
     }
 
-    /// Task with `patterns` random patterns of `neurons` neurons, drawn from
-    /// the seed derived from `master` and the text
-    /// `random/<neurons>/<patterns>/<trial>`. The seed does not depend on
-    /// the learning rule, so all rules see the same patterns.
+    /// Task with `patterns` random patterns of `neurons` neurons, seeded by
+    /// `master/random/<neurons>/<patterns>/<trial>`.
     pub fn random(master: u64, neurons: usize, patterns: usize, trial: usize) -> Self {
         Self {
             source: PatternSource::Random { neurons },
@@ -63,9 +59,8 @@ impl Task {
         }
     }
 
-    /// The pattern set of the task: the first `patterns` rows of
-    /// `datasets[index]`, or random patterns drawn one after another from
-    /// the input stream of the seed, as a `N x 1` bitmap.
+    /// The pattern set of the task: a prefix of `datasets[index]`, or random
+    /// patterns from the input stream of the seed as an `N x 1` bitmap.
     ///
     /// # Panics
     ///

@@ -9,26 +9,11 @@ use crate::patterns::Pattern;
 use crate::patterns::npy::read_npy;
 use crate::{Error, PatternSet, Result};
 
-/// Where the initial state of a recall run comes from, written as an
-/// `[input]` table whose `source` key names the kind:
-///
-/// ```toml
-/// [input]
-/// source = "pattern" # stored pattern `index` with `flips` random pixels flipped
-/// index = 2
-/// flips = 10
-/// ```
-///
-/// `source = "occlusion"` takes `index` and `rows` (a band of that many
-/// consecutive rows of the pattern covered with `-1`), `source = "random"`
-/// no parameters and `source = "file"` takes `path` (an `.npy` pattern set
-/// of the same bitmap size, relative to the configuration file) and `index`
-/// (0 by default).
+/// Initial state of a recall run, an `[input]` table selected by `source`.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(tag = "source", rename_all = "kebab-case", deny_unknown_fields)]
 pub enum Input {
-    /// Stored pattern `index` with exactly `flips` pixels flipped, chosen at
-    /// random without repetition.
+    /// Stored pattern `index` with exactly `flips` random pixels flipped.
     Pattern {
         /// Index of the stored pattern, from 0.
         index: usize,
@@ -36,8 +21,7 @@ pub enum Input {
         #[serde(default)]
         flips: usize,
     },
-    /// Stored pattern `index` with a band of `rows` consecutive full-width
-    /// rows at a random position set to `-1` (see
+    /// Stored pattern `index` with `rows` full-width rows covered (see
     /// [`Bitmap::occluded`](crate::patterns::Bitmap::occluded)).
     Occlusion {
         /// Index of the stored pattern, from 0.
@@ -47,9 +31,9 @@ pub enum Input {
     },
     /// A random state, every pixel `1` or `-1` with probability 1/2.
     Random {},
-    /// Pattern `index` of an `.npy` pattern set.
+    /// Pattern `index` of an `.npy` pattern set of the same bitmap size.
     File {
-        /// The `.npy` file.
+        /// The `.npy` file, relative to the configuration file.
         path: PathBuf,
         /// Index of the pattern in the file, from 0.
         #[serde(default)]
@@ -67,8 +51,7 @@ pub struct Initial {
 }
 
 impl Input {
-    /// Builds the initial state for a network that stores `set`. Random
-    /// choices come from `rng`.
+    /// Builds the initial state for a network that stores `set`.
     pub fn initial<R: Rng + ?Sized>(&self, set: &PatternSet, rng: &mut R) -> Result<Initial> {
         match self {
             Self::Pattern { index, flips } => {

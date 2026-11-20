@@ -2,25 +2,13 @@
 
 use serde::{Deserialize, Serialize};
 
-/// Local fields with `|h| <= ZERO_FIELD_TOLERANCE` count as zero.
-///
-/// Fields that are exactly zero in exact arithmetic come out as tiny values
-/// of either sign after rounding, differently in the dense and the factored
-/// backend. The smallest non-zero Hebbian field is `1/N`, at least
-/// `1.7e-5` for `N <= 60000`, far above this tolerance.
+/// Local fields with `|h| <= ZERO_FIELD_TOLERANCE` count as zero (rounding
+/// noise); the smallest real Hebbian field, `1/N`, is far above it.
 pub const ZERO_FIELD_TOLERANCE: f64 = 1e-10;
 
-/// New state of a neuron whose local field is zero, i.e. the value of
-/// `sgn(0)`.
-///
-/// The literature uses both conventions: `sgn(0) = +1` (Bruck 1990,
-/// McEliece et al. 1987, MacKay 2003) and keeping the previous state (Rojas
-/// 1996, Personnaz et al. 1985). Keeping the state acts like a positive
-/// self-coupling `epsilon`, i.e. weights `W + epsilon I`, which stay
-/// symmetric with a non-negative diagonal, so the convergence results for
-/// both update modes still apply. [`Display`](std::fmt::Display) and
-/// `&'static str` conversion give the name used in configuration files
-/// (`keep`, `plus-one`).
+/// Value of `sgn(0)`: keep the state (Rojas 1996, Personnaz et al. 1985) or
+/// `+1` (Bruck 1990, McEliece et al. 1987, MacKay 2003); both keep the
+/// convergence guarantees.
 #[derive(
     Debug,
     Clone,
@@ -45,9 +33,8 @@ pub enum ZeroField {
 }
 
 impl ZeroField {
-    /// New state `sgn(h)` of a neuron with local field `field` and state
-    /// `previous`: `1` above [`ZERO_FIELD_TOLERANCE`], `-1` below
-    /// `-ZERO_FIELD_TOLERANCE` and this convention in between.
+    /// New state `sgn(field)` of a neuron in state `previous`, with this
+    /// convention within [`ZERO_FIELD_TOLERANCE`] of zero.
     pub fn activate(self, field: f64, previous: i8) -> i8 {
         if field > ZERO_FIELD_TOLERANCE {
             1

@@ -7,30 +7,25 @@ use clap::Args;
 use compute::run::OutputDir;
 use compute::stable::{StableConfig, StableSearch};
 
-/// Directory of the results next to the configuration file.
 const RESULTS_DIR: &str = "results";
 
 #[derive(Debug, Args)]
 pub struct SearchStableArgs {
-    /// Search configuration (TOML) with the bitmap size, the largest weight,
-    /// the number of sets to check and the output datasets.
+    /// Search configuration (TOML).
     #[arg(long)]
     config: PathBuf,
 
-    /// Output directory, `results` next to the configuration by default; it
-    /// must be empty or not exist yet.
+    /// Output directory (default: `results` next to the configuration).
     #[arg(long, value_name = "DIR")]
     out: Option<PathBuf>,
 
-    /// Write into a non-empty output directory, replacing files of the same
-    /// name.
+    /// Overwrite files in a non-empty output directory.
     #[arg(long)]
     force: bool,
 }
 
 impl SearchStableArgs {
-    /// Runs the search, writes the summary and the datasets and prints the
-    /// checked sets to stdout.
+    /// Runs the search and prints the checked sets.
     pub fn run(self) -> compute::Result<()> {
         let start = Instant::now();
         let config = StableConfig::from_file(&self.config)?;

@@ -19,11 +19,8 @@ pub struct OutputDir {
 }
 
 impl OutputDir {
-    /// Output directory `path`, checked before the run: an existing
-    /// directory must be empty unless `force` is set; then the files of the
-    /// run replace files of the same name and other files stay. The
-    /// directory (with its parents) is created by the first write, so a run
-    /// that fails before writing leaves nothing behind.
+    /// Checks that `path` is empty unless `force`; it is created on the
+    /// first write.
     pub fn new(path: &Path, force: bool) -> Result<Self> {
         let io_error = |source| Error::Io {
             path: path.to_owned(),
@@ -76,8 +73,7 @@ impl OutputDir {
         })
     }
 
-    /// Writes `batch` as a Parquet file `name`, compressed with zstd. The
-    /// file depends only on the batch and the `parquet` version.
+    /// Writes `batch` as a Parquet file `name`, compressed with zstd.
     pub fn write_parquet(&self, name: &str, batch: &RecordBatch) -> Result<()> {
         let properties = WriterProperties::builder()
             .set_compression(Compression::ZSTD(ZstdLevel::default()))
@@ -91,8 +87,7 @@ impl OutputDir {
         })
     }
 
-    /// Removes the file `name` if it exists, e.g. a file of an earlier run
-    /// that this run replaces with another one.
+    /// Removes the file `name` if it exists.
     pub fn remove(&self, name: &str) -> Result<()> {
         let path = self.path.join(name);
         match std::fs::remove_file(&path) {

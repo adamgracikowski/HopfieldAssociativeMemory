@@ -7,30 +7,25 @@ use clap::Args;
 use compute::capacity::{CapacityConfig, CapacityRun};
 use compute::run::OutputDir;
 
-/// Directory of the results next to the configuration file.
 const RESULTS_DIR: &str = "results";
 
 #[derive(Debug, Args)]
 pub struct CapacityArgs {
-    /// Capacity configuration (TOML) with the seed, the datasets, the random
-    /// sets and the learning rules.
+    /// Capacity configuration (TOML).
     #[arg(long)]
     config: PathBuf,
 
-    /// Output directory, `results` next to the configuration by default; it
-    /// must be empty or not exist yet.
+    /// Output directory (default: `results` next to the configuration).
     #[arg(long, value_name = "DIR")]
     out: Option<PathBuf>,
 
-    /// Write into a non-empty output directory, replacing files of the same
-    /// name.
+    /// Overwrite files in a non-empty output directory.
     #[arg(long)]
     force: bool,
 }
 
 impl CapacityArgs {
-    /// Checks the stability of every configured pattern set with every rule,
-    /// writes the tables and prints a summary to stdout.
+    /// Runs the capacity check and prints a summary.
     pub fn run(self) -> compute::Result<()> {
         let start = Instant::now();
         let config = CapacityConfig::from_file(&self.config)?;

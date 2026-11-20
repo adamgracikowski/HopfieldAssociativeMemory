@@ -5,9 +5,7 @@ mod cli;
 use clap::Parser;
 use peak_alloc::PeakAlloc;
 
-/// Global allocator that counts the bytes on the heap and their peak, read
-/// by the `benchmark` subcommand; it allocates through the system
-/// allocator.
+/// Global allocator tracking the heap peak for `benchmark`.
 #[global_allocator]
 static HEAP: PeakAlloc = PeakAlloc;
 

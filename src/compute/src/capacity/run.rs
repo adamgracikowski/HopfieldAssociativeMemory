@@ -66,9 +66,7 @@ pub struct CapacityRun {
 impl CapacityRun {
     /// Loads the datasets and, in parallel over the pattern sets, trains
     /// every rule on every set and checks the stability of its patterns
-    /// (with the configured `zero_field`). Every set depends only on its
-    /// own [`Task`] and the results are collected in task order, so they do
-    /// not depend on the number of threads.
+    /// (with the configured `zero_field`).
     pub fn execute(config: &CapacityConfig) -> Result<Self> {
         let mut datasets = Vec::new();
         let mut sets = Vec::new();
@@ -162,11 +160,8 @@ impl CapacityRun {
             .collect()
     }
 
-    /// Writes `metadata.json`, [`SUMMARY_FILE`] (`{"rows": [...]}` with the
-    /// [`CapacitySummary`] of every (source, `p`, rule)) and
-    /// [`CAPACITY_FILE`] (the [`CapacityTable`]). The last two depend only
-    /// on the configuration and the code, not on the time or the number of
-    /// threads.
+    /// Writes `metadata.json`, [`SUMMARY_FILE`] (`{"rows": [...]}`) and
+    /// [`CAPACITY_FILE`].
     pub fn write(&self, config: &CapacityConfig, out: &OutputDir) -> Result<()> {
         out.write_json(METADATA_FILE, &CapacityMetadata::new(config, self))?;
         out.write_json(

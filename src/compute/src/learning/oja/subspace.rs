@@ -2,19 +2,9 @@
 
 use ndarray::Array2;
 
-/// One batch epoch of the subspace rule for weights `W = Xi^T M Xi / N`.
-///
-/// With `x = xi / sqrt(N)` and `G = Xi Xi^T / N` (`gram`), the outputs are
-/// `y_mu = W x_mu = Xi^T M G[:, mu] / sqrt(N)`, and the averaged update
-/// `dW = (eta / p) sum_mu (y_mu x_mu^T - y_mu y_mu^T W)` keeps the form
-/// `Xi^T dM Xi / N` with
-///
-/// `dM = (eta / p) M G (I - G M G M)`.
-///
-/// The exact update has `M^T` in place of the last `M`; the two agree
-/// because `M` starts as a multiple of `I` and stays a polynomial in the
-/// symmetric `G`, hence symmetric. Every epoch costs `O(p^3)`, independent
-/// of `N`. Returns `dM`; `rate` is `eta / p`.
+/// One batch epoch of the subspace rule for `W = Xi^T M Xi / N`, with
+/// `G = Xi Xi^T / N` (`gram`) and `rate = eta / p`:
+/// `dM = rate M G (I - G M G M)`; `O(p^3)` per epoch.
 pub(super) fn step(matrix: &Array2<f64>, gram: &Array2<f64>, rate: f64) -> Array2<f64> {
     let p = gram.nrows();
     let mg = matrix.dot(gram);

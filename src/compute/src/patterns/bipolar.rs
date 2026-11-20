@@ -14,9 +14,6 @@ use crate::{Error, Result};
 /// [`Pattern`] owns its pixels, [`PatternView`] borrows them (e.g. a row of a
 /// [`PatternSet`](super::PatternSet)) without copying. Methods taking another
 /// vector accept both kinds.
-///
-/// Random methods take the generator as an argument, so that a seeded
-/// generator (e.g. `ChaCha8Rng`) makes every result reproducible.
 pub struct BipolarVector<S: Data<Elem = i8>>(ArrayBase<S, Ix1>);
 
 /// Bipolar vector owning its pixels.
@@ -83,10 +80,8 @@ impl<S: Data<Elem = i8>> BipolarVector<S> {
         self.0.iter().zip(&other.0).filter(|(x, y)| x != y).count()
     }
 
-    /// Overlap $m = \frac{1}{N} \sum_i a_i b_i$ with `other`: `1` for equal
-    /// vectors, `-1` for opposite ones and close to `0` for unrelated ones.
-    ///
-    /// The sum is computed exactly in integers before the division.
+    /// Overlap `m = (1/N) sum_i a_i b_i` with `other`: `1` for equal vectors,
+    /// `-1` for opposite ones and close to `0` for unrelated ones.
     ///
     /// # Panics
     ///
@@ -107,8 +102,8 @@ impl<S: Data<Elem = i8>> BipolarVector<S> {
         self.0.iter().filter(|&&x| x == 1).count() as f64 / self.len() as f64
     }
 
-    /// Copy with exactly `k` pixels flipped, chosen uniformly at random
-    /// without repetition. The result is at Hamming distance `k` from `self`.
+    /// Copy with exactly `k` distinct pixels flipped, chosen uniformly at
+    /// random.
     pub fn flipped<R: Rng + ?Sized>(&self, k: usize, rng: &mut R) -> Result<Pattern> {
         let n = self.len();
         if k > n {
@@ -133,8 +128,8 @@ impl<S: Data<Elem = i8>> BipolarVector<S> {
 }
 
 impl Pattern {
-    /// Random pattern of `n` pixels, each `1` or `-1` with probability 1/2,
-    /// independently of the others.
+    /// Random pattern of `n` independent pixels, each `1` or `-1` with
+    /// probability 1/2.
     pub fn random<R: Rng + ?Sized>(n: usize, rng: &mut R) -> Result<Self> {
         Self::new(Array1::from_shape_fn(n, |_| {
             if rng.random::<bool>() { 1 } else { -1 }

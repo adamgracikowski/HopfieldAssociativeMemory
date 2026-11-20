@@ -12,17 +12,13 @@ use crate::run::Nearest;
 use crate::weights::{WeightMatrix, Weights};
 
 /// One distinct final state of the runs of a cell, with how often the runs
-/// ended in it.
-///
-/// A cycle of length 2 is one attractor, represented by the lexicographically
-/// smaller of its two states (`-1 < 1`, pixels in row-major order), so runs
-/// that stop in either state of the same cycle count together.
+/// ended in it; a 2-cycle is represented by its lexicographically smaller
+/// state.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Attractor {
     /// Index of the grid cell.
     pub cell: usize,
-    /// Position among the attractors of the cell, from 0, by `count` from
-    /// the largest, then by the first run in the order of the trials.
+    /// Position in the cell by decreasing `count`, then by first run.
     pub rank: usize,
     /// Number of runs that ended in this state.
     pub count: usize,
@@ -32,34 +28,24 @@ pub struct Attractor {
     pub class: FinalClass,
     /// Why the runs stopped.
     pub termination: Termination,
-    /// Energy `-1/2 x^T W x` of the state, computed afresh from the
-    /// weights, so it does not depend on the run that reached it.
+    /// Energy of the state, computed from the weights.
     pub energy: f64,
     /// Overlaps `m` of the state with every stored pattern.
     pub overlaps: Vec<f64>,
     /// Stored pattern with the largest `|m|`.
     pub nearest: Nearest,
-    /// The closest mixture of stored patterns (see [`Mixture::closest`]);
-    /// `None` for fewer than three patterns.
+    /// The [closest](Mixture::closest) mixture of stored patterns.
     pub mixture: Option<Mixture>,
-    /// The first run that ended in this state, in the order of the trials;
-    /// its seed repeats the run with `recall`.
+    /// The first run that ended in this state; `recall` repeats it.
     pub first: Trial,
     /// The state.
     pub state: Pattern,
 }
 
 impl Attractor {
-    /// The distinct final states of `runs`, all of one cell, each a trial
-    /// result with its final state, in the order of the trials. The network
-    /// has `weights`, which store `set`, and the dynamics use `zero_field`,
-    /// which gives the second state of a cycle of length 2 (one synchronous
-    /// step from the final state).
-    ///
-    /// Runs are grouped by termination and state, so a state reached as a
-    /// fixed point and at the step limit gives two attractors. The result
-    /// depends only on `runs` and their order, not on the number of threads
-    /// that computed them.
+    /// The distinct final states of the runs of one cell, grouped by
+    /// termination and state; `zero_field` gives the second state of a
+    /// 2-cycle.
     ///
     /// # Panics
     ///
@@ -111,8 +97,7 @@ impl Attractor {
             .collect()
     }
 
-    /// `state` itself, or for a cycle of length 2 the smaller of `state`
-    /// and its synchronous successor `sgn(W state)`.
+    /// `state`, or for a 2-cycle the smaller of it and its successor.
     fn canonical(
         state: &Pattern,
         termination: Termination,

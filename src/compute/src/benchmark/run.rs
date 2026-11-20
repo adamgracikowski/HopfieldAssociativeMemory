@@ -52,11 +52,10 @@ pub struct Measurement {
     pub weights_bytes: usize,
     /// Largest growth of the heap during training.
     pub train_peak_bytes: Option<usize>,
-    /// Time of the local fields of one random state, the main cost of a
-    /// synchronous step, measured after one untimed call so that it does
-    /// not include waking up the threads.
+    /// Time of the local fields of one random state (after an untimed
+    /// warm-up call).
     pub fields_seconds: f64,
-    /// Time of one asynchronous sweep from that state (see [`sweep`]).
+    /// Time of one asynchronous sweep from that state.
     pub sweep_seconds: f64,
     /// Time of a synchronous recall run from the damaged input.
     pub sync_seconds: f64,
@@ -90,22 +89,11 @@ pub struct BenchmarkRun {
 }
 
 impl BenchmarkRun {
-    /// Measures every set with every backend that
-    /// [measures](BenchmarkConfig::measures) it and every rule,
-    /// `repeats` times, one measurement after another, and passes each one
-    /// to `on_measurement`. Every measurement trains the network, computes
-    /// the local fields of a random state, makes one asynchronous sweep from
-    /// it, and runs the synchronous and the asynchronous dynamics from the
-    /// first pattern with `round(noise N)` pixels flipped. The random state,
-    /// the sweep order, the input and the update orders come from the seed
-    /// derived from `seed`, the source, `N` and the repeat, so every backend
-    /// and rule gets the same ones. Random sets are drawn as in a capacity
-    /// run ([`Task::random`] with trial 0).
-    ///
-    /// # Errors
-    ///
-    /// Besides loading errors, an invalid configuration if no set is
-    /// measured with any backend (see [`BenchmarkConfig::check_measured`]).
+    /// Measures every set x backend x rule `repeats` times, passing each
+    /// measurement to `on_measurement`: training, local fields of a random
+    /// state, one asynchronous sweep, and synchronous and asynchronous recall
+    /// from pattern 0 with `round(noise N)` flips. Inputs depend only on
+    /// seed, source, `N` and repeat.
     pub fn execute(
         config: &BenchmarkConfig,
         probe: &impl HeapProbe,
@@ -182,9 +170,8 @@ impl BenchmarkRun {
         })
     }
 
-    /// Writes `metadata.json` and [`BENCHMARK_FILE`] (the
-    /// [`BenchmarkTable`]). Unlike the other runs, the table depends on the
-    /// machine and changes from run to run.
+    /// Writes `metadata.json` and [`BENCHMARK_FILE`]; unlike other results,
+    /// the table is machine-dependent.
     pub fn write(&self, config: &BenchmarkConfig, out: &OutputDir) -> Result<()> {
         out.write_json(METADATA_FILE, &BenchmarkMetadata::new(config, self))?;
         out.write_parquet(BENCHMARK_FILE, BenchmarkTable::new(self).batch())
@@ -257,12 +244,7 @@ fn measure(
     })
 }
 
-/// Time in seconds of one asynchronous sweep from `state`: `N` updates in a
-/// random order drawn from `rng`, each reading the field of a
-/// [`FieldTracker`] and flipping the neuron if `sgn` of its field differs
-/// (`sgn(0)` keeps the state). The tracker and the order are built before
-/// the clock starts, so unlike a recall run the time excludes the energies
-/// and the setup.
+/// Seconds of one asynchronous sweep from `state`, excluding the setup.
 fn sweep(weights: &Weights, state: PatternView<'_>, rng: &mut impl Rng) -> f64 {
     let n = state.len();
     let mut tracker = FieldTracker::new(weights, state);

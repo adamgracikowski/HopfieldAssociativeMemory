@@ -104,8 +104,7 @@ struct RecallResult<'a> {
 
 impl RecallRun {
     /// Loads the dataset, trains the network, builds the initial state and
-    /// runs the dynamics, all as configured. The initial state and the
-    /// dynamics draw from the two streams of the [`Seed`].
+    /// runs the dynamics, all as configured.
     pub fn execute(config: &RunConfig) -> Result<Self> {
         let seed = Seed(config.require_seed()?);
         let input = config.require_input()?;

@@ -4,27 +4,8 @@ use serde::{Deserialize, Serialize};
 
 use super::Damage;
 
-/// The `[input]` table of an experiment, whose `source` key names the kind
-/// of initial state:
-///
-/// ```toml
-/// [input]
-/// source = "pattern"           # every stored pattern with flipped pixels
-/// noise = [0.0, 0.1, 0.2]      # fractions of flipped pixels, one grid axis
-/// ```
-///
-/// `source = "occlusion"` covers a band of rows of every stored pattern
-/// instead:
-///
-/// ```toml
-/// [input]
-/// source = "occlusion"
-/// occlusion = [0.0, 0.3, 0.6]  # fractions of covered rows, one grid axis
-/// ```
-///
-/// `source = "random"` takes no parameters: every trial starts from one
-/// random state. Noise and occlusion fractions are the damage levels of the
-/// grid cells.
+/// The `[input]` table of an experiment: the kind of initial state (`source`)
+/// and its damage levels, one grid axis.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(tag = "source", rename_all = "kebab-case", deny_unknown_fields)]
 pub enum ExperimentInput {
@@ -84,16 +65,13 @@ impl ExperimentInput {
         }
     }
 
-    /// Number of pixels flipped at noise level `noise` in a network of
-    /// `neurons` neurons: `noise * N` rounded to the nearest integer, halves
-    /// away from zero.
+    /// Number of pixels flipped at noise level `noise`: `noise * N` rounded.
     pub fn flips(noise: f64, neurons: usize) -> usize {
         (noise * neurons as f64).round() as usize
     }
 
-    /// Number of rows covered at occlusion level `occlusion` of a bitmap
-    /// with `height` rows: `occlusion * height` rounded to the nearest
-    /// integer, halves away from zero.
+    /// Number of rows covered at occlusion level `occlusion`:
+    /// `occlusion * height` rounded.
     pub fn rows(occlusion: f64, height: usize) -> usize {
         (occlusion * height as f64).round() as usize
     }

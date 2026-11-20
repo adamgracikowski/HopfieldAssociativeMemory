@@ -4,8 +4,7 @@ use serde::Serialize;
 
 use crate::dynamics::Mode;
 
-/// One combination of the grid axes of an experiment. Datasets and learning
-/// rules are given by their position in the configuration.
+/// One combination of the grid axes of an experiment.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 pub struct Cell {
     /// Index into `datasets`.
@@ -20,10 +19,8 @@ pub struct Cell {
 }
 
 impl Cell {
-    /// Whether every trial of the cell gives the same runs: synchronous
-    /// updates of undamaged stored patterns (`pixels = 0` pixels flipped or
-    /// covered) do not depend on random numbers, so the cell runs a single
-    /// trial and its fractions are exact.
+    /// Whether every trial gives the same runs: synchronous updates of
+    /// undamaged patterns (`pixels = 0`).
     pub fn is_deterministic(&self, pixels: usize) -> bool {
         self.mode == Mode::Synchronous && self.noise.is_some() && pixels == 0
     }

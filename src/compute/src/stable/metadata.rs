@@ -7,7 +7,7 @@ use crate::build_info::BuildInfo;
 use crate::run::metadata::timestamp;
 
 /// Contents of the `metadata.json` of a search: what was run, with which
-/// code and settings. Running it again changes only `created`.
+/// code and settings.
 #[derive(Debug, Clone, Serialize)]
 pub struct StableMetadata<'a> {
     /// Subcommand, `search-stable`.

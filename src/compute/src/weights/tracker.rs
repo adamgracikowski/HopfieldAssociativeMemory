@@ -5,21 +5,9 @@ use ndarray::Array1;
 use super::{DenseWeights, FactoredWeights, Weights};
 use crate::patterns::{BipolarVector, Pattern, PatternView};
 
-/// A network state together with what its local fields need, so that one
-/// field costs `O(N)` for dense weights and `O(p)` for factored weights,
-/// instead of recomputing the fields of the whole state.
-///
-/// - Dense weights: the state is also kept in `f64`, and `h_i` is the dot
-///   product of row `i` with it (`O(N)`).
-/// - Factored weights `W = A Xi - diag(d)`: the overlaps `m = Xi x` are
-///   kept, `h_i = A[i] m - d_i x_i` costs `O(p)`, and flipping neuron `j`
-///   updates them by `m += 2 x_j Xi[:, j]` (with the new `x_j`), also
-///   `O(p)`. The overlaps are integers of magnitude at most `N`, so they
-///   stay exact in `f64`.
-///
-/// Every field is bitwise equal to the corresponding element of
-/// [`WeightMatrix::local_fields`](super::WeightMatrix::local_fields) of the
-/// current state.
+/// A state with cached data so that one local field costs `O(N)` (dense) or
+/// `O(p)` (factored, via the overlaps `m = Xi x`); fields are bitwise equal
+/// to [`WeightMatrix::local_fields`](super::WeightMatrix::local_fields).
 #[derive(Debug, Clone)]
 pub struct FieldTracker<'w> {
     state: Array1<i8>,
@@ -89,7 +77,7 @@ impl<'w> FieldTracker<'w> {
         }
     }
 
-    /// Flips neuron `i` and updates the cached values.
+    /// Flips neuron `i` and updates the cache (`O(p)` for factored weights).
     ///
     /// # Panics
     ///

@@ -22,15 +22,8 @@ pub struct Proportion {
 }
 
 impl Proportion {
-    /// Fraction `count / total` with the Wilson score interval: for
-    /// `p = k / n` and `z = 1.96` the centre is
-    /// `(p + z^2 / 2n) / (1 + z^2 / n)` and the half-width
-    /// `z / (1 + z^2 / n) * sqrt(p (1 - p) / n + z^2 / 4n^2)`. Unlike the
-    /// normal approximation it stays within `[0, 1]` and is not empty for
-    /// `k = 0` or `k = n`. The interval always contains `p`, with ends 0 for
-    /// `k = 0` and 1 for `k = n`; the computed ends are clamped to `[0, p]`
-    /// and `[p, 1]`, because rounding can move them slightly past `p` (e.g.
-    /// an upper end of `1 - 1e-16` for `k = n = 100`).
+    /// Fraction `count / total` with the 95% Wilson score interval, clamped
+    /// so it contains the fraction.
     ///
     /// # Panics
     ///
@@ -53,8 +46,7 @@ impl Proportion {
 }
 
 impl Proportion {
-    /// Fraction `count / total` known exactly, e.g. of a deterministic
-    /// cell: both ends of the interval equal the fraction.
+    /// Fraction `count / total` with both interval ends equal to it.
     ///
     /// # Panics
     ///
@@ -70,8 +62,8 @@ impl Proportion {
         }
     }
 
-    /// Fraction `count / total`, [exact](Self::exact) if `deterministic`,
-    /// otherwise with the [Wilson](Self::wilson) interval.
+    /// [Exact](Self::exact) if `deterministic`, otherwise
+    /// [Wilson](Self::wilson).
     pub fn of(count: usize, total: usize, deterministic: bool) -> Self {
         if deterministic {
             Self::exact(count, total)
@@ -157,23 +149,20 @@ pub struct CellSummary {
     /// Damage level: the fraction of flipped pixels, or of covered rows;
     /// `None` for random initial states.
     pub noise: Option<f64>,
-    /// Number of damaged pixels (see [`Damage::pixels`](super::Damage::pixels));
-    /// `None` for random initial states.
+    /// Number of damaged pixels; `None` for random initial states.
     pub flips: Option<usize>,
     /// Number of runs: trials times targets.
     pub runs: usize,
-    /// Whether the cell is deterministic (synchronous updates of undamaged
-    /// patterns): it ran a single trial and its fractions are exact, with
-    /// both interval ends equal to the fraction.
+    /// Whether the cell ran a single trial with exact fractions
+    /// (synchronous updates of undamaged patterns).
     pub deterministic: bool,
     /// Fractions of the final state classes.
     pub classes: Classes,
     /// Fraction of runs that ended in their target; `None` for random
     /// initial states.
     pub recovered: Option<Proportion>,
-    /// Fraction of runs whose target is among the patterns closest to the
-    /// final state (see [`TrialResult::nearest_target`]), in any final
-    /// class; `None` for random initial states.
+    /// Fraction of runs with [`TrialResult::nearest_target`]; `None` for
+    /// random initial states.
     pub nearest_target: Option<Proportion>,
     /// Applied steps.
     pub steps: Moments,

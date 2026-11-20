@@ -5,11 +5,9 @@ use ndarray::Array2;
 use super::{Hyperplane, StrictStability};
 use crate::weights::{DenseWeights, Weights};
 
-/// The Hebbian weights `W = (1/N) sum_mu xi^mu xi^mu^T` with zero diagonal
-/// of all members of `S_u`, accumulated member by member: the sums
-/// `C_ij = sum_mu xi_i^mu xi_j^mu` are integers, kept exactly in `i64`, so
-/// the weights equal those of [`Hebb`](crate::learning::Hebb) trained on
-/// the whole set, without its `p x N` matrices.
+/// Hebbian weights of all members of `S_u` from the exact `i64` sums
+/// `C_ij = sum_mu xi_i^mu xi_j^mu`, equal to those of
+/// [`Hebb`](crate::learning::Hebb) trained on the whole set.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct HebbSum {
     sums: Array2<i64>,
@@ -17,8 +15,7 @@ pub struct HebbSum {
 }
 
 impl HebbSum {
-    /// The sums of every member of `plane`, accumulated in parallel chunks
-    /// and added exactly.
+    /// The sums over every member of `plane`.
     pub fn of(plane: &Hyperplane) -> Self {
         let n = plane.neurons();
         let partials = plane.fold_members(
@@ -57,11 +54,8 @@ impl HebbSum {
     }
 
     /// Strict stability of every member of `plane` in the network of
-    /// [`weights`](Self::weights), computed exactly: `N h_i = sum_{j != i}
-    /// C_ij xi_j` is an integer, so a member is strictly stable when every
-    /// `xi_i N h_i > 0`, without the rounding of large `f64` fields (the
-    /// sums grow with `|S_u|`). The reported aligned fields are `xi_i h_i`
-    /// in the units of the weights. Chunks are combined in chunk order.
+    /// [`weights`](Self::weights), checked exactly in integers; reported
+    /// fields are in weight units.
     ///
     /// # Panics
     ///

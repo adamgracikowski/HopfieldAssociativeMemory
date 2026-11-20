@@ -7,9 +7,7 @@ use super::ZeroField;
 use crate::PatternSet;
 use crate::weights::{WeightMatrix, Weights};
 
-/// Which stored patterns are fixed points of the network: pattern `mu` is
-/// stable when no neuron would change, `sgn(h_i) = xi_i` for the local
-/// fields `h = W xi`.
+/// Which stored patterns are fixed points of the network (`sgn(W xi) = xi`).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Stability {
     /// Number of stable patterns.
@@ -19,19 +17,13 @@ pub struct Stability {
 }
 
 impl Stability {
-    /// Checks every pattern of `set` against `weights`, with `zero_field`
-    /// deciding neurons with a zero local field. Costs one evaluation of
-    /// all local fields per pattern.
+    /// Checks every pattern of `set`, with `zero_field` deciding zero fields.
     pub fn of(weights: &Weights, set: &PatternSet, zero_field: ZeroField) -> Self {
         Self::from_aligned_fields(Self::aligned_fields(weights, set).view(), set, zero_field)
     }
 
-    /// The aligned local fields `xi_i^mu h_i` of every pattern `mu` of `set`
-    /// as a `p x N` matrix, where `h = W xi^mu`. Neuron `i` of pattern `mu`
-    /// keeps its value when the aligned field is positive and changes when
-    /// it is negative; a zero field is decided by [`ZeroField`]. For the
-    /// Hebbian rule the aligned field is the signal `1 - p/N` plus the
-    /// crosstalk of the other patterns.
+    /// The aligned local fields `xi_i^mu h_i`, `h = W xi^mu`, as a `p x N`
+    /// matrix; a negative one marks a neuron that would change.
     pub fn aligned_fields(weights: &Weights, set: &PatternSet) -> Array2<f64> {
         let mut aligned = Array2::zeros((set.len(), set.neurons()));
         for (pattern, mut row) in set.iter().zip(aligned.rows_mut()) {
@@ -41,15 +33,11 @@ impl Stability {
         aligned
     }
 
-    /// Stability from the [aligned fields](Self::aligned_fields) of `set`:
-    /// neuron `i` of pattern `mu` would change when
-    /// `zero_field.activate(h_i, xi_i) != xi_i` for the local field
-    /// `h_i = xi_i * aligned[mu, i]`.
+    /// Stability from the [aligned fields](Self::aligned_fields) of `set`.
     ///
     /// # Panics
     ///
-    /// Panics if `aligned` is not `p x N` for the `p` patterns of `N`
-    /// neurons of `set`.
+    /// Panics if `aligned` is not `p x N`.
     pub fn from_aligned_fields(
         aligned: ArrayView2<'_, f64>,
         set: &PatternSet,

@@ -4,15 +4,8 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 
-/// One value of the `datasets` axis: a registry name, or a table with the
-/// name and the number of leading patterns to store:
-///
-/// ```toml
-/// datasets = ["small-7x7", { name = "large-25x25.plus", patterns = 6 }]
-/// ```
-///
-/// [`Display`](fmt::Display) gives its label in the results: the name, or
-/// `name:p` for a prefix (e.g. `large-25x25.plus:6`).
+/// One value of the `datasets` axis: a registry name, or a name with the
+/// number of leading patterns. Displayed as `name` or `name:p`.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum DatasetEntry {
@@ -22,8 +15,7 @@ pub enum DatasetEntry {
     Prefix(DatasetPrefix),
 }
 
-/// The first [`patterns`](Self::patterns) patterns of dataset
-/// [`name`](Self::name).
+/// The first `patterns` patterns of dataset `name`.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct DatasetPrefix {

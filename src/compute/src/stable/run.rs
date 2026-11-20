@@ -76,14 +76,10 @@ pub struct StableSearch {
 }
 
 impl StableSearch {
-    /// Counts `|S_u|` for every candidate `u` ([`Hyperplane::candidates`]),
-    /// and checks the `verify` largest non-empty sets against every member:
-    /// the Hebbian rule with the weights of the whole set, exactly
-    /// ([`HebbSum::strict_stability`]), and Oja's rule trained (dense
-    /// weights) on the basis of the set ([`Hyperplane::basis`],
-    /// [`StrictStability`]). The best set is the first checked one that is
-    /// strictly stable with both rules. Nothing is random, so the result
-    /// depends only on the configuration.
+    /// Counts `|S_u|` for every candidate `u` and checks the `verify` largest
+    /// non-empty sets: Hebb exactly on the whole set ([`HebbSum`]) and Oja
+    /// (dense) on its [`basis`](Hyperplane::basis). The best set is the
+    /// first one strictly stable with both rules.
     pub fn execute(config: &StableConfig) -> Result<Self> {
         let planes = Hyperplane::candidates(config.neurons(), config.max_weight)?;
         let mut ranked: Vec<(u64, Hyperplane)> = planes
@@ -147,11 +143,9 @@ impl StableSearch {
         self.best.map(|index| &self.verified[index])
     }
 
-    /// Writes `metadata.json` and [`SUMMARY_FILE`] (the best set, the
-    /// checked sets and every candidate) to `out`, and the basis and the
-    /// sample of the best set to the configured `.npy` files with their
-    /// [`StableProvenance`]. Everything but `metadata.json` depends only on
-    /// the configuration and the code.
+    /// Writes `metadata.json` and [`SUMMARY_FILE`] to `out`, and the basis
+    /// and the sample of the best set to the configured `.npy` files with
+    /// their [`StableProvenance`].
     pub fn write(&self, config: &StableConfig, out: &OutputDir) -> Result<()> {
         out.write_json(METADATA_FILE, &StableMetadata::new(config))?;
         out.write_json(

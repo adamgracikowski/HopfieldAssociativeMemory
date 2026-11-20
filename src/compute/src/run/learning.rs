@@ -8,15 +8,8 @@ use crate::learning::{Hebb, LearningRule, Oja, Trained};
 use crate::weights::Backend;
 use crate::{PatternSet, Result};
 
-/// Learning rule with its parameters, written as a `[learning]` table whose
-/// `rule` key names the rule:
-///
-/// ```toml
-/// [learning]
-/// rule = "oja"         # or "hebb", which takes no parameters
-/// variant = "subspace" # parameters of `Oja`, defaults when left out
-/// eta = 0.5
-/// ```
+/// Learning rule with its parameters, a `[learning]` table selected by
+/// `rule`.
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 #[serde(tag = "rule", rename_all = "kebab-case", deny_unknown_fields)]
 pub enum Learning {

@@ -72,10 +72,7 @@ impl ImageConverter {
         Ok(self.grayscale(&image))
     }
 
-    /// Converts `image` to grayscale (`to_luma8`) and scales it to
-    /// `width x height` with the Lanczos filter, cropping the centre of the
-    /// image when its aspect ratio differs, so that the bitmap is filled
-    /// without distortion.
+    /// Grayscale, centre-cropped and Lanczos-scaled to `width x height`.
     pub fn grayscale(&self, image: &DynamicImage) -> GrayImage {
         DynamicImage::ImageLuma8(image.to_luma8())
             .resize_to_fill(self.width, self.height, FilterType::Lanczos3)

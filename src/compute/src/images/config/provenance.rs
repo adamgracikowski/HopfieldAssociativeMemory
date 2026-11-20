@@ -9,11 +9,7 @@ use crate::build_info::BuildInfo;
 use crate::images::Binarization;
 use crate::paths::relative_to;
 
-/// Where a converted dataset comes from, written next to its `.npy` file:
-/// the build of `compute`, the configuration, the bitmap size, the
-/// binarization and the source images in pattern order. It has no
-/// timestamp, so converting again with the same code and images gives the
-/// same file.
+/// Origin of a converted dataset, written next to its `.npy` file.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Provenance<'a> {
     /// Command that produced the dataset.

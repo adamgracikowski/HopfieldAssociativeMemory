@@ -11,32 +11,9 @@ use crate::patterns::registry::Registry;
 use crate::weights::Backend;
 use crate::{Error, PatternSet, Result};
 
-/// Settings of a run, read from a TOML file:
-///
-/// ```toml
-/// dataset = "small-7x7"   # name in the dataset registry
-/// patterns = 3            # optional: only the first 3 patterns
-/// seed = 42               # required by `recall`
-/// backend = "auto"        # optional, `auto` by default
-///
-/// [learning]
-/// rule = "hebb"
-///
-/// [dynamics]              # optional, defaults of `Dynamics`
-/// mode = "synchronous"
-///
-/// [input]                 # required by `recall`
-/// source = "pattern"
-/// index = 0
-/// flips = 5
-/// ```
-///
-/// The registry is `registry` if given, otherwise
-/// `data/datasets/datasets.toml` found from the directory of the
-/// configuration file upwards. Relative paths (`registry`, the input file)
-/// are resolved against the directory of the configuration file when they
-/// are used and kept as written in the fields, so the serialized
-/// configuration does not depend on the working directory.
+/// Settings of a run, read from a TOML file. See the Configuration section
+/// of `src/compute/README.md`. Relative paths are kept as written and
+/// resolved against [`directory`](Self::directory) when used.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct RunConfig {

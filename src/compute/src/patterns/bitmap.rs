@@ -48,11 +48,8 @@ impl<'a> Bitmap<'a> {
         self.height
     }
 
-    /// Copy with a band of `rows` consecutive full-width rows set to `-1`
-    /// (the background), as if covered. The first row of the band is drawn
-    /// uniformly from the `height - rows + 1` possible positions, so `rows =
-    /// 0` leaves the bitmap unchanged and `rows = height` covers all of it.
-    /// One number is drawn from `rng` in every case.
+    /// Copy with a band of `rows` full-width rows at a uniformly random
+    /// position set to `-1`; draws one number from `rng` even for `rows = 0`.
     pub fn occluded<R: Rng + ?Sized>(&self, rows: usize, rng: &mut R) -> Result<Pattern> {
         if rows > self.height {
             return Err(Error::InvalidArgument {

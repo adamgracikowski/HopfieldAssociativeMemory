@@ -3,17 +3,14 @@
 use crate::PatternSet;
 use crate::patterns::PatternView;
 
-/// Numbers of patterns in the mixtures that are checked. Only odd numbers:
-/// a sum of an odd number of `+-1` values is never 0, so its sign is always
-/// defined.
+/// Numbers of patterns in the checked mixtures; odd, so the sign of the sum
+/// is always defined.
 pub const MIXTURE_SIZES: [usize; 3] = [3, 5, 7];
 
 /// A mixture state `sgn(sum_mu e_mu xi^mu)` of `size` stored patterns with
-/// signs `e_mu`, and its Hamming distance to a state.
-///
-/// Symmetric mixtures of an odd number of patterns are stable states of a
-/// Hebbian network with few patterns (Amit, Gutfreund and Sompolinsky 1985);
-/// Hopfield, Feinstein and Palmer (1983) show one of three patterns.
+/// signs `e_mu`, and its Hamming distance to a state; odd symmetric mixtures
+/// are stable in a Hebbian network with few patterns (Amit, Gutfreund and
+/// Sompolinsky 1985).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Mixture {
     /// Number of patterns, one of [`MIXTURE_SIZES`].
@@ -27,19 +24,10 @@ pub struct Mixture {
 }
 
 impl Mixture {
-    /// The mixture closest to `state` among the candidates of every size in
-    /// [`MIXTURE_SIZES`] not larger than the number of patterns `p`; `None`
-    /// for `p < 3`.
-    ///
-    /// The candidate of size `k` takes the `k` patterns with the largest
-    /// `|m|` among `overlaps` (the overlaps of `state` with every pattern of
-    /// `set`; ties by the lower index) with the signs of their overlaps
-    /// (`+1` for `m = 0`). A state that is a mixture of nearly orthogonal
-    /// patterns has its largest overlaps with exactly those patterns, so the
-    /// check finds it in `O(k N)` instead of trying every subset; for
-    /// strongly correlated patterns it may miss a mixture of other patterns,
-    /// so a distance is an upper bound. On equal distances the smaller
-    /// mixture wins, so a distance of 0 gives the smallest exact mixture.
+    /// The closest mixture of size `k` in [`MIXTURE_SIZES`] (`k <= p`), each
+    /// built from the `k` patterns with the largest `|m|` and the signs of
+    /// their overlaps; the smaller mixture wins ties. The distance is an upper
+    /// bound for correlated patterns. `None` for `p < 3`.
     ///
     /// # Panics
     ///
@@ -81,8 +69,7 @@ impl Mixture {
         self.distance == 0
     }
 
-    /// Hamming distance of `state` to `sgn(sum e_mu xi^mu)` over `patterns`
-    /// with `signs`, computed pixel by pixel with integer sums.
+    /// Hamming distance of `state` to `sgn(sum e_mu xi^mu)`.
     fn distance(
         state: PatternView<'_>,
         set: &PatternSet,

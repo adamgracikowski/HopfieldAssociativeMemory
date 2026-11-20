@@ -8,9 +8,8 @@ use arrow_array::{
 
 use super::{Cell, ExperimentRun, TrialResult};
 
-/// Every trial result as an Arrow record batch, one row per run, in the
-/// order of [`ExperimentRun::results`]. Columns (nullable ones are null for
-/// random initial states):
+/// Every trial result as an Arrow record batch, one row per run (nullable
+/// columns are null for random initial states):
 ///
 /// | Column | Type | Content |
 /// |---|---|---|
@@ -128,8 +127,6 @@ impl TrialTable {
     }
 }
 
-/// `value` as `u32`; counts, distances and indices of a network with at
-/// most `u32::MAX` neurons and trials fit.
 fn to_u32(value: usize) -> u32 {
     u32::try_from(value).expect("count fits in u32")
 }

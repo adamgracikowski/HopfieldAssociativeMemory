@@ -9,7 +9,6 @@ use crate::run::metadata::timestamp;
 
 /// Contents of the `metadata.json` of an experiment: what was run, with
 /// which code and settings, and the training of every (dataset, rule) pair.
-/// Running the experiment again changes only `created`.
 #[derive(Debug, Clone, Serialize)]
 pub struct ExperimentMetadata<'a> {
     /// Subcommand, `experiment`.
@@ -27,7 +26,7 @@ pub struct ExperimentMetadata<'a> {
 }
 
 impl<'a> ExperimentMetadata<'a> {
-    /// Metadata of `run`, executed now with the current build from `config`.
+    /// Metadata of `run` with the current time and build.
     pub fn new(config: &'a ExperimentConfig, run: &'a ExperimentRun) -> Self {
         Self {
             command: "experiment",

@@ -9,9 +9,9 @@ use arrow_array::{
 
 use super::{Attractor, Cell, ExperimentRun};
 
-/// The [attractors](Attractor) of every cell of an experiment as an Arrow
-/// record batch, one row per (cell, distinct final state), in the order of
-/// [`ExperimentRun::attractors`]. Columns:
+/// The [attractors](Attractor) of every cell as an Arrow record batch, one
+/// row per (cell, distinct final state); mixture columns are null for fewer
+/// than three stored patterns:
 ///
 /// | Column | Type | Content |
 /// |---|---|---|
@@ -35,9 +35,6 @@ use super::{Attractor, Cell, ExperimentRun};
 /// | `trial` | uint32 | trial number of the first run |
 /// | `seed` | uint64 | seed of the first run, for `recall` |
 /// | `state` | list of int8 | the state, row-major |
-///
-/// The mixture columns come from [`Mixture::closest`](super::Mixture::closest)
-/// and are null for fewer than three stored patterns.
 #[derive(Debug, Clone, PartialEq)]
 pub struct AttractorTable {
     batch: RecordBatch,
@@ -172,8 +169,6 @@ impl AttractorTable {
     }
 }
 
-/// `value` as `u32`; counts, distances and indices of a network with at
-/// most `u32::MAX` neurons and trials fit.
 fn to_u32(value: usize) -> u32 {
     u32::try_from(value).expect("count fits in u32")
 }

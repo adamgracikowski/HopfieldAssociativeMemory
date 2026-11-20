@@ -8,15 +8,8 @@ use crate::seed::Seed;
 use crate::weights::Weights;
 use crate::{PatternSet, Result};
 
-/// One run of a trained network from one initial state.
-///
-/// The initial state is built by [`Input`] from the input stream of `seed`
-/// and the dynamics use its dynamics stream, exactly as in a `recall` run.
-/// So `recall` repeats the trial with this seed, the experiment's dataset,
-/// `registry`, `backend` and `[learning]` table of the rule, `[dynamics]`
-/// with the cell's `mode` and the experiment's `zero_field`, `order` and
-/// `max_steps`, and the [input](Damage::input) of its damage with `index =
-/// target` (or `random`).
+/// One run of a trained network from one initial state; `recall` with this
+/// seed and the same settings repeats it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Trial {
     /// Index of the grid cell.
@@ -61,14 +54,9 @@ pub struct TrialResult {
 }
 
 impl TrialResult {
-    /// Whether the target is among the stored patterns closest to the final
-    /// state, not as its negation: its overlap `m` is positive and at least
-    /// the largest `|m|` of all patterns. Ties count, so the result does not
-    /// depend on the order of the patterns ([`nearest`](Self::nearest) keeps
-    /// the first one). Both overlaps come from the same computation, so they
-    /// are compared exactly. `None` for a random initial state. Unlike
-    /// [`recovered`](Self::recovered) it holds for a run that ends near an
-    /// unstable target, in any final class.
+    /// Whether the target is among the patterns closest to the final state:
+    /// its overlap is positive and at least the largest `|m|` (ties count).
+    /// `None` for a random initial state.
     pub fn nearest_target(&self) -> Option<bool> {
         self.final_overlap
             .map(|m| m > 0.0 && m >= self.nearest.overlap.abs())
@@ -84,14 +72,12 @@ impl Trial {
         }
     }
 
-    /// Number of damaged pixels of the target (see [`Damage::pixels`]); 0
-    /// for a random state.
+    /// Number of damaged pixels of the target; 0 for a random state.
     pub fn damaged_pixels(&self) -> usize {
         self.damage.map_or(0, |damage| damage.pixels())
     }
 
-    /// Runs the network with `weights`, which stores `set`, under
-    /// `dynamics`, without recording frames.
+    /// Runs the network storing `set` without recording frames.
     pub fn run(
         &self,
         weights: &Weights,

@@ -15,14 +15,8 @@ pub(super) struct Synchronous<'w> {
 }
 
 impl Synchronous<'_> {
-    /// Runs from `initial` until a fixed point, a cycle of length 2 or
-    /// `max_steps` applied steps.
-    ///
-    /// Every step computes the fields `h = W x(t)` (in parallel for large
-    /// networks), records `x(t)` with its energy `-1/2 x(t)^T h` and builds
-    /// the next state. Without changes `x(t)` is a fixed point; if the next
-    /// state equals `x(t-1)`, the network alternates between `x(t-1)` and
-    /// `x(t)`. Only three state vectors and one field vector are kept.
+    /// Runs from `initial` until a fixed point, a 2-cycle (next state equals
+    /// `x(t-1)`) or `max_steps` applied steps, recording every `x(t)`.
     pub(super) fn run(&self, initial: PatternView<'_>, recorder: &mut impl Recorder) -> Outcome {
         let n = initial.len();
         let mut current = initial.values().to_owned();

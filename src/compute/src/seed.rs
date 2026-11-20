@@ -23,11 +23,8 @@ impl Seed {
     /// Stream of the dynamics (update order).
     const DYNAMICS_STREAM: u64 = 1;
 
-    /// Seed derived from `master` and `parts`: the first 8 bytes, read as a
-    /// big-endian integer, of the SHA-1 digest of the text
-    /// `master/part/part/...`. The result does not depend on the Rust
-    /// version or the platform. Parts should not contain `/`, otherwise two
-    /// different lists may give the same text.
+    /// First 8 bytes (big-endian) of the SHA-1 of `master/part/part/...`,
+    /// independent of the platform. Parts must not contain `/`.
     pub fn derive(master: u64, parts: &[&dyn fmt::Display]) -> Self {
         let mut text = master.to_string();
         for part in parts {

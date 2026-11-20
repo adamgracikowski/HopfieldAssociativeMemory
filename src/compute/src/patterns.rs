@@ -128,8 +128,8 @@ impl PatternSet {
             .map(BipolarVector::new_unchecked)
     }
 
-    /// Symmetric `p x p` matrix of overlaps $m^{\mu\nu}$ between all
-    /// patterns (see [`BipolarVector::overlap`]), with ones on the diagonal.
+    /// Symmetric `p x p` matrix of overlaps `m^{mu nu}` (see
+    /// [`BipolarVector::overlap`]), with ones on the diagonal.
     pub fn overlap_matrix(&self) -> Array2<f64> {
         let p = self.len();
         let mut matrix = Array2::eye(p);
@@ -168,8 +168,7 @@ impl PatternSet {
     }
 }
 
-/// Number of pixels `width * height` of a bitmap, or an error if the product
-/// does not fit in `usize`.
+/// Number of pixels `width * height`, or an error on overflow.
 pub(crate) fn bitmap_size(width: usize, height: usize) -> Result<usize> {
     width
         .checked_mul(height)

@@ -24,8 +24,7 @@ pub struct DatasetStatistics {
     pub fraction_on: Vec<f64>,
     /// Overlap matrix `m^{mu nu}`, row by row.
     pub overlaps: Vec<Vec<f64>>,
-    /// For every pattern, the sum of `|m^{mu nu}|` over the other patterns
-    /// (see [`Summary::overlap_sums`]).
+    /// For every pattern, the sum of `|m^{mu nu}|` over the other patterns.
     pub overlap_sums: Vec<f64>,
     /// Largest `|m^{mu nu}|` over pairs of different patterns; `None` for a
     /// single pattern.

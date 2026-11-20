@@ -7,9 +7,6 @@ use serde::{Deserialize, Serialize};
 pub const DENSE_LIMIT_BYTES: usize = 256 * 1024 * 1024;
 
 /// Weight storage backend.
-///
-/// [`Display`](std::fmt::Display) and `&'static str` conversion give the name
-/// used in configuration files (`auto`, `dense`, `factored`).
 #[derive(
     Debug,
     Clone,
@@ -38,9 +35,7 @@ pub enum Backend {
 }
 
 impl Backend {
-    /// The concrete backend for a network of `neurons` neurons: `Auto`
-    /// becomes `Dense` or `Factored` by the memory limit, the others stay
-    /// unchanged.
+    /// The concrete backend for `neurons` neurons (`Auto` by the limit).
     pub fn resolve(self, neurons: usize) -> Self {
         match self {
             Self::Auto => {

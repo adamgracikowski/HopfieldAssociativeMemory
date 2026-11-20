@@ -10,14 +10,8 @@ use crate::experiment::{Moments, Proportion};
 /// field of a neuron is approximately normal with mean `N` and variance
 /// `N p`, so a neuron is unstable with probability
 /// `Phi(-sqrt(N / p))`, and a pattern of `N` independent neurons is stable
-/// with probability `(1 - Phi(-sqrt(N / p)))^N`.
-///
-/// This is the large-`N` form of the literature. With the zero diagonal of
-/// [`Hebb`](crate::learning::Hebb) the aligned field `N xi_i h_i` has mean
-/// `N - 1` and crosstalk variance `(p - 1)(N - 1)`, so the exact moments
-/// give the slightly smaller `Phi(-sqrt((N - 1) / (p - 1)))`; and the
-/// neurons of a pattern are not independent. Measured random sets are
-/// therefore a little more stable than this prediction.
+/// with probability `(1 - Phi(-sqrt(N / p)))^N`. Large-`N` approximation;
+/// with the zero diagonal, measured sets are slightly more stable.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 pub struct Theory {
     /// Probability that one neuron of a pattern is unstable.
@@ -28,10 +22,8 @@ pub struct Theory {
 
 impl Theory {
     /// The prediction for `patterns` random patterns of `neurons` neurons;
-    /// `Phi(x) = erfc(-x / sqrt(2)) / 2`. Both `erfc` and the power come
-    /// from `libm`, a pure Rust implementation, so the values are the same
-    /// on every platform (the precision of `f64::powi` is unspecified and
-    /// differs between them).
+    /// `Phi(x) = erfc(-x / sqrt 2) / 2`, via `libm` for platform-independent
+    /// results.
     pub fn new(neurons: usize, patterns: usize) -> Self {
         let ratio = (neurons as f64 / patterns as f64).sqrt();
         let bit_error = 0.5 * libm::erfc(ratio / std::f64::consts::SQRT_2);

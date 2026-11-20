@@ -32,10 +32,8 @@ struct Partial {
 }
 
 impl StrictStability {
-    /// Checks every member of `plane` against `weights`, computing the
-    /// local fields of each member one at a time. The chunks of members
-    /// are checked in parallel and combined in chunk order, so the result
-    /// does not depend on the number of threads.
+    /// Checks every member of `plane` against `weights`, one member at a
+    /// time.
     ///
     /// # Panics
     ///

@@ -35,10 +35,8 @@ pub struct DatasetInfo {
 }
 
 impl DatasetInfo {
-    /// Loads dataset `name` from `registry` for a configuration file in the
-    /// directory `config_dir`, against which the registry path is recorded;
-    /// with `prefix`, only its first `prefix` patterns, which must be at
-    /// least 1 and at most the size of the set.
+    /// Loads dataset `name` (its first `prefix` patterns, if given), with the
+    /// registry path recorded relative to `config_dir`.
     pub fn load(
         registry: &Registry,
         name: &str,

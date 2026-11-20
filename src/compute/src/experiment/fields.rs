@@ -6,10 +6,9 @@ use arrow_array::{ArrayRef, Float64Array, RecordBatch, StringArray, UInt32Array}
 
 use super::ExperimentRun;
 
-/// The [aligned fields](crate::dynamics::Stability::aligned_fields)
-/// `xi_i^mu h_i` of every training of an experiment as an Arrow record
-/// batch, one row per (training, pattern, neuron), ordered by training (as
-/// [`ExperimentRun::trainings`]), then pattern, then neuron. Columns:
+/// The [aligned fields](crate::dynamics::Stability::aligned_fields) of every
+/// training as an Arrow record batch, one row per (training, pattern, neuron)
+/// in that order:
 ///
 /// | Column | Type | Content |
 /// |---|---|---|
@@ -17,21 +16,17 @@ use super::ExperimentRun;
 /// | `pattern` | uint32 | stored pattern `mu` |
 /// | `neuron` | uint32 | neuron `i`, row-major pixel index |
 /// | `field` | float64 | `xi_i^mu h_i` for `h = W xi^mu` |
-///
-/// A neuron with a negative field would change; a zero field is decided by
-/// the `sgn(0)` convention of the dynamics.
 #[derive(Debug, Clone, PartialEq)]
 pub struct FieldTable {
     batch: RecordBatch,
 }
 
 impl FieldTable {
-    /// The table of `run`, which must hold the fields of every training.
+    /// The table of `run`.
     ///
     /// # Panics
     ///
-    /// Panics if `run` has no fields for some training (the experiment ran
-    /// without `stability_fields`).
+    /// Panics if `run` ran without `stability_fields`.
     pub fn new(run: &ExperimentRun) -> Self {
         assert_eq!(
             run.fields.len(),
@@ -74,7 +69,6 @@ impl FieldTable {
     }
 }
 
-/// `value` as `u32`; pattern and neuron indices fit.
 fn to_u32(value: usize) -> u32 {
     u32::try_from(value).expect("index fits in u32")
 }

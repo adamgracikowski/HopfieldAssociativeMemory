@@ -11,29 +11,7 @@ use crate::run::Learning;
 use crate::weights::Backend;
 use crate::{Error, Result};
 
-/// Settings of a benchmark, read from a TOML file:
-///
-/// ```toml
-/// seed = 7
-/// datasets = ["cats-300x200-median"]   # optional, registered datasets
-/// repeats = 5                         # measurements of every combination
-/// backends = ["dense", "factored"]
-/// dense_limit = 16384                 # largest N measured with dense weights
-/// noise = 0.1                         # flipped fraction of the recall input
-///
-/// [random]                            # optional, random pattern sets
-/// neurons = [1024, 4096, 16384]
-/// patterns = 12
-///
-/// [[learning]]
-/// rule = "hebb"
-/// [[learning]]
-/// rule = "oja"
-/// ```
-///
-/// The registry is `registry` if given (relative to the directory of the
-/// configuration file), otherwise `data/datasets/datasets.toml` found from
-/// that directory upwards.
+/// Settings of a benchmark, read from a TOML file.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct BenchmarkConfig {
@@ -151,10 +129,8 @@ impl BenchmarkConfig {
         backend != Backend::Dense || neurons <= self.dense_limit
     }
 
-    /// Checks that at least one set of `neurons` (the numbers of neurons of
-    /// all sets, datasets included) is [measured](Self::measures) with at
-    /// least one backend, e.g. not only dense weights for sets larger than
-    /// `dense_limit`.
+    /// Checks that at least one set (of sizes `neurons`, datasets included)
+    /// is [measured](Self::measures) with some backend.
     pub fn check_measured(&self, neurons: &[usize]) -> Result<()> {
         let any = neurons.iter().any(|&n| {
             self.backends

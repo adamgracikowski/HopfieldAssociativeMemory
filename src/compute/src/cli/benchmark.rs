@@ -7,23 +7,19 @@ use clap::Args;
 use compute::benchmark::{BenchmarkConfig, BenchmarkRun, HeapProbe};
 use compute::run::OutputDir;
 
-/// Directory of the results next to the configuration file.
 const RESULTS_DIR: &str = "results";
 
 #[derive(Debug, Args)]
 pub struct BenchmarkArgs {
-    /// Benchmark configuration (TOML) with the seed, the datasets, the
-    /// random sizes, the backends and the learning rules.
+    /// Benchmark configuration (TOML).
     #[arg(long)]
     config: PathBuf,
 
-    /// Output directory, `results` next to the configuration by default; it
-    /// must be empty or not exist yet.
+    /// Output directory (default: `results` next to the configuration).
     #[arg(long, value_name = "DIR")]
     out: Option<PathBuf>,
 
-    /// Write into a non-empty output directory, replacing files of the same
-    /// name.
+    /// Overwrite files in a non-empty output directory.
     #[arg(long)]
     force: bool,
 }
@@ -43,8 +39,7 @@ impl HeapProbe for AllocatorProbe {
 }
 
 impl BenchmarkArgs {
-    /// Measures every configured set, backend and rule, writes the table
-    /// and prints one line per measurement and a summary to stdout.
+    /// Runs the benchmark, printing one line per measurement.
     pub fn run(self) -> compute::Result<()> {
         let start = Instant::now();
         let config = BenchmarkConfig::from_file(&self.config)?;

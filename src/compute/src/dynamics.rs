@@ -47,17 +47,12 @@ pub struct Dynamics {
     /// Largest number of steps (synchronous updates or asynchronous
     /// sweeps).
     pub max_steps: usize,
-    /// Asynchronous mode only: a frame is recorded every `record_every`
-    /// neuron updates (if the state changed since the previous frame).
-    /// `None` means once per sweep, i.e. every `N` updates. The synchronous
-    /// mode records every step.
+    /// Asynchronous mode only: record a frame every `record_every` updates;
+    /// `None` means once per sweep.
     pub record_every: Option<usize>,
 }
 
 impl Default for Dynamics {
-    /// Asynchronous mode with a new random permutation in every sweep,
-    /// `sgn(0)` keeps the previous state, at most 1000 steps, a frame per
-    /// sweep.
     fn default() -> Self {
         Self {
             mode: Mode::Asynchronous,
@@ -70,10 +65,8 @@ impl Default for Dynamics {
 }
 
 impl Dynamics {
-    /// Runs the network with `weights` from `initial` and passes the
-    /// frames to `recorder`: the initial state, the states between steps
-    /// and the final state, consecutive frames always different. `rng`
-    /// drives the random update orders of the asynchronous mode.
+    /// Runs the network from `initial`, passing the frames to `recorder`;
+    /// `rng` drives the random update orders of the asynchronous mode.
     pub fn run<R, H>(
         &self,
         weights: &Weights,

@@ -7,24 +7,21 @@ use compute::run::{OutputDir, RunConfig, TrainRun};
 
 #[derive(Debug, Args)]
 pub struct TrainArgs {
-    /// Run configuration (TOML) with the dataset and the learning rule; the
-    /// `sgn(0)` convention of its dynamics decides pattern stability.
+    /// Run configuration (TOML).
     #[arg(long)]
     config: PathBuf,
 
-    /// Output directory; it must be empty or not exist yet.
+    /// Output directory.
     #[arg(long, value_name = "DIR")]
     out: PathBuf,
 
-    /// Write into a non-empty output directory, replacing files of the same
-    /// name.
+    /// Overwrite files in a non-empty output directory.
     #[arg(long)]
     force: bool,
 }
 
 impl TrainArgs {
-    /// Trains the configured network, writes its weights and metadata and
-    /// prints a summary.
+    /// Trains the network and prints a summary.
     pub fn run(self) -> compute::Result<()> {
         let config = RunConfig::from_file(&self.config)?;
         let out = OutputDir::new(&self.out, self.force)?;

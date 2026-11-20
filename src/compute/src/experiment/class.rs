@@ -6,10 +6,6 @@ use crate::PatternSet;
 use crate::dynamics::{Outcome, Termination};
 
 /// What a trial ended in, decided by exact equality of states.
-///
-/// [`Display`](std::fmt::Display) and `&'static str` conversion give the
-/// name used in output files (`pattern`, `negation`, `spurious`, `cycle`,
-/// `unconverged`).
 #[derive(
     Debug,
     Clone,
@@ -38,8 +34,7 @@ pub enum FinalClass {
 }
 
 impl FinalClass {
-    /// Class of `outcome` in a network that stores `set`. A stored pattern
-    /// has Hamming distance 0 to the state, a negated one distance `N`.
+    /// Class of `outcome` in a network that stores `set`.
     pub fn of(outcome: &Outcome, set: &PatternSet) -> Self {
         match outcome.termination {
             Termination::TwoCycle => Self::Cycle,

@@ -6,13 +6,10 @@ use crate::patterns::Pattern;
 /// Final state of a simulation and how it was reached.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Outcome {
-    /// State after `steps` steps. For a [`Termination::TwoCycle`] it is one
-    /// of the two alternating states, the other being the state one step
-    /// earlier.
+    /// State after `steps` steps; for a 2-cycle one of its two states.
     pub state: Pattern,
-    /// Number of steps applied (synchronous updates or asynchronous sweeps).
-    /// The step that only confirms a fixed point or reveals a cycle is not
-    /// applied, so a stable initial state gives 0.
+    /// Number of applied steps (synchronous updates or asynchronous sweeps);
+    /// 0 for a stable initial state.
     pub steps: usize,
     /// Total number of neuron state changes over all steps.
     pub changes: usize,

@@ -1,14 +1,9 @@
 //! Weight matrices of a Hopfield network.
 //!
-//! Two storage backends implement [`WeightMatrix`]:
-//! - [`DenseWeights`]: the full `N x N` matrix, for small and medium networks,
-//! - [`FactoredWeights`]: `W = A Xi - diag(d)` built from the `p` stored
-//!   patterns, using `O(N p)` memory, for large bitmaps where the dense
-//!   matrix would not fit in memory.
-//!
-//! [`Weights`] holds either of them and is chosen with [`Backend`].
-//! [`FieldTracker`] keeps a state together with what its local fields need,
-//! for updating one neuron at a time.
+//! [`Weights`] holds one of two [`WeightMatrix`] backends, chosen with
+//! [`Backend`]: [`DenseWeights`] (`N x N`) or [`FactoredWeights`]
+//! (`W = A Xi - diag(d)`, `O(N p)` memory). [`FieldTracker`] serves
+//! single-neuron updates.
 
 pub mod backend;
 pub mod dense;
@@ -33,9 +28,7 @@ pub trait WeightMatrix {
     /// Number of neurons `N`.
     fn neurons(&self) -> usize;
 
-    /// Writes the local fields `h = W x` of `state` into `out`, without
-    /// allocating an `N x N` temporary. Networks of at least
-    /// [`PARALLEL_MIN_NEURONS`] neurons compute the fields in parallel.
+    /// Writes the local fields `h = W x` of `state` into `out`.
     ///
     /// # Panics
     ///
@@ -50,8 +43,7 @@ pub trait WeightMatrix {
     /// Panics if `i >= N` or `state` does not have `N` elements.
     fn local_field(&self, i: usize, state: ArrayView1<'_, i8>) -> f64;
 
-    /// The full `N x N` matrix. Meant for tests and small networks: it
-    /// allocates `N^2` values.
+    /// The full `N x N` matrix, for tests and small networks.
     fn to_dense(&self) -> Array2<f64>;
 
     /// Local fields `h = W x` of `state` as a new vector.
@@ -65,9 +57,7 @@ pub trait WeightMatrix {
         out
     }
 
-    /// Energy `E = -1/2 x^T W x = -1/2 sum_i x_i h_i` of `state`. For
-    /// symmetric weights with zero diagonal it does not increase when one
-    /// neuron is updated at a time.
+    /// Energy `E = -1/2 x^T W x` of `state`.
     ///
     /// # Panics
     ///
@@ -77,8 +67,7 @@ pub trait WeightMatrix {
     }
 }
 
-/// Energy `E = -1/2 sum_i x_i h_i` of `state` from its local fields
-/// `fields`.
+/// Energy `E = -1/2 sum_i x_i h_i` of `state` from its local fields.
 ///
 /// # Panics
 ///
@@ -102,8 +91,7 @@ pub enum Weights {
 }
 
 impl Weights {
-    /// Backend that stores these weights ([`Backend::Dense`] or
-    /// [`Backend::Factored`]).
+    /// Backend that stores these weights.
     pub fn backend(&self) -> Backend {
         match self {
             Self::Dense(_) => Backend::Dense,

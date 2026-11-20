@@ -12,27 +12,9 @@ use crate::patterns::registry::Registry;
 use crate::seed::Seed;
 use crate::{Error, PatternSet, Result};
 
-/// Settings of a generation, read from a TOML file:
-///
-/// ```toml
-/// seed = 20261110
-/// dataset = "large-25x25"   # prototypes come from this registered dataset
-/// prototypes = [0, 2, 4]    # indices of the prototypes, one group each
-/// variants = 5              # patterns per group
-///
-/// [[outputs]]
-/// flip = 0.05               # fraction of flipped pixels of every variant
-/// file = "../../datasets/groups-25x25-d05.npy"
-/// ```
-///
-/// Every output holds `prototypes.len() * variants` patterns, group by
-/// group. Variant `v` of prototype `mu` in output `<stem>.npy` flips
-/// `round(flip * N)` pixels chosen with the input stream of the seed derived
-/// from `seed` and the text `<stem>/<mu>/<v>`. The prototypes themselves are
-/// not stored. The registry is `registry` if given (relative to the
-/// directory of the configuration file), otherwise
-/// `data/datasets/datasets.toml` found from that directory upwards; output
-/// files are relative to the directory of the configuration file.
+/// Settings of a generation, read from a TOML file. Variant `v` of prototype
+/// `mu` in output `<stem>.npy` flips pixels chosen with the input stream of
+/// the seed derived from `seed` and the text `<stem>/<mu>/<v>`.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct GroupsConfig {

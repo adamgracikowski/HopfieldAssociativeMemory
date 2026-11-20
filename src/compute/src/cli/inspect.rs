@@ -12,12 +12,11 @@ pub struct InspectArgs {
     /// Dataset name from the registry.
     name: String,
 
-    /// Dataset registry. By default `data/datasets/datasets.toml` is searched
-    /// for in the current directory and its parents.
+    /// Dataset registry (default: found from the current directory upwards).
     #[arg(long)]
     registry: Option<PathBuf>,
 
-    /// Show only these patterns (indices from 0). By default all are shown.
+    /// Show only these patterns (indices from 0).
     #[arg(long = "pattern", value_name = "MU")]
     patterns: Vec<usize>,
 

@@ -12,34 +12,13 @@ use crate::run::Learning;
 use crate::weights::Backend;
 use crate::{Error, Result};
 
-/// Settings of a capacity run, read from a TOML file:
-///
-/// ```toml
-/// seed = 7
-/// datasets = ["letters-14x20"]   # prefixes p = 1, 2, ..., len
-/// trials = 50                    # random sets per (N, p)
-/// zero_field = "keep"            # optional, `keep` by default
-/// backend = "auto"               # optional, `auto` by default
-///
-/// [[random]]
-/// neurons = 280
-/// patterns = { start = 2, end = 80, step = 2 }
-///
-/// [[learning]]
-/// rule = "hebb"
-/// [[learning]]
-/// rule = "oja"
-/// ```
-///
-/// The registry is `registry` if given (relative to the directory of the
-/// configuration file), otherwise `data/datasets/datasets.toml` found from
-/// that directory upwards.
+/// Settings of a capacity run, read from a TOML file.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct CapacityConfig {
     /// Master seed; every random set derives its own seed from it.
     pub seed: u64,
-    /// Registered datasets whose prefixes are checked.
+    /// Registered datasets whose prefixes `p = 1..=len` are checked.
     #[serde(default)]
     pub datasets: Vec<String>,
     /// Dataset registry file.

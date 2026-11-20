@@ -5,8 +5,7 @@ use ndarray::{Array1, Array2, ArrayView1, ArrayView2, ArrayViewMut1, Zip};
 use super::{PARALLEL_MIN_NEURONS, WeightMatrix};
 use crate::{Error, Result};
 
-/// Full `N x N` weight matrix with zero diagonal. Symmetry is not required:
-/// some learning rules produce asymmetric weights.
+/// Full `N x N` weight matrix with zero diagonal, not necessarily symmetric.
 #[derive(Debug, Clone, PartialEq)]
 pub struct DenseWeights {
     matrix: Array2<f64>,
@@ -63,8 +62,6 @@ impl WeightMatrix for DenseWeights {
         self.matrix.nrows()
     }
 
-    /// Computes every `h_i` as the dot product of row `i` with the state
-    /// converted to `f64` once.
     fn local_fields_into(&self, state: ArrayView1<'_, i8>, out: ArrayViewMut1<'_, f64>) {
         assert_eq!(state.len(), self.neurons(), "state length");
         let x: Array1<f64> = state.mapv(f64::from);

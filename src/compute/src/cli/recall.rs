@@ -9,17 +9,15 @@ use compute::run::{Input, OutputDir, RecallRun, RunConfig};
 
 #[derive(Debug, Args)]
 pub struct RecallArgs {
-    /// Run configuration (TOML) with the dataset, the learning rule, the
-    /// dynamics, the seed and the initial state.
+    /// Run configuration (TOML).
     #[arg(long)]
     config: PathBuf,
 
-    /// Output directory; it must be empty or not exist yet.
+    /// Output directory.
     #[arg(long, value_name = "DIR")]
     out: PathBuf,
 
-    /// Write into a non-empty output directory, replacing files of the same
-    /// name.
+    /// Overwrite files in a non-empty output directory.
     #[arg(long)]
     force: bool,
 
@@ -29,8 +27,7 @@ pub struct RecallArgs {
 }
 
 impl RecallArgs {
-    /// Runs the configured recall, writes its artifacts and prints a
-    /// summary.
+    /// Runs the recall and prints a summary.
     pub fn run(self) -> compute::Result<()> {
         let config = RunConfig::from_file(&self.config)?;
         let out = OutputDir::new(&self.out, self.force)?;
