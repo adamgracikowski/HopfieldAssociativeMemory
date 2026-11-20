@@ -1,11 +1,7 @@
-# Capacity: stability of the stored patterns against the number of patterns,
-# for prefixes of two datasets and for random patterns of the same sizes
-# (50 random sets per number of patterns), with the Hebbian rule and Oja's
-# subspace rule.
+# Fraction of stable stored patterns against p: dataset prefixes and random
+# sets of the same N. The run takes about 40 min with 8 threads.
 #
-# Run from src/compute (about 40 min with 8 threads):
 #   cargo run --release -- capacity --config ../../data/experiments/capacity/config.toml
-# Report figure, from src/analysis:
 #   uv run hopfield-analysis capacity ../../data/experiments/capacity/results --out ../../data/experiments/capacity/figures/capacity
 
 seed = 20261106

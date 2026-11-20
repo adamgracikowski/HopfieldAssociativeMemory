@@ -1,12 +1,7 @@
-# Stability of the stored patterns with Oja's single-neuron rule, which
-# learns only the first principal component: every CSV dataset, each stored
-# pattern given as the input in both update modes, with the aligned fields
-# written.
+# Stability with Oja's single-neuron rule, which learns only the first principal
+# component; plotted by the `stable` command of stability/config.toml.
 #
-# Run from src/compute:
 #   cargo run --release -- experiment --config ../../data/experiments/stability-single-neuron/config.toml
-# Plotted together with stability: see the `stable` command in
-# ../stability/config.toml.
 
 seed = 20261106
 datasets = [

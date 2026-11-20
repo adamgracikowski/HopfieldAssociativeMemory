@@ -1,8 +1,4 @@
-# Experiment used by the tests of the random input plots: 50 random initial
-# states for small-7x7 and its first 3 patterns, both learning rules and
-# update modes, with the distinct final states in attractors.parquet.
-# Regenerate from src/compute:
-#   cargo run --release -- experiment --config ../analysis/tests/fixtures/random.toml --out ../analysis/tests/fixtures/random --force
+# Fixture of the analysis tests; see README.md.
 
 seed = 1
 datasets = [{ name = "small-7x7", patterns = 3 }, "small-7x7"]

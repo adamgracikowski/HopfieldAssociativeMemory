@@ -1,11 +1,7 @@
-# Registry of pattern sets.
+# Registry of pattern sets: `[datasets.<name>]` with `file` (relative `.csv` or
+# `.npy`), `width`, `height`, optional `separator` (CSV) and `description`.
 #
-# Each entry `[datasets.<name>]` describes one file in this directory:
-# - `file`: path relative to this registry (`.csv` with one pattern per row,
 #   or `.npy` with shape (p, height, width)),
-# - `width`, `height`: bitmap size, pixels stored row by row (row-major),
-# - `separator` (optional, CSV only): field separator, `,` by default,
-# - `description`: what the patterns show.
 
 [datasets.small-7x7]
 file = "small-7x7.csv"

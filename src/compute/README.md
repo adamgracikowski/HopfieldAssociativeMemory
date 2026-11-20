@@ -36,7 +36,7 @@ cargo run --release -- experiment --config ../../data/experiments/noise/config.t
 
 ## Configuration
 
-Configurations are TOML files. Relative paths are resolved against the file's directory, and datasets are looked up by name in `data/datasets/datasets.toml`. Every experiment in `data/experiments/` has its configuration there, with the commands that produce its results and figures in the header comments.
+Configurations are TOML files. Relative paths are resolved against the file's directory, and datasets are looked up by name in `data/datasets/datasets.toml`. Every experiment in `data/experiments/` has its configuration there, with the commands that produce its results and figures in the header comments (`cargo` lines run from `src/compute`, `uv` lines from `src/analysis`).
 
 A run configuration (`train`, `recall`):
 

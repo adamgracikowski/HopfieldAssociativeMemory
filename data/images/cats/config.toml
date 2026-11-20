@@ -1,5 +1,5 @@
-# Conversion of cat photos to 300x200 bipolar bitmaps (N = 60000).
-# Run from src/compute:
+# Cat photos to 300x200 bipolar bitmaps (N = 60000).
+#
 #   cargo run --release -- convert-images --config ../../data/images/cats/config.toml
 
 width = 300

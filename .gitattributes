@@ -1,10 +1,7 @@
-# NumPy arrays are binary: no end-of-line conversion or text diffs.
+# Binary formats: no end-of-line conversion or text diffs.
 *.npy binary
-
-# Parquet tables are binary.
 *.parquet binary
 
-# Experiment results are compared byte for byte with what compute writes:
-# no end-of-line conversion on checkout.
+# Compared byte for byte with what compute writes.
 data/experiments/*/results/* -text
 src/analysis/tests/fixtures/*/* -text

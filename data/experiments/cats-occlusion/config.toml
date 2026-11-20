@@ -1,13 +1,8 @@
-# Recovery of the cat photos (300x200 bitmaps, N = 60000, factored weights)
-# from inputs with a band of rows at a random position covered with the
-# background (-1): both cat datasets, both learning rules and update modes,
-# round(f * 200) covered rows for f from 0 to 0.8 in steps of 0.1.
+# Recovery of the cat photos (N = 60000, factored weights) from a band of rows
+# covered with -1.
 #
-# Run from src/compute:
 #   cargo run --release -- experiment --config ../../data/experiments/cats-occlusion/config.toml
-# Report figure, from src/analysis:
 #   uv run hopfield-analysis classes ../../data/experiments/cats-occlusion/results --out ../../data/experiments/cats-occlusion/figures/classes
-# Example runs: recall-occlusion-hebb.toml and recall-occlusion-oja.toml.
 
 seed = 20261113
 datasets = ["cats-300x200-median", "cats-300x200-dither"]

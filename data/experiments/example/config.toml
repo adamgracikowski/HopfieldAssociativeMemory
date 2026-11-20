@@ -1,9 +1,6 @@
-# Example experiment: recovery of damaged patterns on two small datasets,
-# with both learning rules and both update modes.
+# Example experiment: recovery of damaged patterns.
 #
-# Run from src/compute:
 #   cargo run --release -- experiment --config ../../data/experiments/example/config.toml
-# Plot from src/analysis:
 #   uv run hopfield-analysis recovery ../../data/experiments/example/results --out ../../data/experiments/example/plots/recovery.png
 
 seed = 20261105

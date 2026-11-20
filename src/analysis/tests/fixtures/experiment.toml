@@ -1,8 +1,4 @@
-# Experiment used by the tests of the stability plots: stored patterns of
-# small-7x7 and animals-14x9 (14 wide, 9 high, so a swap of width and height
-# is noticed) as inputs, both learning rules, aligned fields written.
-# Regenerate from src/compute:
-#   cargo run --release -- experiment --config ../analysis/tests/fixtures/experiment.toml --out ../analysis/tests/fixtures/experiment --force
+# Fixture of the analysis tests; see README.md.
 
 seed = 1
 datasets = ["small-7x7", "animals-14x9"]
