@@ -32,10 +32,8 @@ struct Partial {
 }
 
 impl StrictStability {
-    /// Checks every member of `plane` against `weights`, computing the
-    /// local fields of each member one at a time. The chunks of members
-    /// are checked in parallel and combined in chunk order, so the result
-    /// does not depend on the number of threads.
+    /// Checks every member of `plane` against `weights`, one member at a
+    /// time.
     ///
     /// # Panics
     ///
@@ -102,9 +100,6 @@ mod tests {
     use crate::learning::{Hebb, LearningRule};
     use crate::weights::Backend;
 
-    /// The members of a small hyperplane trained with the Hebbian rule: the
-    /// streaming check counts the same strictly stable patterns as
-    /// [`Stability`] with aligned fields required to be positive.
     #[test]
     fn agrees_with_the_aligned_fields_of_every_pattern() {
         for weights in [vec![1, 1, 1, 1, 1, 1, 1, 1, 2], vec![1, 2, 1, 2, 3, 1, 2]] {
@@ -130,10 +125,8 @@ mod tests {
         }
     }
 
-    /// `N = 18` ones: `C(18, 9) = 48620` members spread over `2^(18 - 16) =
-    /// 4` chunks. The chunks add up to the count, and the sums, the exact
-    /// and the floating-point checks are the same with one and with four
-    /// threads.
+    /// `N = 18` ones: `C(18, 9) = 48620` members in `2^(18 - 16) = 4`
+    /// chunks.
     #[test]
     fn several_chunks_give_the_same_result_with_any_number_of_threads() {
         let plane = Hyperplane::new(vec![1; 18]).unwrap();

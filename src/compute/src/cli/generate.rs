@@ -8,15 +8,13 @@ use compute::patterns::summary::Summary;
 
 #[derive(Debug, Args)]
 pub struct GenerateArgs {
-    /// Generation configuration (TOML) with the seed, the prototypes, the
-    /// number of variants and the output datasets.
+    /// Generation configuration (TOML).
     #[arg(long)]
     config: PathBuf,
 }
 
 impl GenerateArgs {
-    /// Generates the configured datasets, writes them with their provenance
-    /// and prints the statistics of each dataset.
+    /// Generates the datasets and prints the statistics of each.
     pub fn run(self) -> compute::Result<()> {
         let config = GroupsConfig::from_file(&self.config)?;
         for (i, generated) in config.generate()?.iter().enumerate() {

@@ -66,38 +66,24 @@ pub struct ExperimentRun {
     pub learning: Vec<String>,
     /// Trainings ordered by dataset, then rule.
     pub trainings: Vec<Training>,
-    /// The [aligned fields](Stability::aligned_fields) (`p x N`) of every
-    /// training, in the order of `trainings`, if the configuration asks for
-    /// `stability_fields`; otherwise empty.
+    /// [Aligned fields](Stability::aligned_fields) (`p x N`) of every
+    /// training with `stability_fields`; otherwise empty.
     pub fields: Vec<Array2<f64>>,
     /// Cells of the grid.
     pub cells: Vec<Cell>,
     /// Results ordered by cell, then trial, then target.
     pub results: Vec<TrialResult>,
-    /// The distinct final states of every cell, ordered by cell, then
-    /// [rank](Attractor::rank), if the configuration asks for
-    /// `attractors`; otherwise empty.
+    /// Distinct final states ordered by cell, then
+    /// [rank](Attractor::rank), with `attractors`; otherwise empty.
     pub attractors: Vec<Attractor>,
 }
 
 impl ExperimentRun {
-    /// Loads the datasets, checks that their noise levels give different
-    /// numbers of flipped pixels and, for every (dataset, rule) pair in turn,
-    /// trains the network, checks pattern stability, passes the training to
-    /// `on_training` and runs the trials of the pair's cells in parallel.
-    /// With `attractors` the cells run one after another, each with its
-    /// trials in parallel, and the final states of a cell are grouped into
-    /// attractors as soon as it ends, so only one cell's states are held in
-    /// memory.
-    ///
-    /// Every trial draws only from its own [`Seed`], derived from the
-    /// experiment seed, the dataset name in the registry (the same for all
-    /// prefixes of a dataset, so a target gets the same damaged input in
-    /// each of them), the input source, the number of
-    /// damaged pixels, the target and the trial number, and the results are
-    /// collected in task order, so they do not depend on the number of
-    /// threads. The seed does not depend on the rule or the mode: all of
-    /// them start from the same initial states.
+    /// Loads the datasets, checks that their damage levels give distinct
+    /// damaged-pixel counts, trains every (dataset, rule) pair, reports it to
+    /// `on_training` and runs its trials in parallel (with `attractors`, cell
+    /// by cell). Trial seeds depend on the dataset registry name, source,
+    /// damaged pixels, target and trial, not on the prefix, rule or mode.
     pub fn execute(
         config: &ExperimentConfig,
         mut on_training: impl FnMut(&Training),
@@ -212,15 +198,8 @@ impl ExperimentRun {
             .collect()
     }
 
-    /// Writes `metadata.json`, [`SUMMARY_FILE`] (`{"cells": [...]}` with the
-    /// [`CellSummary`] of every cell), [`DATASETS_FILE`]
-    /// (`{"datasets": [...]}` with the [`DatasetStatistics`] of every
-    /// dataset), [`TRIALS_FILE`] (the [`TrialTable`]) and, if the run kept
-    /// them, [`FIELDS_FILE`] (the [`FieldTable`]) and [`ATTRACTORS_FILE`]
-    /// (the [`AttractorTable`]); an old file of a table the run did not keep
-    /// is removed, so a reused directory holds only tables of this run. All
-    /// files but the metadata depend only on the
-    /// configuration and the code, not on the time or the number of threads.
+    /// Writes metadata, summary, datasets and trial table, plus the field and
+    /// attractor tables if configured (removing stale ones otherwise).
     pub fn write(&self, config: &ExperimentConfig, out: &OutputDir) -> Result<()> {
         out.write_json(METADATA_FILE, &ExperimentMetadata::new(config, self))?;
         out.write_json(
@@ -249,9 +228,7 @@ impl ExperimentRun {
     }
 }
 
-/// The trials of cell `index`: for every trial number every target (all
-/// stored patterns, or one random state). A
-/// [deterministic](Cell::is_deterministic) cell has only trial 0.
+/// The trials of cell `index`; a deterministic cell has only trial 0.
 fn trials(
     config: &ExperimentConfig,
     index: usize,
@@ -335,11 +312,9 @@ mod tests {
         ExperimentRun::execute(&config(text), |_| {}).unwrap()
     }
 
-    /// `small-7x7` has `p = 5` patterns of `N = 49` neurons: 2 rules x 2
-    /// modes x 2 noise levels = 8 cells of 3 trials x 5 targets, with
-    /// `round(0.2 * 49) = 10` flipped pixels at the higher noise level,
-    /// except the 2 deterministic cells (synchronous, no noise) with one
-    /// trial: `6 * 15 + 2 * 5 = 100` runs.
+    /// `small-7x7` (`p = 5`, `N = 49`): 8 cells of 3 trials x 5 targets,
+    /// `round(0.2 * 49) = 10` flips at noise 0.2, one trial in the 2
+    /// deterministic cells (synchronous, no noise): `6 * 15 + 2 * 5 = 100`.
     #[test]
     fn runs_every_trial_of_the_grid() {
         let mut trained = Vec::new();
@@ -429,8 +404,7 @@ mod tests {
         assert_eq!(in_pool(1), in_pool(4));
     }
 
-    /// Trials with the same dataset, flips, target and number share their
-    /// seed, so every rule and mode starts from the same damaged input.
+    /// Same seed for the same dataset, flips, target and trial number.
     #[test]
     fn rules_and_modes_start_from_the_same_inputs() {
         let run = execute(CONFIG);
@@ -444,8 +418,6 @@ mod tests {
         assert_eq!(seeds.len(), 2 * 5 * 3);
     }
 
-    /// A `recall` run with the seed, rule, mode, target and flips of a trial
-    /// repeats it.
     #[test]
     fn recall_repeats_a_trial() {
         let run = execute(CONFIG);
@@ -483,11 +455,10 @@ mod tests {
         assert!(checked >= 8);
     }
 
-    /// Occlusion levels 0 and 0.3 of the 7-row `small-7x7` cover 0 and
-    /// `round(2.1) = 2` rows, 14 pixels; only covered pixels equal to `1`
-    /// change, so the initial distance is at most 14. The grid has the same
-    /// shape as with noise (100 runs), but the seeds differ from the noise
-    /// trials, and `recall` with `source = "occlusion"` repeats a trial.
+    /// Occlusion 0.3 of the 7-row `small-7x7` covers `round(2.1) = 2` rows,
+    /// 14 pixels; only covered `1` pixels change, so the initial distance is
+    /// at most 14. Same grid as with noise (100 runs) but other seeds;
+    /// `recall` with `source = "occlusion"` repeats a trial.
     #[test]
     fn covers_rows_of_the_targets() {
         let text = CONFIG.replace(
@@ -541,10 +512,9 @@ mod tests {
         assert!(summaries[0].deterministic && !summaries[1].deterministic);
     }
 
-    /// `small-7x7` has 5 patterns, so its prefix of 5 is the whole set: the
-    /// same 100 runs under the label `small-7x7:5`. The prefix of 3 has
-    /// `6 * 3 * 3 + 2 * 3 = 60` runs whose seeds, and so damaged inputs,
-    /// equal those of the same targets in the whole set; `recall` with
+    /// Prefix 5 of `small-7x7` is the whole set: the same 100 runs as
+    /// `small-7x7:5`. Prefix 3 gives `6 * 3 * 3 + 2 * 3 = 60` runs with the
+    /// seeds of the same targets in the whole set; `recall` with
     /// `patterns = 3` repeats them.
     #[test]
     fn prefixes_store_the_first_patterns() {
@@ -635,9 +605,7 @@ mod tests {
             )
     }
 
-    /// The attractors are the same with one and with four threads, and a
-    /// `recall` run with the seed, rule and mode of an attractor's first run
-    /// ends in its state (or, for a cycle, in one of its two states).
+    /// Same with 1 and 4 threads; for a cycle, either of its two states.
     #[test]
     fn recall_repeats_the_first_run_of_an_attractor() {
         let text = random_attractors();
@@ -686,7 +654,6 @@ source = \"random\"
         }
     }
 
-    /// Random initial states give one run per trial, without a target.
     #[test]
     fn random_inputs_have_no_target() {
         let run = execute(&CONFIG.replace(

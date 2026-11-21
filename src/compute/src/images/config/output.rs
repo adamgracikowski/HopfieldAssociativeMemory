@@ -6,15 +6,13 @@ use serde::Deserialize;
 
 use crate::images::Binarization;
 
-/// One output dataset of a conversion: a binarization method and the `.npy`
-/// file the converted patterns are written to.
+/// One output dataset of a conversion.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Output {
     /// Binarization method.
     pub method: Binarization,
-    /// `.npy` file to write. Relative paths in a configuration file are
-    /// resolved against its directory.
+    /// `.npy` file to write.
     pub file: PathBuf,
 }
 

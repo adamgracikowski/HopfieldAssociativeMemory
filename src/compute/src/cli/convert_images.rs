@@ -8,8 +8,7 @@ use compute::patterns::summary::Summary;
 
 #[derive(Debug, Args)]
 pub struct ConvertImagesArgs {
-    /// Conversion configuration (TOML) with the bitmap size, the source list,
-    /// the image directory and the output datasets.
+    /// Conversion configuration (TOML).
     #[arg(long)]
     config: PathBuf,
 
@@ -19,8 +18,7 @@ pub struct ConvertImagesArgs {
 }
 
 impl ConvertImagesArgs {
-    /// Converts the configured images, writes the datasets (and previews)
-    /// and prints the statistics of each dataset.
+    /// Converts the images and prints the statistics of each dataset.
     pub fn run(self) -> compute::Result<()> {
         let config = ConversionConfig::from_file(&self.config)?;
         for (i, conversion) in config.convert()?.iter().enumerate() {

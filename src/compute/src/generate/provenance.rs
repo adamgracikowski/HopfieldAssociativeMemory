@@ -8,10 +8,7 @@ use super::GroupSet;
 use crate::build_info::BuildInfo;
 use crate::paths::relative_to;
 
-/// Where a generated dataset comes from, written next to its `.npy` file:
-/// the build of `compute`, the configuration, the prototypes and how the
-/// variants were made. It has no timestamp, so generating again with the
-/// same code and configuration gives the same file.
+/// Origin of a generated dataset, written next to its `.npy` file.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct GroupsProvenance<'a> {
     /// Command that produced the dataset.

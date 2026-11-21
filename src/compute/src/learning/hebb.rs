@@ -9,19 +9,12 @@ use crate::{PatternSet, Result};
 
 /// Hebbian rule: `w_ij = (1/N) sum_mu xi_i^mu xi_j^mu` for `i != j` and
 /// `w_ii = 0`.
-///
-/// Each pattern strengthens the connections between neurons that agree in
-/// it and weakens those between neurons that disagree, so the local field of
-/// a stored pattern is the pattern itself plus a crosstalk term from the
-/// other patterns.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct Hebb;
 
 impl LearningRule for Hebb {
-    /// Dense backend: `W = (1/N) Xi^T Xi` computed in place into the
-    /// `N x N` matrix, then the diagonal is zeroed. Factored backend:
-    /// coefficients `A = Xi^T / N`, which give the same matrix. Reports 0
-    /// epochs and convergence, as the rule is computed in closed form.
+    /// Dense: `W = Xi^T Xi / N` with the diagonal zeroed; factored:
+    /// `A = Xi^T / N`.
     fn train(&self, set: &PatternSet, backend: Backend) -> Result<Trained> {
         let n = set.neurons();
         let scale = 1.0 / n as f64;
@@ -55,8 +48,8 @@ mod tests {
     use rand::SeedableRng;
     use rand_chacha::ChaCha8Rng;
 
-    /// 5x5 set: `a` is all ones, `b` has -1 at pixels 0-9, `c` has 1 at
-    /// pixels 0, 5, 10, 15, 20 (the first column).
+    /// 5x5 set: `a` all ones, `b` -1 at pixels 0-9, `c` 1 in the first
+    /// column.
     fn three_patterns() -> PatternSet {
         let data = Array2::from_shape_fn((3, 25), |(mu, i)| match mu {
             0 => 1,
@@ -68,7 +61,7 @@ mod tests {
         PatternSet::new(5, 5, data).unwrap()
     }
 
-    /// `w_ij = (a_i a_j + b_i b_j + c_i c_j) / 25`, computed by hand:
+    /// `w_ij = (a_i a_j + b_i b_j + c_i c_j) / 25`:
     /// - `w[0][1]`: `1 + (-1)(-1) + (1)(-1) = 1`, so 0.04,
     /// - `w[0][5]`: `1 + 1 + 1 = 3`, so 0.12,
     /// - `w[0][10]`: `1 + (-1)(1) + 1 = 1`, so 0.04,
@@ -136,9 +129,8 @@ mod tests {
         }
     }
 
-    /// For orthogonal patterns the local field of a stored pattern is
-    /// `h = (1 - p/N) xi`: the self term minus the removed diagonal, with no
-    /// crosstalk. Here `p = 2`, `N = 4`, so `h = xi / 2`.
+    /// Orthogonal patterns have no crosstalk: `h = (1 - p/N) xi = xi / 2`
+    /// for `p = 2`, `N = 4` (the removed diagonal takes `p/N`).
     #[test]
     fn orthogonal_patterns_are_fixed_points() {
         let set = PatternSet::new(4, 1, array![[1, 1, 1, 1], [1, -1, 1, -1]]).unwrap();

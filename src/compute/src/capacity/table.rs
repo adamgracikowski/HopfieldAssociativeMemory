@@ -86,7 +86,7 @@ impl CapacityTable {
     }
 }
 
-/// `value` as `u32`; counts of neurons, patterns, trials and epochs fit.
+/// `value` as `u32`.
 fn to_u32(value: usize) -> u32 {
     u32::try_from(value).expect("count fits in u32")
 }

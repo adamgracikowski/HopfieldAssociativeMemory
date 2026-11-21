@@ -11,10 +11,7 @@ use crate::paths::relative_to;
 use crate::patterns::npy::write_npy;
 use crate::{Error, Result};
 
-/// Where a dataset of a search comes from, written next to its `.npy` file:
-/// the build, the configuration, the hyperplane and what part of its set
-/// the file holds. It has no timestamp, so searching again with the same
-/// code and configuration gives the same file.
+/// Origin of a dataset written by a search, next to its `.npy` file.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct StableProvenance<'a> {
     /// Command that produced the dataset.

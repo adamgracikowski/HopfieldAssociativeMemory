@@ -1,9 +1,7 @@
 """Results of ``compute experiment``: loading and plotting.
 
 An experiment directory holds ``trials.parquet`` (one row per run),
-``summary.json`` (aggregates of every grid cell) and ``metadata.json``. All
-numbers are computed by the compute layer; this module only reads and plots
-them.
+``summary.json`` (aggregates of every grid cell) and ``metadata.json``.
 """
 
 import json
@@ -45,15 +43,11 @@ METADATA_FILE = "metadata.json"
 
 
 def load_trials(results: Path) -> pl.DataFrame:
-    """Reads the trial table of an experiment.
-
-    Args:
-        results: Directory written by ``compute experiment``.
+    """Reads ``trials.parquet`` from the results directory of an experiment.
 
     Returns:
-        One row per run with the columns described in ``src/compute/README.md``
-        (``dataset``, ``learning``, ``mode``, ``noise``, ``class``,
-        ``recovered`` and others).
+        One row per run with the columns documented on ``TrialTable`` in
+        ``src/compute/src/experiment/table.rs``.
     """
     return pl.read_parquet(results / TRIALS_FILE)
 
@@ -64,9 +58,6 @@ def load_summary(results: Path) -> pl.DataFrame:
     Nested fields are joined with ``_``, e.g. ``recovered_fraction``,
     ``recovered_lower``, ``classes_pattern_fraction`` or ``steps_mean``.
 
-    Args:
-        results: Directory written by ``compute experiment``.
-
     Returns:
         One row per grid cell, in the order of the grid.
     """
@@ -75,22 +66,12 @@ def load_summary(results: Path) -> pl.DataFrame:
 
 
 def load_metadata(results: Path) -> dict[str, Any]:
-    """Reads the metadata of an experiment.
-
-    Args:
-        results: Directory written by ``compute experiment``.
-
-    Returns:
-        The configuration, build, datasets and trainings as parsed JSON.
-    """
+    """Reads ``metadata.json`` of an experiment: configuration, build, datasets, trainings."""
     return json.loads((results / METADATA_FILE).read_text(encoding="utf-8"))
 
 
 def damage(metadata: dict[str, Any]) -> str:
-    """The kind of damage of the inputs of an experiment.
-
-    Args:
-        metadata: Metadata from :func:`load_metadata`.
+    """The kind of damage of the inputs of an experiment, from :func:`load_metadata`.
 
     Returns:
         ``noise`` for flipped pixels (``source = "pattern"``) or ``occlusion``
@@ -107,9 +88,6 @@ def damage(metadata: dict[str, Any]) -> str:
 
 def dataset_sizes(metadata: dict[str, Any]) -> pl.DataFrame:
     """The datasets of an experiment with their names in the registry and sizes.
-
-    Args:
-        metadata: Metadata from :func:`load_metadata`.
 
     Returns:
         One row per dataset in configuration order with the columns
@@ -163,21 +141,14 @@ def plot_recovery(
     """Plots a recovery fraction against the damage level.
 
     One panel per dataset, at most three in a row, one line per learning
-    rule and update mode, with the 95% Wilson intervals from the summary as
-    error bars, the legend above and one damage axis label below the panels, all in
-    the report style with Polish labels.
+    rule and update mode, with the 95% Wilson intervals as error bars.
 
     Args:
         summary: Cell aggregates from :func:`load_summary` of an experiment
             with damaged stored patterns as inputs.
-        metric: ``recovered`` (runs that ended in their target) or
-            ``nearest-target`` (runs whose final state is nearest their
-            target, see :data:`METRICS`).
+        metric: ``recovered`` or ``nearest-target``, see :data:`METRICS`.
         damage: ``noise`` (flipped pixels) or ``occlusion`` (covered rows),
             e.g. from :func:`damage`; it names the axis.
-
-    Returns:
-        The figure, not attached to any GUI backend.
 
     Raises:
         ValueError: If the metric is unknown or the summary has no fractions
@@ -222,8 +193,6 @@ def plot_load(
     rule; in every panel one line per damage level against the number of
     patterns ``p`` of the prefixes of the dataset (and of the whole dataset,
     if the experiment has it), with the 95% Wilson intervals as error bars.
-    Only the cells of update mode ``mode`` are drawn. The legend of the levels
-    is above the panels.
 
     Args:
         summary: Cell aggregates from :func:`load_summary`.
@@ -232,9 +201,6 @@ def plot_load(
         mode: Update mode of the drawn cells.
         metric: ``recovered`` or ``nearest-target``, as in :func:`plot_recovery`.
         damage: ``noise`` or ``occlusion``; it names the legend.
-
-    Returns:
-        The figure in the report style with Polish labels.
 
     Raises:
         ValueError: If the metric is unknown or missing, a requested level is
@@ -287,15 +253,10 @@ def plot_classes(summary: pl.DataFrame, damage: str = "noise") -> Figure:
     mode; in every panel one bar per damage level (or a single bar for random
     inputs) stacked from the classes ``pattern``, ``negation``, ``spurious``,
     ``cycle`` and ``unconverged``, with the class legend above the panels.
-    With more than six damage levels only every k-th bar is labelled, so the
-    labels do not overlap.
 
     Args:
         summary: Cell aggregates from :func:`load_summary`.
         damage: ``noise`` or ``occlusion``; it names the axis.
-
-    Returns:
-        The figure in the report style with Polish labels.
     """
     datasets = summary["dataset"].unique(maintain_order=True).to_list()
     series = summary.select("learning", "mode").unique(maintain_order=True).rows()

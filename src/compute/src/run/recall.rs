@@ -104,8 +104,7 @@ struct RecallResult<'a> {
 
 impl RecallRun {
     /// Loads the dataset, trains the network, builds the initial state and
-    /// runs the dynamics, all as configured. The initial state and the
-    /// dynamics draw from the two streams of the [`Seed`].
+    /// runs the dynamics, all as configured.
     pub fn execute(config: &RunConfig) -> Result<Self> {
         let seed = Seed(config.require_seed()?);
         let input = config.require_input()?;
@@ -214,8 +213,7 @@ mod tests {
         config(dir, array![[1, 1, 1, 1], [1, -1, 1, -1]], extra)
     }
 
-    /// A stored pattern of an orthogonal Hebbian network is a fixed point:
-    /// one frame, overlaps 1 with itself and 0 with the other pattern.
+    /// One frame, overlaps 1 with itself and 0 with the other pattern.
     #[test]
     fn stored_pattern_stays() {
         let dir = tempfile::tempdir().unwrap();
@@ -239,10 +237,10 @@ mod tests {
         assert_eq!(run.frames().overlaps, [[0.0, 1.0]]);
     }
 
-    /// The single pattern `(1, 1, 1, 1)` gives `w_ij = 1/4`. With one pixel
-    /// flipped, that neuron has `h = 3/4` and the others `(2 - 1)/4 = 1/4`,
-    /// so one synchronous step restores the pattern. The two frames have
-    /// overlaps `(4 - 2)/4 = 0.5` and 1, with one change.
+    /// `(1, 1, 1, 1)` gives `w_ij = 1/4`. With one pixel flipped, that
+    /// neuron has `h = 3/4` and the others `(2 - 1)/4 = 1/4`, so one
+    /// synchronous step restores the pattern: overlaps `(4 - 2)/4 = 0.5`
+    /// and 1, one change.
     #[test]
     fn damaged_pattern_is_recovered() {
         let dir = tempfile::tempdir().unwrap();
@@ -275,8 +273,6 @@ mod tests {
         assert_eq!(first.history, second.history);
     }
 
-    /// The initial state comes from its own random stream: changing the
-    /// dynamics keeps it, changing the seed changes it.
     #[test]
     fn damaged_input_does_not_depend_on_the_dynamics() {
         let dir = tempfile::tempdir().unwrap();

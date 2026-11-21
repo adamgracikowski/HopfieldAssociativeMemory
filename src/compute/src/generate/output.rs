@@ -12,8 +12,7 @@ pub struct GroupsOutput {
     /// Fraction of the pixels of a prototype flipped in each variant, from 0
     /// to 1.
     pub flip: f64,
-    /// `.npy` file to write. Relative paths in a configuration file are
-    /// resolved against its directory.
+    /// `.npy` file to write.
     pub file: PathBuf,
 }
 

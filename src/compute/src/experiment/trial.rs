@@ -8,15 +8,8 @@ use crate::seed::Seed;
 use crate::weights::Weights;
 use crate::{PatternSet, Result};
 
-/// One run of a trained network from one initial state.
-///
-/// The initial state is built by [`Input`] from the input stream of `seed`
-/// and the dynamics use its dynamics stream, exactly as in a `recall` run.
-/// So `recall` repeats the trial with this seed, the experiment's dataset,
-/// `registry`, `backend` and `[learning]` table of the rule, `[dynamics]`
-/// with the cell's `mode` and the experiment's `zero_field`, `order` and
-/// `max_steps`, and the [input](Damage::input) of its damage with `index =
-/// target` (or `random`).
+/// One run of a trained network from one initial state; `recall` with this
+/// seed and the same settings repeats it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Trial {
     /// Index of the grid cell.
@@ -61,14 +54,9 @@ pub struct TrialResult {
 }
 
 impl TrialResult {
-    /// Whether the target is among the stored patterns closest to the final
-    /// state, not as its negation: its overlap `m` is positive and at least
-    /// the largest `|m|` of all patterns. Ties count, so the result does not
-    /// depend on the order of the patterns ([`nearest`](Self::nearest) keeps
-    /// the first one). Both overlaps come from the same computation, so they
-    /// are compared exactly. `None` for a random initial state. Unlike
-    /// [`recovered`](Self::recovered) it holds for a run that ends near an
-    /// unstable target, in any final class.
+    /// Whether the target is among the patterns closest to the final state:
+    /// its overlap is positive and at least the largest `|m|` (ties count).
+    /// `None` for a random initial state.
     pub fn nearest_target(&self) -> Option<bool> {
         self.final_overlap
             .map(|m| m > 0.0 && m >= self.nearest.overlap.abs())
@@ -84,14 +72,12 @@ impl Trial {
         }
     }
 
-    /// Number of damaged pixels of the target (see [`Damage::pixels`]); 0
-    /// for a random state.
+    /// Number of damaged pixels of the target; 0 for a random state.
     pub fn damaged_pixels(&self) -> usize {
         self.damage.map_or(0, |damage| damage.pixels())
     }
 
-    /// Runs the network with `weights`, which stores `set`, under
-    /// `dynamics`, without recording frames.
+    /// Runs the network storing `set` without recording frames.
     pub fn run(
         &self,
         weights: &Weights,
@@ -143,7 +129,7 @@ mod tests {
     use crate::weights::DenseWeights;
     use ndarray::array;
 
-    /// Two neurons with `w_01 = w_10 = 0.5` (Hebbian weights of `(1, 1)`).
+    /// Hebbian weights of `(1, 1)`: `w_01 = w_10 = 0.5`.
     fn weights() -> Weights {
         Weights::from(DenseWeights::new(array![[0.0, 0.5], [0.5, 0.0]]).unwrap())
     }
@@ -164,11 +150,9 @@ mod tests {
         trial.run(&weights(), &set, &dynamics).unwrap()
     }
 
-    /// Target `(1, -1)` with both pixels flipped starts at `(-1, 1)`:
-    /// `h = (0.5, -0.5)` gives `(1, -1)`, then `h = (-0.5, 0.5)` gives
-    /// `(-1, 1)` again, a cycle of length 2 found after one step whose
-    /// final state equals the target. It is not a fixed point, so the run
-    /// does not count as recovered, but the target is the nearest pattern.
+    /// Target `(1, -1)` with both pixels flipped ends in a 2-cycle at the
+    /// target: not a fixed point, so not recovered, but the target is
+    /// nearest.
     #[test]
     fn a_two_cycle_through_the_target_is_not_recovered() {
         let result = run(array![[1, -1]], 2);
@@ -179,9 +163,8 @@ mod tests {
         assert_eq!(result.nearest_target(), Some(true));
     }
 
-    /// Target `(1, 1)` with both pixels flipped starts at `(-1, -1)`:
-    /// `h = (-0.5, -0.5)` keeps it, a fixed point equal to the negated
-    /// target with `m = -1`, which is not the target.
+    /// Target `(1, 1)` with both pixels flipped stays at the fixed point
+    /// `(-1, -1)`, the negated target (`m = -1`).
     #[test]
     fn the_negated_target_is_not_the_nearest_target() {
         let result = run(array![[1, 1]], 2);
@@ -196,8 +179,8 @@ mod tests {
         assert_eq!(result.nearest_target(), Some(false));
     }
 
-    /// A final state with overlap `0.5` with both patterns: `Nearest::of`
-    /// keeps pattern 0, but target 1 ties with it and counts as nearest.
+    /// Target 1 with `m = 0.5` ties with the nearest pattern 0
+    /// (`|m| = 0.5`) and counts as nearest.
     #[test]
     fn a_target_tied_for_the_largest_overlap_is_nearest() {
         let mut result = run(array![[1, 1]], 0);
@@ -214,7 +197,6 @@ mod tests {
         assert_eq!(result.nearest_target(), None);
     }
 
-    /// `(1, 1)` has `h = (0.5, 0.5)`: a fixed point equal to the target.
     #[test]
     fn a_fixed_point_equal_to_the_target_is_recovered() {
         let result = run(array![[1, 1]], 0);

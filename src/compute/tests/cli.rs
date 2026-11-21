@@ -177,8 +177,9 @@ fn convert_images_writes_datasets_and_previews() {
     assert_eq!(provenance["sources"][0]["file"], "a.png");
 }
 
-/// Two prototypes of `small-7x7` with three variants each, `round(0.1 *
-/// 49) = 5` flipped pixels; generating again writes identical files.
+/// Two prototypes of `small-7x7` with three variants each,
+/// `round(0.1 * 49) = 5` flipped pixels; generating again writes identical
+/// files.
 #[test]
 fn generate_writes_datasets_and_provenance() {
     let dir = tempfile::tempdir().unwrap();
@@ -225,9 +226,7 @@ fn generate_writes_datasets_and_provenance() {
     assert_eq!(files("groups-d10.json"), json);
 }
 
-/// The committed grouped datasets are what the current code generates from
-/// their configuration; only the `.npy` files are compared, because the
-/// provenance records the build.
+/// Only the `.npy` files are compared: the provenance records the build.
 #[test]
 fn generated_datasets_match_the_committed_files() {
     let source = Path::new("../../data/generated/groups-25x25/config.toml");
@@ -432,8 +431,7 @@ fn recall_writes_history_frames_and_metadata() {
     assert_eq!(stats["changes"][0], 0);
 }
 
-/// Running again with the same seed reproduces every file; the metadata
-/// differs only in `created`.
+/// Metadata differs only in `created`.
 #[test]
 fn recall_is_reproducible() {
     let dir = tempfile::tempdir().unwrap();
@@ -516,9 +514,8 @@ fn discovery_setup(root: &Path) -> PathBuf {
     exp
 }
 
-/// The configuration given by its bare file name finds the registry, and
-/// runs from two working directories give the same metadata, whose paths
-/// are relative to the configuration.
+/// A bare configuration file name finds the registry; metadata paths are
+/// relative to the configuration.
 #[test]
 fn recall_does_not_depend_on_the_working_directory() {
     let dir = tempfile::tempdir().unwrap();
@@ -564,8 +561,6 @@ fn failed_recall_leaves_no_output_directory() {
     assert!(!out.exists());
 }
 
-/// Training again with another backend into the same directory replaces
-/// the weight file instead of leaving the old one next to the new one.
 #[test]
 fn train_with_another_backend_removes_the_old_weights() {
     let dir = tempfile::tempdir().unwrap();
@@ -698,8 +693,7 @@ fn experiment_writes_tables_and_metadata() {
 }
 
 /// Covering `round(0.3 * 7) = 2` rows of the 7 x 7 patterns damages 14
-/// pixels; the experiment and a `recall` of one of its trials both accept
-/// `source = "occlusion"`, and the invalid levels are reported.
+/// pixels; levels covering the same rows are rejected.
 #[test]
 fn experiment_and_recall_cover_rows() {
     let dir = tempfile::tempdir().unwrap();
@@ -742,9 +736,9 @@ fn experiment_and_recall_cover_rows() {
         .stderr(contains("both cover 1 of the 7 rows"));
 }
 
-/// With `stability_fields` the experiment writes one row per pattern and
-/// neuron of every training: 5 x 49 for `small-7x7` and one rule. Its
-/// negative fields agree with the unstable neurons in the metadata.
+/// One row per pattern and neuron, 5 x 49 for `small-7x7` and one rule,
+/// with negative fields at the unstable neurons of the metadata; a run
+/// without the option removes the old table.
 #[test]
 fn experiment_writes_stability_fields_on_request() {
     let dir = tempfile::tempdir().unwrap();
@@ -801,9 +795,8 @@ fn experiment_writes_stability_fields_on_request() {
     );
 }
 
-/// With `attractors` a random-input experiment writes one row per distinct
-/// final state of every cell, whose counts add up to the runs of the cell
-/// in `summary.json`; a run without the option removes the old table.
+/// One row per distinct final state of every cell, with counts adding up
+/// to the runs of the cell; a run without the option removes the old table.
 #[test]
 fn experiment_writes_attractors_on_request() {
     let dir = tempfile::tempdir().unwrap();
@@ -855,8 +848,7 @@ fn experiment_writes_attractors_on_request() {
     );
 }
 
-/// The tables are byte for byte the same with one and with four threads;
-/// the metadata differs only in `created`.
+/// Metadata differs only in `created`.
 #[test]
 fn experiment_tables_do_not_depend_on_the_number_of_threads() {
     let dir = tempfile::tempdir().unwrap();
@@ -930,12 +922,8 @@ fn experiment_requires_a_seed() {
     assert!(!dir.path().join("results").exists());
 }
 
-/// The committed results of the example experiment are what the current
-/// code computes, with one thread and with four. A change of the code that
-/// changes the results fails here until the results are regenerated. The
-/// trial table is compared as decoded data, because the Parquet file also
-/// records the version of the `parquet` crate; the JSON tables byte for
-/// byte.
+/// Committed `example` results equal the current output with 1 and 4
+/// threads.
 #[test]
 fn example_experiment_matches_the_committed_results() {
     let example = Path::new("../../data/experiments/example");
@@ -974,9 +962,8 @@ fn capacity(config: &Path) -> Command {
     command
 }
 
-/// `small-7x7` gives 5 prefixes, the random entry `p = 2, 5, 8` with 4
-/// trials each: 17 sets, 2 rules, 34 rows and `(5 + 3) * 2 = 16` summary
-/// rows.
+/// 5 prefixes of `small-7x7` and random `p = 2, 5, 8` with 4 trials each:
+/// 17 sets x 2 rules = 34 rows, `(5 + 3) * 2 = 16` summary rows.
 #[test]
 fn capacity_writes_tables_and_metadata() {
     let dir = tempfile::tempdir().unwrap();
@@ -1009,8 +996,7 @@ fn capacity_writes_tables_and_metadata() {
     assert_eq!(metadata["datasets"][0]["neurons"], 49);
 }
 
-/// The tables are byte for byte the same with one and with four threads,
-/// and the results go next to the configuration by default.
+/// Without `--out` the results go next to the configuration.
 #[test]
 fn capacity_tables_do_not_depend_on_the_number_of_threads() {
     let dir = tempfile::tempdir().unwrap();
@@ -1058,12 +1044,9 @@ const BENCHMARK: &str = "seed = 5\ndatasets = [\"small-7x7\"]\nrepeats = 2\n\
                          [random]\nneurons = [40, 80]\npatterns = 3\n\
                          [[learning]]\nrule = \"hebb\"\n[[learning]]\nrule = \"oja\"\n";
 
-/// `small-7x7` (`N = 49`) and the random set of `N = 40` with both backends,
-/// the one of `N = 80 > dense_limit` with factored weights only:
-/// `(2 + 2 + 1) * 2 rules * 2 repeats = 20` measurements, each with the
-/// heap counted by the allocator of the binary; dense weights of
-/// `small-7x7` take `8 * 49^2 = 19208` bytes, and training them allocates
-/// at least as much.
+/// 20 measurements with the heap counted by the binary's allocator; dense
+/// `small-7x7` weights take `8 * 49^2 = 19208` bytes, and training them
+/// allocates at least as much.
 #[test]
 fn benchmark_writes_the_table_and_metadata() {
     let dir = tempfile::tempdir().unwrap();
@@ -1112,10 +1095,8 @@ fn benchmark_writes_the_table_and_metadata() {
     benchmark().arg("--force").assert().success();
 }
 
-/// The committed oscillation example: the Hebbian network of the four
-/// shapes of `cycle-5x5` started from the checkerboard ends in a cycle of
-/// length 2 after one synchronous step, the second state being the negated
-/// checkerboard (all 25 pixels change) with the same energy.
+/// The committed `recall-cycle.toml`: a 2-cycle after one synchronous step
+/// to the negated checkerboard (25 changes) with the same energy.
 #[test]
 fn checkerboard_oscillates_in_the_network_of_the_cycle_shapes() {
     let dir = tempfile::tempdir().unwrap();
@@ -1136,10 +1117,8 @@ fn checkerboard_oscillates_in_the_network_of_the_cycle_shapes() {
     assert_eq!(frames["energy"][0], frames["energy"][1]);
 }
 
-/// 5 x 3 bitmaps: the largest set, `u = (1, ..., 1, 2)` with `2 C(14, 6) =
-/// 6006` members, is strictly stable with both rules; its basis of 14
-/// patterns and a sample of 24 are written as `(p, 3, 5)` datasets with
-/// their provenance.
+/// 5 x 3 bitmaps: the basis (14 patterns) and a sample (24) of the best set
+/// are written as `(p, 3, 5)` datasets with provenance.
 #[test]
 fn search_stable_writes_the_summary_and_the_datasets() {
     let dir = tempfile::tempdir().unwrap();
@@ -1203,10 +1182,7 @@ fn same_file(out: &Path, expected: &Path, name: &str) -> bool {
     }
 }
 
-/// The committed results of the pattern stability experiment with Oja's
-/// single-neuron rule are what the current code computes (the run takes a
-/// fraction of a second; the other committed experiments of the same kind
-/// train Oja's subspace rule for many epochs and are too slow for a test).
+/// Committed `stability-single-neuron` results equal the current output.
 #[test]
 fn single_neuron_stability_matches_the_committed_results() {
     let experiment_dir = Path::new("../../data/experiments/stability-single-neuron");
@@ -1231,12 +1207,8 @@ fn single_neuron_stability_matches_the_committed_results() {
     }
 }
 
-/// The test fixtures of the presentation layer (`src/analysis/tests/fixtures`)
-/// are what `recall`, `train`, `experiment` and `capacity` write for their
-/// configurations. A change of the output fails here until the fixtures are
-/// regenerated with the commands in their README. Only the data files are
-/// compared (see [`same_file`]): the metadata records the time and the
-/// build.
+/// Fixtures in `src/analysis/tests/fixtures` equal the current output
+/// (regenerate per their README).
 #[test]
 fn analysis_fixtures_match_the_current_output() {
     let fixtures = Path::new("../analysis/tests/fixtures");

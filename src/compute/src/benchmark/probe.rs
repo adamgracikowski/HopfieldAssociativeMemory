@@ -1,8 +1,7 @@
 //! Measurement of the heap used by a piece of work.
 
 /// Source of the size of the heap, e.g. a counting global allocator of the
-/// binary. The library does not install an allocator itself, so its tests
-/// and other users keep the system one.
+/// binary.
 pub trait HeapProbe {
     /// Resets the peak to the current heap size and returns that size in
     /// bytes, or `None` if the heap is not measured.
@@ -12,9 +11,8 @@ pub trait HeapProbe {
     /// `None` if the heap is not measured.
     fn peak(&self) -> Option<usize>;
 
-    /// Runs `work` and returns its result with the largest growth of the
-    /// heap during it: the peak minus the size at the start, or `None` if
-    /// the heap is not measured.
+    /// Runs `work` and returns its result with the heap growth during it
+    /// (peak minus start), or `None` if the heap is not measured.
     fn measure<T>(&self, work: impl FnOnce() -> T) -> (T, Option<usize>)
     where
         Self: Sized,

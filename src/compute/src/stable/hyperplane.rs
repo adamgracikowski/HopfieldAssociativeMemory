@@ -8,17 +8,12 @@ use crate::{Error, Result};
 /// Largest number of neurons whose states are enumerated (`2^N` states).
 pub const MAX_NEURONS: usize = 32;
 
-/// Number of low bits of a state index enumerated by one task, so that a
-/// fold splits `2^N` states into the same chunks on every machine.
+/// Number of low bits of a state index enumerated by one chunk.
 const CHUNK_BITS: usize = 16;
 
 /// The hyperplane `u . x = 0` of a vector `u` of positive integers, and
-/// its bipolar points `S_u = {xi in {-1, 1}^N : u . xi = 0}`.
-///
-/// States are enumerated by their index `0..2^N`: pixel `j` of state `k`
-/// is `1` if bit `j` of `k` is set and `-1` otherwise. Changing the sign of
-/// `u_j` maps `S_u` to itself with pixel `j` flipped, so positive weights
-/// lose no set up to such a flip.
+/// its bipolar points `S_u = {xi in {-1, 1}^N : u . xi = 0}`. Pixel `j` of
+/// the state with index `k` in `0..2^N` is `1` if bit `j` of `k` is set.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Hyperplane {
     weights: Vec<u32>,
@@ -46,12 +41,8 @@ impl Hyperplane {
         Ok(Self { weights, total })
     }
 
-    /// Every non-decreasing vector of `neurons` weights from 1 to
-    /// `max_weight` whose greatest common divisor is 1, in lexicographic
-    /// order: one representative of every set of vectors that differ by a
-    /// permutation, which permutes the pixels of `S_u` and changes neither
-    /// its size nor its stability, or by a common factor, which does not
-    /// change `S_u` at all.
+    /// Non-decreasing weight vectors in `1..=max_weight` with gcd 1, in
+    /// lexicographic order (one per permutation or scale class).
     pub fn candidates(neurons: usize, max_weight: u32) -> Result<Vec<Self>> {
         let mut current = Vec::with_capacity(neurons);
         fn extend(
@@ -105,10 +96,8 @@ impl Hyperplane {
         self.weights.len()
     }
 
-    /// Size of `S_u`, counted without enumerating it: the number of sign
-    /// vectors with `sum_j u_j xi_j = 0`, by dynamic programming over the
-    /// partial sums of the weights with sign `+1`, which must equal half of
-    /// `sum_j u_j` (none if that sum is odd).
+    /// Size of `S_u` without enumerating it: subsets of the weights adding
+    /// up to half of `sum_j u_j`, by dynamic programming.
     pub fn count(&self) -> u64 {
         if self.total % 2 == 1 {
             return 0;
@@ -147,9 +136,9 @@ impl Hyperplane {
     }
 
     /// Folds the members of `S_u` in index order within fixed chunks of
-    /// `2^min(16, N)` indices, the chunks in parallel, and returns one accumulator
-    /// per chunk in chunk order, so that the caller can reduce them in an
-    /// order that does not depend on the number of threads.
+    /// `2^min(16, N)` indices, the chunks in parallel, and returns one
+    /// accumulator per chunk in chunk order, so that the caller can reduce
+    /// them in an order that does not depend on the number of threads.
     pub fn fold_members<T: Send>(
         &self,
         init: impl Fn() -> T + Sync,
@@ -187,17 +176,10 @@ impl Hyperplane {
             })
     }
 
-    /// A well-conditioned basis of the span of `S_u`: at most `N - 1`
-    /// members (the dimension of the hyperplane), fewer if `S_u` spans a
-    /// smaller space. Gram-Schmidt with pivoting picks, from
-    /// [`sample`](Self::sample) of `8 N` members, the one farthest from the
-    /// span of those already picked (the first one on ties), so the basis
-    /// is close to orthogonal; members in index order independent of them
-    /// complete it if the sample does not span the whole set. A residual counts as independent when its squared norm exceeds
-    /// `1e-6` (independent bipolar vectors of at most 32 pixels leave far
-    /// larger ones). A nearly orthogonal basis matters for Oja's rule,
-    /// which converges slowly along the small eigenvalues of the Gram
-    /// matrix of its training set.
+    /// Near-orthogonal basis of span `S_u` (at most `N - 1` members), by
+    /// pivoted Gram-Schmidt over `8 N` [sampled](Self::sample) members,
+    /// completed from all members if needed (Oja's rule converges slowly on
+    /// an ill-conditioned basis).
     pub fn basis(&self) -> Vec<Pattern> {
         let n = self.neurons();
         let target = n - 1;
@@ -327,8 +309,8 @@ mod tests {
         }
     }
 
-    /// `u = (1, ..., 1, 2)` with 25 weights: the 24 ones must sum to `-2
-    /// xi_25`, so 11 or 13 of them are `+1`: `2 * C(24, 11) = 2 * 2496144`.
+    /// `u = (1, ..., 1, 2)` with 25 weights: the 24 ones sum to `-2 xi_25`,
+    /// so 11 or 13 of them are `+1`: `2 * C(24, 11) = 2 * 2496144`.
     #[test]
     fn counts_the_large_hyperplane_without_enumerating_it() {
         let mut weights = vec![1; 24];
@@ -357,8 +339,8 @@ mod tests {
         assert!(Hyperplane::new(vec![]).is_err());
     }
 
-    /// The basis has `N - 1` independent members of `S_u`, and a sample is
-    /// spread over the members in index order.
+    /// The basis has `N - 1` members of `S_u`; a sample of `k` takes every
+    /// `size / k`-th member.
     #[test]
     fn finds_a_basis_and_a_sample_of_members() {
         let plane = Hyperplane::new(vec![1, 1, 1, 1, 1, 1, 1, 1, 2]).unwrap();

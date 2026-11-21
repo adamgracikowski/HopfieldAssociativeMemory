@@ -1,4 +1,4 @@
-//! Statistics of a pattern set printed by `compute inspect`.
+//! Statistics of a pattern set.
 
 use std::fmt;
 
@@ -26,7 +26,7 @@ pub struct Summary {
     pub neurons: usize,
     /// Fraction of pixels equal to `1` in every pattern.
     pub fraction_on: Vec<f64>,
-    /// Overlap matrix $m^{\mu\nu}$ (see [`PatternSet::overlap_matrix`]).
+    /// Overlap matrix `m^{mu nu}` (see [`PatternSet::overlap_matrix`]).
     pub overlaps: Array2<f64>,
 }
 
@@ -45,7 +45,7 @@ impl Summary {
         }
     }
 
-    /// Load ratio $p / N$.
+    /// Load ratio `p/N`.
     pub fn load(&self) -> f64 {
         self.patterns as f64 / self.neurons as f64
     }
@@ -69,9 +69,8 @@ impl Summary {
             .collect()
     }
 
-    /// Largest $|m^{\mu\nu}|$ over pairs of different patterns, with the first
-    /// pair `(mu, nu)`, `mu < nu`, that reaches it. `None` for a single
-    /// pattern.
+    /// Largest `|m^{mu nu}|` over pairs of different patterns, with the first
+    /// pair `(mu, nu)`, `mu < nu`, that reaches it. `None` for one pattern.
     pub fn max_abs_overlap(&self) -> Option<(f64, usize, usize)> {
         let p = self.patterns;
         (0..p)
@@ -81,8 +80,7 @@ impl Summary {
     }
 }
 
-/// Formats the load `p/N` with three decimals, or in scientific notation with
-/// three significant digits when it is below 0.001 (large bitmaps).
+/// Three decimals, or three significant digits below 0.001.
 fn format_load(load: f64) -> String {
     if load >= 1e-3 {
         format!("{load:.3}")
@@ -152,9 +150,8 @@ mod tests {
         assert_eq!(summary.max_abs_overlap(), Some((0.5, 0, 2)));
     }
 
-    /// Overlaps of the three patterns: `m^{01} = 0`, `m^{02} = 0.5`,
-    /// `m^{12} = -0.5`, so the sums are `0 + 0.5`, `0 + 0.5` and
-    /// `0.5 + 0.5`.
+    /// `m^{01} = 0`, `m^{02} = 0.5`, `m^{12} = -0.5`: sums `0 + 0.5`,
+    /// `0 + 0.5`, `0.5 + 0.5`.
     #[test]
     fn sums_absolute_overlaps_with_the_other_patterns() {
         assert_eq!(summary().overlap_sums(), [0.5, 0.5, 1.0]);

@@ -1,6 +1,4 @@
-# Train run used by the tests: Hebbian weights of small-7x7 (dense, 49 x 49).
-# Regenerate from src/compute:
-#   cargo run --release -- train --config ../analysis/tests/fixtures/train.toml --out ../analysis/tests/fixtures/train --force
+# Fixture of the analysis tests; see README.md.
 
 dataset = "small-7x7"
 backend = "dense"

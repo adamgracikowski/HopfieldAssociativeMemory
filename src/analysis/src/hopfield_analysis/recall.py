@@ -36,12 +36,6 @@ class Recall:
     def load(cls, run: Path) -> "Recall":
         """Reads the directory written by ``compute recall``.
 
-        Args:
-            run: Output directory of the run.
-
-        Returns:
-            The run.
-
         Raises:
             ValueError: If the files disagree on the number of frames.
         """

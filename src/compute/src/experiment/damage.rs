@@ -22,8 +22,7 @@ pub enum Damage {
 }
 
 impl Damage {
-    /// Number of damaged pixels: flipped, or covered (only those equal to
-    /// `1` change).
+    /// Number of flipped or covered pixels.
     pub fn pixels(&self) -> usize {
         match *self {
             Self::Flip { pixels } | Self::Occlusion { pixels, .. } => pixels,

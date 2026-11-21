@@ -12,13 +12,7 @@ COEFFICIENTS_FILE = "coefficients.npy"
 
 
 def load_weights(train: Path) -> np.ndarray:
-    """Reads the dense weight matrix of a ``compute train`` run.
-
-    Args:
-        train: Output directory of the run.
-
-    Returns:
-        The ``N x N`` weight matrix.
+    """Reads the dense ``N x N`` weight matrix from the directory of a ``compute train`` run.
 
     Raises:
         ValueError: If the run stored factored weights (``coefficients.npy``),
@@ -36,14 +30,9 @@ def load_weights(train: Path) -> np.ndarray:
 
 
 def plot_weights(weights: np.ndarray) -> Figure:
-    """Shows a weight matrix as a heat map with a symmetric color scale.
+    """Shows an ``N x N`` weight matrix as a heat map with a symmetric color scale.
 
-    Args:
-        weights: ``N x N`` matrix.
-
-    Returns:
-        The figure in the report style: negative weights blue, positive red,
-        zero white, with a color bar.
+    Negative weights are blue, positive red, zero white, with a color bar.
     """
     figure = style.new_figure(width=0.6 * style.TEXT_WIDTH, height=0.5 * style.TEXT_WIDTH)
     ax = figure.subplots()

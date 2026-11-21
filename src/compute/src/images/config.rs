@@ -1,20 +1,6 @@
-//! Configuration of a photo conversion: bitmap size, list of source images
-//! and output datasets.
-//!
-//! ```toml
-//! width = 300
-//! height = 200
-//! sources = "sources.tsv"
-//! images = "raw"
-//!
-//! [[outputs]]
-//! method = "median"
-//! file = "../../datasets/cats-300x200-median.npy"
-//! ```
-//!
-//! Paths are relative to the directory of the configuration file. The source
-//! list format is described in [`Source::read_list`]; its row order is the
-//! pattern order in the output datasets.
+//! Configuration of a photo conversion: `width`, `height`, `sources` (source
+//! list, see [`Source::read_list`]; its row order is the pattern order),
+//! `images` (image directory) and `[[outputs]]` ([`Output`]).
 
 pub mod conversion;
 pub mod output;
@@ -67,11 +53,8 @@ impl ConversionConfig {
         Self::parse(&text, path)
     }
 
-    /// Parses and validates configuration `text`: the bitmap size must be
-    /// valid for [`ImageConverter`], there must be at least one output, and
-    /// no two outputs may share a file or a file stem (which names their
-    /// preview directory). Relative paths are resolved against the parent
-    /// directory of `path`.
+    /// Parses and validates `text`: a valid bitmap size and at least one
+    /// output, with distinct file stems (they name the preview directories).
     pub fn parse(text: &str, path: &Path) -> Result<Self> {
         let raw: RawConfig = toml::from_str(text).map_err(|source| Error::Config {
             path: path.to_owned(),
@@ -144,10 +127,8 @@ impl ConversionConfig {
         Source::read_list(&self.sources)
     }
 
-    /// Converts every source image once to a grayscale bitmap and binarizes
-    /// it with the method of each output. Each image must exist and match its
-    /// listed SHA-1 checksum. Patterns follow the order of the source list.
-    /// Nothing is written.
+    /// Converts every source image (checked against its SHA-1) once and
+    /// binarizes it with each output's method. Nothing is written.
     pub fn convert(&self) -> Result<Vec<Conversion>> {
         let sources = self.read_sources()?;
         let grays = sources

@@ -6,13 +6,6 @@ use crate::dynamics::{Dynamics, Mode, UpdateOrder, ZeroField};
 
 /// The `[dynamics]` table of an experiment: the update modes to compare and
 /// the settings shared by all of them, with the defaults of [`Dynamics`].
-///
-/// ```toml
-/// [dynamics]
-/// modes = ["synchronous", "asynchronous"]
-/// zero_field = "keep"
-/// max_steps = 1000
-/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct ExperimentDynamics {
@@ -28,7 +21,6 @@ pub struct ExperimentDynamics {
 }
 
 impl Default for ExperimentDynamics {
-    /// The default mode and settings of [`Dynamics`].
     fn default() -> Self {
         let dynamics = Dynamics::default();
         Self {
@@ -41,8 +33,7 @@ impl Default for ExperimentDynamics {
 }
 
 impl ExperimentDynamics {
-    /// Settings of a single run in `mode`. Trials record no frames, so
-    /// `record_every` keeps its default.
+    /// Settings of a single run in `mode`.
     pub fn for_mode(&self, mode: Mode) -> Dynamics {
         Dynamics {
             mode,

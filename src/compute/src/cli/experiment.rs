@@ -7,30 +7,25 @@ use clap::Args;
 use compute::experiment::{ExperimentConfig, ExperimentRun};
 use compute::run::OutputDir;
 
-/// Directory of the results next to the configuration file.
 const RESULTS_DIR: &str = "results";
 
 #[derive(Debug, Args)]
 pub struct ExperimentArgs {
-    /// Experiment configuration (TOML) with the seed, the grid axes and the
-    /// number of trials.
+    /// Experiment configuration (TOML).
     #[arg(long)]
     config: PathBuf,
 
-    /// Output directory, `results` next to the configuration by default; it
-    /// must be empty or not exist yet.
+    /// Output directory (default: `results` next to the configuration).
     #[arg(long, value_name = "DIR")]
     out: Option<PathBuf>,
 
-    /// Write into a non-empty output directory, replacing files of the same
-    /// name.
+    /// Overwrite files in a non-empty output directory.
     #[arg(long)]
     force: bool,
 }
 
 impl ExperimentArgs {
-    /// Runs every trial of the configured grid, writes the tables and
-    /// prints the progress of training to stderr and a summary to stdout.
+    /// Runs the experiment, printing training progress to stderr.
     pub fn run(self) -> compute::Result<()> {
         let start = Instant::now();
         let config = ExperimentConfig::from_file(&self.config)?;

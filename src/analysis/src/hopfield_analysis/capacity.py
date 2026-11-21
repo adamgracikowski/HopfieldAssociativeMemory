@@ -3,8 +3,7 @@
 A capacity directory holds ``capacity.parquet`` (one row per pattern set and
 learning rule), ``summary.json`` (aggregates of every source, number of
 patterns and rule, with the prediction for random Hebbian sets) and
-``metadata.json``. All numbers are computed by the compute layer; this
-module only reads and plots them.
+``metadata.json``.
 """
 
 import json
@@ -27,16 +26,11 @@ THEORY_COLUMNS = ("theory_bit_error", "theory_pattern_stable")
 
 
 def load_capacity(results: Path) -> pl.DataFrame:
-    """Reads the table of a capacity run.
-
-    Args:
-        results: Directory written by ``compute capacity``.
+    """Reads ``capacity.parquet`` from the results directory of a capacity run.
 
     Returns:
-        One row per pattern set and learning rule with the columns described
-        in ``src/compute/README.md`` (``source``, ``learning``, ``neurons``,
-        ``patterns``, ``trial``, ``seed``, ``stable``, ``unstable_neurons``,
-        ``epochs``, ``converged``).
+        One row per pattern set and learning rule with the columns documented
+        on ``CapacityTable`` in ``src/compute/src/capacity/table.rs``.
     """
     return pl.read_parquet(results / CAPACITY_FILE)
 
@@ -48,9 +42,6 @@ def load_capacity_summary(results: Path) -> pl.DataFrame:
     ``all_stable_lower`` or ``theory_pattern_stable``; the theory columns
     are null where the run has no prediction and present even if no row has
     one.
-
-    Args:
-        results: Directory written by ``compute capacity``.
 
     Returns:
         One row per (source, ``p``, rule), in the order of the run.
@@ -78,15 +69,10 @@ def plot_capacity(summary: pl.DataFrame) -> Figure:
     fraction of stable patterns of a set, below the mean fraction of
     unstable neurons. One line per source and learning rule (the same color
     in every panel), the prediction for random Hebbian sets as a black dashed
-    line, and vertical lines at ``p / N = 0.138`` and ``1 / (2 ln N)``; the
-    legend lists the series of every panel first, then the theory and the
-    lines.
+    line, and vertical lines at ``p / N = 0.138`` and ``1 / (2 ln N)``.
 
     Args:
         summary: Aggregates from :func:`load_capacity_summary`.
-
-    Returns:
-        The figure in the report style with Polish labels.
     """
     sizes = sorted(summary["neurons"].unique().to_list())
     series = summary.select("source", "learning").unique(maintain_order=True).rows()

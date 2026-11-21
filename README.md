@@ -115,7 +115,7 @@ scripts/reproduce.sh                       # Linux, macOS, Git Bash
 pwsh -File scripts/reproduce.ps1           # Windows PowerShell
 ```
 
-Options: experiment names to run only those (`scripts/reproduce.sh noise cats-noise`), `--figures-only` (`-FiguresOnly`) to redraw the figures from the committed results, and `--benchmark` (`-Benchmark`) to remeasure time and memory on your machine, which is skipped by default. The computations are deterministic, so afterwards `git status` shows only the `metadata.json` files (time and build commit) and the creation dates inside the figure PDFs.
+Options: experiment names to run only those (`scripts/reproduce.sh noise cats-noise`), `--figures-only` (`-FiguresOnly`) to redraw the figures (the recall figures need the `runs/` of an earlier full run), and `--benchmark` (`-Benchmark`) to remeasure time and memory on your machine, which is skipped by default. The computations are deterministic, so afterwards `git status` shows only the `metadata.json` files (time and build commit) and the creation dates inside the figure PDFs.
 
 | Experiment | What it studies | Report chapter |
 |---|---|---|

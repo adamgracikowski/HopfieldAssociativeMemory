@@ -1,11 +1,7 @@
-# Reaction to random inputs against the number of stored patterns at a fixed
-# N: prefixes of large-25x25.plus (N = 625) and letters-14x20 (N = 280),
-# 10000 random initial states, the same ones in every prefix (seeds use the
-# registry name), with the distinct final states in attractors.parquet.
+# Random inputs against p at a fixed N (dataset prefixes); the same initial
+# states in every prefix.
 #
-# Run from src/compute:
 #   cargo run --release -- experiment --config ../../data/experiments/random-load/config.toml
-# Report figure, from src/analysis:
 #   uv run hopfield-analysis distinct ../../data/experiments/random-load/results --out ../../data/experiments/random-load/figures/distinct
 
 seed = 20261112

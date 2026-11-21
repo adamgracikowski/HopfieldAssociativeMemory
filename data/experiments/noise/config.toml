@@ -1,10 +1,6 @@
-# Recovery of stored patterns from inputs with randomly flipped pixels:
-# every CSV dataset, both learning rules and update modes, noise from 0 to
-# 0.5 in steps of 0.05.
+# Recovery from inputs with randomly flipped pixels.
 #
-# Run from src/compute:
 #   cargo run --release -- experiment --config ../../data/experiments/noise/config.toml
-# Report figure, from src/analysis:
 #   uv run hopfield-analysis recovery ../../data/experiments/noise/results --out ../../data/experiments/noise/figures/recovery
 
 seed = 20261110

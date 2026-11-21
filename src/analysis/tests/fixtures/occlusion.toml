@@ -1,8 +1,4 @@
-# Experiment used by the tests of the recovery plots: stored patterns of
-# small-7x7 and of its first 3 patterns with 0 or round(0.3 * 7) = 2 of the
-# 7 rows covered, both learning rules and update modes.
-# Regenerate from src/compute:
-#   cargo run --release -- experiment --config ../analysis/tests/fixtures/occlusion.toml --out ../analysis/tests/fixtures/occlusion --force
+# Fixture of the analysis tests; see README.md.
 
 seed = 1
 datasets = [{ name = "small-7x7", patterns = 3 }, "small-7x7"]

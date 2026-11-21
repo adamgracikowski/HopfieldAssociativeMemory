@@ -1,13 +1,8 @@
-# Recall from a random input: run 2 of letters-abc-8x12 in random (seed
-# from attractors.parquet), trained with the Hebbian rule, asynchronous
-# updates with a frame every 8 of the 96 updates of a sweep. The same seed
-# gives the same input for both rules. The state ends in the mixture of the
-# three letters with positive signs, a spurious state with a lower energy
-# than the letters.
+# Run 2 of letters-abc-8x12 in the random experiment (seed from
+# attractors.parquet), Hebbian rule: ends in the mixture sign(a + b + c), a
+# spurious state with a lower energy than the letters.
 #
-# Run from src/compute:
 #   cargo run --release -- recall --config ../../data/experiments/random/recall-random-hebb.toml --out ../../data/experiments/random/runs/recall-random-hebb
-# Report figure, from src/analysis:
 #   uv run hopfield-analysis frames ../../data/experiments/random/runs/recall-random-hebb --max 5 --width 0.75 --out ../../data/experiments/random/figures/recall-random-hebb
 
 dataset = "letters-abc-8x12"

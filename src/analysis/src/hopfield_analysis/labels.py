@@ -96,23 +96,12 @@ def final_class(name: str) -> str:
 
 
 def number(value: float, digits: int = 2) -> str:
-    """Formats ``value`` with ``digits`` decimals, a decimal comma and a minus sign.
-
-    Args:
-        value: The number.
-        digits: Number of decimals.
-
-    Returns:
-        The text, e.g. ``-98,98`` for ``-98.984``.
-    """
+    """Formats ``value`` with ``digits`` decimals, a decimal comma and a minus sign (U+2212)."""
     return f"{value:.{digits}f}".replace(".", ",").replace("-", "−")
 
 
 def decimal(value: float) -> str:
-    """Formats ``value`` with the digits it needs, a decimal comma and a minus sign.
-
-    Args:
-        value: The number, e.g. a noise level.
+    """Formats ``value`` like :func:`number`, with the digits it needs.
 
     Returns:
         The shortest text that keeps 6 significant digits, e.g. ``0,025`` for

@@ -48,11 +48,8 @@ impl TrainRun {
         })
     }
 
-    /// Writes `metadata.json` and the weights: [`WEIGHTS_FILE`] for dense
-    /// weights, [`COEFFICIENTS_FILE`] (the matrix `A` of `W = A Xi - diag(d)`,
-    /// with `Xi` the dataset) for factored ones. The other weight file is
-    /// removed, so a run with another backend in the same directory leaves
-    /// no stale weights.
+    /// Writes metadata and `weights.npy` (dense) or `coefficients.npy`
+    /// (factored), removing the other.
     pub fn write(&self, config: &RunConfig, out: &OutputDir) -> Result<()> {
         let metadata = Metadata::new(
             "train",

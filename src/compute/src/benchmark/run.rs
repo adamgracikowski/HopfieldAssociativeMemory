@@ -52,11 +52,10 @@ pub struct Measurement {
     pub weights_bytes: usize,
     /// Largest growth of the heap during training.
     pub train_peak_bytes: Option<usize>,
-    /// Time of the local fields of one random state, the main cost of a
-    /// synchronous step, measured after one untimed call so that it does
-    /// not include waking up the threads.
+    /// Time of the local fields of one random state (after an untimed
+    /// warm-up call).
     pub fields_seconds: f64,
-    /// Time of one asynchronous sweep from that state (see [`sweep`]).
+    /// Time of one asynchronous sweep from that state.
     pub sweep_seconds: f64,
     /// Time of a synchronous recall run from the damaged input.
     pub sync_seconds: f64,
@@ -90,22 +89,11 @@ pub struct BenchmarkRun {
 }
 
 impl BenchmarkRun {
-    /// Measures every set with every backend that
-    /// [measures](BenchmarkConfig::measures) it and every rule,
-    /// `repeats` times, one measurement after another, and passes each one
-    /// to `on_measurement`. Every measurement trains the network, computes
-    /// the local fields of a random state, makes one asynchronous sweep from
-    /// it, and runs the synchronous and the asynchronous dynamics from the
-    /// first pattern with `round(noise N)` pixels flipped. The random state,
-    /// the sweep order, the input and the update orders come from the seed
-    /// derived from `seed`, the source, `N` and the repeat, so every backend
-    /// and rule gets the same ones. Random sets are drawn as in a capacity
-    /// run ([`Task::random`] with trial 0).
-    ///
-    /// # Errors
-    ///
-    /// Besides loading errors, an invalid configuration if no set is
-    /// measured with any backend (see [`BenchmarkConfig::check_measured`]).
+    /// Measures every set x backend x rule `repeats` times, passing each
+    /// measurement to `on_measurement`: training, local fields of a random
+    /// state, one asynchronous sweep, and synchronous and asynchronous recall
+    /// from pattern 0 with `round(noise N)` flips. Inputs depend only on
+    /// seed, source, `N` and repeat.
     pub fn execute(
         config: &BenchmarkConfig,
         probe: &impl HeapProbe,
@@ -182,9 +170,8 @@ impl BenchmarkRun {
         })
     }
 
-    /// Writes `metadata.json` and [`BENCHMARK_FILE`] (the
-    /// [`BenchmarkTable`]). Unlike the other runs, the table depends on the
-    /// machine and changes from run to run.
+    /// Writes `metadata.json` and [`BENCHMARK_FILE`]; unlike other results,
+    /// the table is machine-dependent.
     pub fn write(&self, config: &BenchmarkConfig, out: &OutputDir) -> Result<()> {
         out.write_json(METADATA_FILE, &BenchmarkMetadata::new(config, self))?;
         out.write_parquet(BENCHMARK_FILE, BenchmarkTable::new(self).batch())
@@ -257,12 +244,7 @@ fn measure(
     })
 }
 
-/// Time in seconds of one asynchronous sweep from `state`: `N` updates in a
-/// random order drawn from `rng`, each reading the field of a
-/// [`FieldTracker`] and flipping the neuron if `sgn` of its field differs
-/// (`sgn(0)` keeps the state). The tracker and the order are built before
-/// the clock starts, so unlike a recall run the time excludes the energies
-/// and the setup.
+/// Seconds of one asynchronous sweep from `state`, excluding the setup.
 fn sweep(weights: &Weights, state: PatternView<'_>, rng: &mut impl Rng) -> f64 {
     let n = state.len();
     let mut tracker = FieldTracker::new(weights, state);
@@ -315,12 +297,10 @@ mod tests {
         BenchmarkConfig::parse(CONFIG, Path::new("../../data/experiments/x/config.toml")).unwrap()
     }
 
-    /// `small-7x7` (`N = 49`) and the random set of `N = 64` are measured
-    /// with both backends, the one of `N = 128 > dense_limit` only with
-    /// factored weights: `(2 + 2 + 1) * 2 rules * 2 repeats = 20`
-    /// measurements. Dense weights of `N = 64` take `8 * 64^2 = 32768`
-    /// bytes, factored ones of `p = 3` patterns `3 * 64 + 8 * 64 * 3 + 8 *
-    /// 64 = 192 + 1536 + 512 = 2240` bytes.
+    /// Sets of `N = 49` and 64 with both backends, `N = 128 > dense_limit`
+    /// only factored: `(2 + 2 + 1) * 2 rules * 2 repeats = 20` measurements.
+    /// Weights of `N = 64`: dense `8 * 64^2 = 32768` bytes, factored
+    /// (`p = 3`) `3 * 64 + 8 * 64 * 3 + 8 * 64 = 2240` bytes.
     #[test]
     fn measures_every_set_backend_rule_and_repeat() {
         let run = BenchmarkRun::execute(&config(), &NoProbe, |_, _| {}).unwrap();
@@ -376,9 +356,6 @@ mod tests {
         assert!(oja.epochs > 0);
     }
 
-    /// Both backends of the same set, rule and repeat start from the same
-    /// input and reach the same final state, so they take the same number
-    /// of steps.
     #[test]
     fn backends_run_the_same_dynamics() {
         let run = BenchmarkRun::execute(&config(), &NoProbe, |_, _| {}).unwrap();

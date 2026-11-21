@@ -7,9 +7,7 @@ use super::ZeroField;
 use crate::PatternSet;
 use crate::weights::{WeightMatrix, Weights};
 
-/// Which stored patterns are fixed points of the network: pattern `mu` is
-/// stable when no neuron would change, `sgn(h_i) = xi_i` for the local
-/// fields `h = W xi`.
+/// Which stored patterns are fixed points of the network (`sgn(W xi) = xi`).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Stability {
     /// Number of stable patterns.
@@ -19,19 +17,13 @@ pub struct Stability {
 }
 
 impl Stability {
-    /// Checks every pattern of `set` against `weights`, with `zero_field`
-    /// deciding neurons with a zero local field. Costs one evaluation of
-    /// all local fields per pattern.
+    /// Checks every pattern of `set`, with `zero_field` deciding zero fields.
     pub fn of(weights: &Weights, set: &PatternSet, zero_field: ZeroField) -> Self {
         Self::from_aligned_fields(Self::aligned_fields(weights, set).view(), set, zero_field)
     }
 
-    /// The aligned local fields `xi_i^mu h_i` of every pattern `mu` of `set`
-    /// as a `p x N` matrix, where `h = W xi^mu`. Neuron `i` of pattern `mu`
-    /// keeps its value when the aligned field is positive and changes when
-    /// it is negative; a zero field is decided by [`ZeroField`]. For the
-    /// Hebbian rule the aligned field is the signal `1 - p/N` plus the
-    /// crosstalk of the other patterns.
+    /// The aligned local fields `xi_i^mu h_i`, `h = W xi^mu`, as a `p x N`
+    /// matrix; a negative one marks a neuron that would change.
     pub fn aligned_fields(weights: &Weights, set: &PatternSet) -> Array2<f64> {
         let mut aligned = Array2::zeros((set.len(), set.neurons()));
         for (pattern, mut row) in set.iter().zip(aligned.rows_mut()) {
@@ -41,15 +33,11 @@ impl Stability {
         aligned
     }
 
-    /// Stability from the [aligned fields](Self::aligned_fields) of `set`:
-    /// neuron `i` of pattern `mu` would change when
-    /// `zero_field.activate(h_i, xi_i) != xi_i` for the local field
-    /// `h_i = xi_i * aligned[mu, i]`.
+    /// Stability from the [aligned fields](Self::aligned_fields) of `set`.
     ///
     /// # Panics
     ///
-    /// Panics if `aligned` is not `p x N` for the `p` patterns of `N`
-    /// neurons of `set`.
+    /// Panics if `aligned` is not `p x N`.
     pub fn from_aligned_fields(
         aligned: ArrayView2<'_, f64>,
         set: &PatternSet,
@@ -80,8 +68,7 @@ mod tests {
     use crate::weights::Backend;
     use ndarray::array;
 
-    /// Orthogonal patterns of `N = 4` neurons: with Hebbian weights every
-    /// pattern has `h = xi (N - 2) / N = xi / 2` and is stable.
+    /// Orthogonal patterns with Hebbian weights have `h = xi / 2`.
     #[test]
     fn orthogonal_patterns_are_stable() {
         let set = PatternSet::new(4, 1, array![[1, 1, 1, 1], [1, -1, 1, -1]]).unwrap();
@@ -93,9 +80,8 @@ mod tests {
         }
     }
 
-    /// The same orthogonal patterns: `h_i = xi_i / 2`, so every aligned
-    /// field `xi_i h_i = xi_i^2 / 2 = 1/2`, the signal `1 - p/N = 1 - 2/4`
-    /// with no crosstalk (`m = 0`).
+    /// Orthogonal patterns: every aligned field is the signal
+    /// `1 - p/N = 1/2`, with no crosstalk.
     #[test]
     fn aligned_fields_of_orthogonal_patterns_are_the_signal() {
         let set = PatternSet::new(4, 1, array![[1, 1, 1, 1], [1, -1, 1, -1]]).unwrap();
@@ -109,11 +95,10 @@ mod tests {
         }
     }
 
-    /// Patterns `(1, 1, 1)` and `(1, 1, -1)` of `N = 3`: Hebbian weights
-    /// `w_01 = 2/3`, `w_02 = w_12 = 0`. Pattern 0 has `h = (2/3, 2/3, 0)`,
-    /// aligned `(2/3, 2/3, 0)`; pattern 1 the same fields, aligned
-    /// `(2/3, 2/3, 0)` too (`-1 * 0`). Neuron 2 has a zero field: stable with
-    /// `keep`; with `plus-one` the `-1` of pattern 1 would change.
+    /// Patterns `(1, 1, 1)` and `(1, 1, -1)`: `w_01 = 2/3`, `w_02 = w_12 = 0`,
+    /// so both have aligned fields `(2/3, 2/3, 0)`. Neuron 2 has a zero
+    /// field: stable with `keep`, while `plus-one` changes the `-1` of
+    /// pattern 1.
     #[test]
     fn stability_follows_the_aligned_fields() {
         let set = PatternSet::new(3, 1, array![[1, 1, 1], [1, 1, -1]]).unwrap();
@@ -132,8 +117,6 @@ mod tests {
         );
     }
 
-    /// On a correlated set the count of negative aligned fields is the
-    /// number of unstable neurons, for the Hebbian and Oja weights.
     #[test]
     fn negative_aligned_fields_are_unstable_neurons() {
         let set = PatternSet::new(

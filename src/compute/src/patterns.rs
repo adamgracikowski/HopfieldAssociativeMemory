@@ -128,8 +128,8 @@ impl PatternSet {
             .map(BipolarVector::new_unchecked)
     }
 
-    /// Symmetric `p x p` matrix of overlaps $m^{\mu\nu}$ between all
-    /// patterns (see [`BipolarVector::overlap`]), with ones on the diagonal.
+    /// Symmetric `p x p` matrix of overlaps `m^{mu nu}` (see
+    /// [`BipolarVector::overlap`]), with ones on the diagonal.
     pub fn overlap_matrix(&self) -> Array2<f64> {
         let p = self.len();
         let mut matrix = Array2::eye(p);
@@ -168,8 +168,7 @@ impl PatternSet {
     }
 }
 
-/// Number of pixels `width * height` of a bitmap, or an error if the product
-/// does not fit in `usize`.
+/// Number of pixels `width * height`, or an error on overflow.
 pub(crate) fn bitmap_size(width: usize, height: usize) -> Result<usize> {
     width
         .checked_mul(height)
@@ -208,12 +207,11 @@ mod tests {
         }
     }
 
-    /// Rows of a 5x5 set: `a` is all ones, `b` has -1 at pixels 0-9, `c` has
-    /// 1 at pixels 0, 5, 10, 15, 20.
-    /// `a . b = 15 - 10 = 5`, overlap 0.2.
-    /// `a . c = 5 - 20 = -15`, overlap -0.6.
-    /// `b . c`: pixels 0-9 give `8 - 2 = 6`, pixels 10-24 give `3 - 12 = -9`,
-    /// together -3, overlap -0.12.
+    /// 5x5 set: `a` all ones, `b` -1 at pixels 0-9, `c` 1 in the first
+    /// column (pixels 0, 5, 10, 15, 20):
+    /// - `a . b = 15 - 10 = 5`, overlap 0.2,
+    /// - `a . c = 5 - 20 = -15`, overlap -0.6,
+    /// - `b . c = (8 - 2) + (3 - 12) = -3` (pixels 0-9, 10-24), overlap -0.12.
     #[test]
     fn overlap_matrix_of_known_patterns() {
         let data = Array2::from_shape_fn((3, 25), |(mu, i)| match mu {

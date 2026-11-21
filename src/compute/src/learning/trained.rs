@@ -2,8 +2,7 @@
 
 use crate::weights::Weights;
 
-/// Weights produced by a learning rule with a summary of the learning, to be
-/// recorded next to the results.
+/// Weights produced by a learning rule with a summary of the learning.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Trained {
     /// Learned weights.

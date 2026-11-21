@@ -24,10 +24,6 @@ pub fn write_npy(set: &PatternSet, path: &Path) -> Result<()> {
 }
 
 /// Writes a pattern set in the `.npy` format to `writer`.
-///
-/// Rows of the `p x N` matrix are row-major bitmaps, so its elements in
-/// logical order are exactly the C-order elements of `(p, height, width)`
-/// and are written without reshaping.
 pub fn write_npy_to(set: &PatternSet, writer: impl Write) -> std::io::Result<()> {
     let shape = [set.len(), set.height(), set.width()].map(|n| n as u64);
     let mut npy = WriteOptions::new()

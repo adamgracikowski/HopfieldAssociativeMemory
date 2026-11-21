@@ -10,8 +10,7 @@ pub trait Recorder {
     fn record(&mut self, state: PatternView<'_>, energy: f64, changes: usize);
 }
 
-/// Recorder that keeps nothing, for runs where only the
-/// [`Outcome`](super::Outcome) matters.
+/// Recorder that keeps nothing.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct NoHistory;
 

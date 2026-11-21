@@ -2,17 +2,10 @@
 
 use ndarray::{Array1, Array2, Axis};
 
-/// One batch epoch of the single-neuron rule for weights `W = A Xi`.
-///
-/// With `x = xi / sqrt(N)` and `G = Xi Xi^T` (`gram`), the outputs are
-/// `y_mu = A G[:, mu] / sqrt(N)`. The averaged update
-/// `dW = (eta / p) sum_mu (y_mu x_mu^T - diag(y_mu * y_mu) W)` keeps the
-/// form `dA Xi` with
-///
-/// `dA = (eta / p) (A G / N - D A)`, `D_ii = sum_mu (A G)[i][mu]^2 / N`,
-///
-/// because `D` scales whole rows. Every epoch costs `O(N p^2)`. Returns
-/// `dA`; `rate` is `eta / p`.
+/// One batch epoch of the single-neuron rule for `W = A Xi`, with
+/// `G = Xi Xi^T` (`gram`) and `rate = eta / p`:
+/// `dA = rate (A G / N - D A)`, `D_ii = sum_mu (A G)[i][mu]^2 / N`;
+/// `O(N p^2)` per epoch.
 pub(super) fn step(coefficients: &Array2<f64>, gram: &Array2<f64>, rate: f64) -> Array2<f64> {
     let n = coefficients.nrows() as f64;
     let outputs = coefficients.dot(gram);

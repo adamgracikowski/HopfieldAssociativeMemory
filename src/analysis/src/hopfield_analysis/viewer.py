@@ -16,11 +16,7 @@ VIEWER_KEYS = (*KEYS, "home", "end")
 
 
 def free_keymaps() -> dict[str, list[str]]:
-    """Toolbar shortcuts without the keys of the viewer.
-
-    By default matplotlib binds the arrows to the previous and next view and
-    ``home`` to the original view, so stepping through frames would also
-    change the zoom.
+    """Toolbar shortcuts without the keys of the viewer, so stepping does not undo a zoom.
 
     Returns:
         The ``keymap.*`` parameters that use a viewer key, without it, for
@@ -41,9 +37,6 @@ class RunViewer:
     at the current frame, and a slider. The arrow keys move by one frame,
     ``home`` and ``end`` jump to the first and the last frame.
 
-    The viewer works on any figure: ``hopfield-analysis view`` opens it in a
-    window, the tests drive it on a figure without a GUI.
-
     Attributes:
         recall: The run.
         frame: Number of the current frame.
@@ -51,12 +44,7 @@ class RunViewer:
     """
 
     def __init__(self, figure: Figure, recall: Recall) -> None:
-        """Draws the first frame of ``recall`` into ``figure``.
-
-        Args:
-            figure: An empty figure.
-            recall: The run.
-        """
+        """Draws the first frame of ``recall`` into the empty ``figure``."""
         self.figure = figure
         self.recall = recall
         self.frame = 0
@@ -111,11 +99,7 @@ class RunViewer:
         )
 
     def set_frame(self, frame: int) -> None:
-        """Shows ``frame``, clamped to the frames of the run.
-
-        Args:
-            frame: Frame number.
-        """
+        """Shows ``frame``, clamped to the frames of the run."""
         self.frame = min(max(frame, 0), self.recall.count - 1)
         self._image.set_data(self.recall.frames[self.frame])
         self._bitmap_ax.set_title(self.title)

@@ -9,28 +9,16 @@ use crate::patterns::{BipolarVector, Pattern};
 
 /// Method that turns grayscale pixels into the values `1` (dark) and `-1`
 /// (light).
-///
-/// [`Display`](std::fmt::Display) and `&'static str` conversion give the name
-/// used in configuration files (`median`, `floyd-steinberg`).
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize, strum::Display, strum::IntoStaticStr,
 )]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum Binarization {
-    /// Threshold at the median brightness.
-    ///
-    /// The threshold `m` is the smallest brightness such that more than half
-    /// of the pixels have brightness at most `m`. Pixels darker than `m`
-    /// become `1`, the others `-1`. At most half of the pixels are `1`, and
-    /// exactly half when no other pixel has brightness `m`. A uniform image
-    /// becomes all `-1`.
+    /// Threshold at the median brightness: darker pixels become `1`.
     Median,
-    /// Floyd-Steinberg error diffusion to black and white
-    /// ([`image::imageops::dither`] with [`BiLevel`], which maps brightness
-    /// above 127 to white). Black pixels become `1`, white pixels `-1`.
-    /// Images narrower than 2 pixels, which the image library cannot dither,
-    /// are thresholded the same way without error diffusion.
+    /// Floyd-Steinberg dithering ([`BiLevel`]): black becomes `1`, white `-1`.
+    /// Images narrower than 2 pixels are thresholded without diffusion.
     FloydSteinberg,
 }
 
@@ -68,7 +56,7 @@ impl Binarization {
 }
 
 /// Smallest brightness `m` such that more than half of `pixels` are at most
-/// `m`, found from a 256-bin histogram.
+/// `m`.
 fn median_threshold(pixels: &[u8]) -> u8 {
     let mut histogram = [0usize; 256];
     for &luma in pixels {

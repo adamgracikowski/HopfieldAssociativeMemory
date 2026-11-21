@@ -10,22 +10,7 @@ use crate::learning::Oja;
 use crate::paths::{directory_of, resolve};
 use crate::{Error, Result};
 
-/// Settings of a search, read from a TOML file:
-///
-/// ```toml
-/// width = 5            # bitmap of N = width * height neurons, N <= 32
-/// height = 5
-/// max_weight = 3       # weights of u from 1 to max_weight
-/// verify = 5           # largest sets checked for stability
-/// samples = 24         # members of the best set written to `sample`
-/// basis = "../../datasets/stable-5x5-basis.npy"    # optional outputs
-/// sample = "../../datasets/stable-5x5-sample.npy"
-///
-/// [oja]                # optional, parameters of Oja's rule
-/// eta = 0.5
-/// ```
-///
-/// Output files are relative to the directory of the configuration file.
+/// Settings of a search, read from a TOML file.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct StableConfig {
@@ -37,7 +22,7 @@ pub struct StableConfig {
     pub max_weight: u32,
     /// Number of the largest sets checked for strict stability.
     pub verify: usize,
-    /// Number of members of the best set written to `sample`.
+    /// Number of members of the best set written to `sample` (24 by default).
     #[serde(default = "default_samples")]
     pub samples: usize,
     /// Oja's rule trained on a basis of every checked set.
@@ -72,11 +57,9 @@ impl StableConfig {
         Self::parse(&text, path)
     }
 
-    /// Parses and validates configuration `text` of the file `path`: the
-    /// bitmap has 2 to 32 pixels, `max_weight`, `verify` and `samples` are at
-    /// least 1, there are at most [`MAX_CANDIDATES`] candidate vectors, and
-    /// the two outputs, if given, are different files after resolving them
-    /// (`.` components ignored).
+    /// Parses and validates configuration `text` of the file `path`: 2 to 32
+    /// pixels, `max_weight`, `verify` and `samples` at least 1, at most
+    /// [`MAX_CANDIDATES`] candidates, and distinct `basis` and `sample` files.
     pub fn parse(text: &str, path: &Path) -> Result<Self> {
         let mut config: Self = toml::from_str(text).map_err(|source| Error::Config {
             path: path.to_owned(),
@@ -103,7 +86,7 @@ impl StableConfig {
         let candidates = Hyperplane::candidate_count(neurons, config.max_weight);
         if candidates > MAX_CANDIDATES {
             return Err(config.invalid(format!(
-                "`max_weight` = {} gives {candidates} candidates for N = {neurons}; at most                  {MAX_CANDIDATES} are searched",
+                "`max_weight` = {} gives {candidates} candidates for N = {neurons}; at most {MAX_CANDIDATES} are searched",
                 config.max_weight
             )));
         }

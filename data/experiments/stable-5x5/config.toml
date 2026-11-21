@@ -1,12 +1,8 @@
-# Largest sets of 5x5 bitmaps whose every pattern is a strict fixed point
-# (every aligned field xi_i h_i > 1e-10) of the network trained with each
-# rule: the bipolar points S_u of the hyperplanes u . xi = 0 for every
-# non-decreasing u with weights 1 to 3, the 5 largest checked with the
-# Hebbian rule on the whole set and Oja's subspace rule on a basis of it.
+# Largest sets of 5x5 strict fixed points (xi_i h_i > 1e-10) for both rules:
+# the points S_u of u . xi = 0 over non-decreasing u, the `verify` largest
+# checked with Hebb on the whole set and Oja on a basis.
 #
-# Run from src/compute:
 #   cargo run --release -- search-stable --config ../../data/experiments/stable-5x5/config.toml
-# Report figure, from src/analysis:
 #   uv run hopfield-analysis patterns stable-5x5-sample --columns 8 --out ../../data/experiments/stable-5x5/figures/sample
 
 width = 5

@@ -3,8 +3,7 @@
 An experiment run with ``attractors = true`` writes ``attractors.parquet``:
 one row per grid cell and distinct final state, with how many runs ended in
 it, its class, energy, overlaps, the closest mixture of stored patterns and
-the state itself. All numbers are computed by the compute layer; this module
-only reads and plots them.
+the state itself.
 """
 
 from pathlib import Path
@@ -31,16 +30,11 @@ ENERGY_GROUPS = {
 
 
 def load_attractors(results: Path) -> pl.DataFrame:
-    """Reads the table of distinct final states of an experiment.
-
-    Args:
-        results: Directory written by ``compute experiment``.
+    """Reads ``attractors.parquet`` from the results directory of an experiment.
 
     Returns:
-        One row per cell and distinct final state with the columns described
-        in ``src/compute/README.md`` (``dataset``, ``learning``, ``mode``,
-        ``rank``, ``count``, ``fraction``, ``class``, ``nearest``,
-        ``mixture``, ``state`` and others).
+        One row per cell and distinct final state with the columns documented
+        on ``AttractorTable`` in ``src/compute/src/experiment/attractor_table.rs``.
 
     Raises:
         ValueError: If the experiment was run without ``attractors = true``.
@@ -54,10 +48,7 @@ def load_attractors(results: Path) -> pl.DataFrame:
 
 
 def bitmap_shapes(metadata: dict[str, Any]) -> dict[str, tuple[int, int]]:
-    """The bitmap shape of every dataset of an experiment.
-
-    Args:
-        metadata: Metadata from :func:`hopfield_analysis.experiments.load_metadata`.
+    """The bitmap shape of every dataset in the metadata of an experiment.
 
     Returns:
         ``(height, width)`` by the dataset label in the results (``name:p``
@@ -96,10 +87,7 @@ def _check_mode(frame: pl.DataFrame, mode: str) -> pl.DataFrame:
 
 
 def describe(row: dict[str, Any]) -> str:
-    """Short Polish description of a final state for a panel title.
-
-    Args:
-        row: A row of :func:`load_attractors` as a dictionary.
+    """Short Polish description of a final state (a row of :func:`load_attractors`).
 
     Returns:
         ``wzorzec 2`` or ``negacja 2`` for a stored pattern or its negation,
@@ -123,11 +111,7 @@ def plot_outcomes(summary: pl.DataFrame) -> Figure:
     dataset, rule and mode.
 
     Args:
-        summary: Cell aggregates from
-            :func:`hopfield_analysis.experiments.load_summary`.
-
-    Returns:
-        The figure in the report style with Polish labels.
+        summary: Cell aggregates from :func:`hopfield_analysis.experiments.load_summary`.
 
     Raises:
         ValueError: If a dataset, rule and mode have more than one cell (an
@@ -177,10 +161,7 @@ def plot_outcomes(summary: pl.DataFrame) -> Figure:
 
 
 def share(fraction: float) -> str:
-    """Formats the fraction of runs that ended in a state, with three decimals.
-
-    Args:
-        fraction: Fraction of runs, positive.
+    """Formats a positive fraction of runs with three decimals.
 
     Returns:
         The text, e.g. ``0,480``, or ``< 0,001`` for a fraction that would
@@ -206,9 +187,6 @@ def plot_attractors(
         shape: ``(height, width)`` of the bitmaps, e.g. from :func:`bitmap_shapes`.
         dataset: Dataset label in the results.
         top: Number of states in a row.
-
-    Returns:
-        The figure in the report style with Polish labels.
 
     Raises:
         ValueError: If the table has no states of the dataset or a state does
@@ -240,9 +218,6 @@ def plot_attractors(
 
 def accessibility(attractors: pl.DataFrame) -> pl.DataFrame:
     """The fraction of runs of every cell that ended in each stored pattern.
-
-    Args:
-        attractors: Table from :func:`load_attractors`.
 
     Returns:
         One row per cell and stored pattern ``mu`` (all ``p`` patterns, also
@@ -290,9 +265,6 @@ def plot_accessibility(
         datasets: Datasets to show, in this order; all by default.
         mode: Update mode of the drawn cells.
 
-    Returns:
-        The figure in the report style with Polish labels.
-
     Raises:
         ValueError: If a requested dataset has no results or no cell has the
             mode.
@@ -337,9 +309,6 @@ def plot_accessibility(
 def spurious_counts(attractors: pl.DataFrame) -> pl.DataFrame:
     """The number of distinct spurious fixed points of every cell.
 
-    Args:
-        attractors: Table from :func:`load_attractors`.
-
     Returns:
         One row per cell with the columns ``dataset``, ``learning``, ``mode``
         and ``spurious`` (rows of class ``spurious``, 0 if none).
@@ -363,11 +332,7 @@ def plot_distinct(attractors: pl.DataFrame, summary: pl.DataFrame, sizes: pl.Dat
         attractors: Table from :func:`load_attractors`.
         summary: Cell aggregates from
             :func:`hopfield_analysis.experiments.load_summary`.
-        sizes: Datasets of the experiment from
-            :func:`hopfield_analysis.experiments.dataset_sizes`.
-
-    Returns:
-        The figure in the report style with Polish labels.
+        sizes: Datasets from :func:`hopfield_analysis.experiments.dataset_sizes`.
     """
     counts = spurious_counts(attractors)
     cells = summary.join(counts, on=["dataset", "learning", "mode"], how="left").join(
@@ -417,16 +382,12 @@ def plot_energies(
     panel one step histogram per group of :data:`ENERGY_GROUPS` that occurs,
     over the same bins, so the energies of stored patterns and of spurious
     states can be compared. A pattern and its negation have the same energy,
-    so they form one group. At most five ticks on the energy axis, so long
-    labels of a narrow range do not overlap.
+    so they form one group.
 
     Args:
         trials: Trial table from :func:`hopfield_analysis.experiments.load_trials`.
         datasets: Datasets to show, in this order; all by default.
         mode: Update mode of the drawn runs.
-
-    Returns:
-        The figure in the report style with Polish labels.
 
     Raises:
         ValueError: If a requested dataset has no results or no run has the

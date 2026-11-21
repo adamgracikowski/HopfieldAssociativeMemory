@@ -1,5 +1,5 @@
-//! Records the git commit of the sources, written to the training artifacts
-//! (`metadata.json`) so that every run can be traced back to its code.
+//! Records the git commit of the sources for `build_info`, which writes it to
+//! every `metadata.json` and provenance file and to `--version`.
 //!
 //! Sets `COMPUTE_GIT_COMMIT` (`unknown` without git) and `COMPUTE_GIT_DIRTY`
 //! (`true` when files of this crate differ from the commit, `unknown`
@@ -19,7 +19,7 @@ fn main() {
     println!("cargo:rustc-env=COMPUTE_GIT_COMMIT={commit}");
     println!("cargo:rustc-env=COMPUTE_GIT_DIRTY={dirty}");
 
-    // Rerun after commits, checkouts and staging, and when sources change.
+    // Rerun when HEAD, the index or the sources change.
     if let Some(git_dir) = git(&["rev-parse", "--absolute-git-dir"]) {
         for file in ["HEAD", "index", "logs/HEAD"] {
             println!("cargo:rerun-if-changed={git_dir}/{file}");

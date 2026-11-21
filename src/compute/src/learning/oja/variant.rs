@@ -2,12 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-/// Form of Oja's rule used to update the whole weight matrix.
-///
-/// Both forms use the outputs `y = W x` of the network for the normalized
-/// patterns `x = xi / sqrt(N)`. [`Display`](std::fmt::Display) and
-/// `&'static str` conversion give the name used in configuration files
-/// (`subspace`, `single-neuron`).
+/// Form of Oja's rule, with outputs `y = W x` for `x = xi / sqrt(N)`.
 #[derive(
     Debug,
     Clone,
@@ -24,23 +19,15 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum OjaVariant {
-    /// Oja's subspace rule `dW = eta (y x^T - y y^T W)` (Oja 1989).
-    ///
-    /// Started from the (scaled) Hebbian weights it converges to the
-    /// projection onto the span of the patterns, `P = Xi^T (Xi Xi^T)^-1 Xi`,
-    /// the projection (pseudo-inverse) rule of Personnaz, Guyon and Dreyfus
-    /// (1985), for which every linearly independent pattern is mapped to
-    /// itself.
+    /// Subspace rule `dW = eta (y x^T - y y^T W)` (Oja 1989); from the
+    /// scaled Hebbian start it converges to the projection (pseudo-inverse)
+    /// rule (Personnaz, Guyon and Dreyfus 1985).
     #[default]
     Subspace,
-    /// Oja's single-neuron rule (Oja 1982) applied to every row:
-    /// `dW = eta (y x^T - diag(y * y) W)`.
-    ///
-    /// Every row converges to the principal eigenvector of the pattern
-    /// correlation matrix (Sanger 1989, p. 465), so for generic pattern sets
-    /// the weights tend to a rank-one matrix that stores at most one pattern
-    /// direction. A row that starts without a component along the principal
-    /// eigenvector converges to another eigenvector instead.
+    /// Single-neuron rule (Oja 1982) on every row,
+    /// `dW = eta (y x^T - diag(y * y) W)`; rows converge to the principal
+    /// eigenvector, so it stores about one pattern direction (Sanger 1989,
+    /// p. 465).
     SingleNeuron,
 }
 

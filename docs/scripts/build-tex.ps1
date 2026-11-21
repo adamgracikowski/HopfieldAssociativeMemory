@@ -3,29 +3,15 @@
     Compile a LaTeX document to PDF and clean up build artifacts.
 
 .DESCRIPTION
-    PowerShell counterpart of scripts/build-tex.sh. Unlike the bash version it
-    does not use latexmk (MiKTeX's latexmk needs Perl, which is usually not on
-    PATH outside Git Bash). Instead it runs the build steps itself:
+    PowerShell counterpart of docs/scripts/build-tex.sh without latexmk
+    (MiKTeX's latexmk needs Perl): runs pdflatex, biber or bibtex if the
+    document has a bibliography, and pdflatex again until LaTeX stops asking
+    for a rerun. On failure prints the LaTeX errors and saves the full log as
+    <output>.log next to the .tex file.
 
-    1. Changes into the directory of the .tex file, so relative paths to the
-       bibliography (.bib) and images (\includegraphics) resolve as usual.
-    2. Runs pdflatex with -output-directory=.latexbuild.
-    3. Runs biber (biblatex documents) or bibtex (\bibliography documents)
-       if the document has a bibliography.
-    4. Re-runs pdflatex until LaTeX stops asking for a rerun (at most
-       MaxRuns passes in total), so cross-references and citations are stable.
-    5. Copies the PDF next to the .tex file under the requested name and
-       removes .latexbuild/, so only the sources and the PDF remain.
-
-    On failure the script prints the LaTeX errors, saves the full log as
-    <output>.log next to the .tex file and exits with code 1. Undefined
-    citations/references and biber warnings are reported but do not fail
-    the build.
-
-    Requirements: pdflatex and biber/bibtex on PATH (e.g. MiKTeX or TeX Live).
-    Works in Windows PowerShell 5.1 and PowerShell 7+. If script execution is
-    blocked, run it with:
-        powershell -ExecutionPolicy Bypass -File scripts\build-tex.ps1 ...
+    Requirements: pdflatex, biber and bibtex on PATH (e.g. MiKTeX or TeX
+    Live). If script execution is blocked, run it with:
+        powershell -ExecutionPolicy Bypass -File docs\scripts\build-tex.ps1 ...
 
 .PARAMETER TexFile
     Source document (relative or absolute path to a .tex file).
@@ -42,13 +28,7 @@
     Maximum number of pdflatex passes (default: 5).
 
 .EXAMPLE
-    .\scripts\build-tex.ps1 docs\report.tex
-
-.EXAMPLE
-    .\scripts\build-tex.ps1 docs\report.tex report.pdf
-
-.EXAMPLE
-    .\scripts\build-tex.ps1 docs\report.tex -Keep
+    .\docs\scripts\build-tex.ps1 docs\report.tex -Keep
 #>
 [CmdletBinding()]
 param(

@@ -1,11 +1,7 @@
-# Groups of similar patterns against a diverse set of the same size
-# (N = 625, p = 15): three pictures of large-25x25 with five variants each,
-# 2%, 5%, 10% or 20% of the pixels flipped (data/generated/groups-25x25),
-# and the 15 different pictures of large-25x25.plus.
+# Groups of similar patterns (groups-25x25-d*) against the diverse
+# large-25x25.plus, N = 625 and p = 15 in every set.
 #
-# Run from src/compute:
 #   cargo run --release -- experiment --config ../../data/experiments/groups/config.toml
-# Report figures, from src/analysis:
 #   uv run hopfield-analysis recovery ../../data/experiments/groups/results --out ../../data/experiments/groups/figures/recovery
 #   uv run hopfield-analysis patterns groups-25x25-d05 --columns 15 --numbers --out ../../data/experiments/groups/figures/patterns-d05
 

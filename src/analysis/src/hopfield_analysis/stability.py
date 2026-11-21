@@ -38,11 +38,7 @@ ANNOTATED_PATTERNS = 8
 
 
 def load_fields(results: Path) -> pl.DataFrame:
-    """Reads the aligned fields of an experiment.
-
-    Args:
-        results: Directory written by ``compute experiment`` with
-            ``stability_fields = true``.
+    """Reads ``stability.parquet`` of an experiment run with ``stability_fields = true``.
 
     Returns:
         One row per (dataset, rule, pattern, neuron) with the columns
@@ -52,10 +48,7 @@ def load_fields(results: Path) -> pl.DataFrame:
 
 
 def load_datasets(results: Path) -> dict[str, dict[str, Any]]:
-    """Reads the dataset statistics of an experiment.
-
-    Args:
-        results: Directory written by ``compute experiment``.
+    """Reads the dataset statistics of an experiment from ``datasets.json``.
 
     Returns:
         The statistics by dataset name: ``width``, ``height``, ``patterns``,
@@ -67,10 +60,7 @@ def load_datasets(results: Path) -> dict[str, dict[str, Any]]:
 
 
 def load_stability(results: Path) -> pl.DataFrame:
-    """Reads the stability of every training of an experiment.
-
-    Args:
-        results: Directory written by ``compute experiment``.
+    """Reads the stability of every training of an experiment from ``metadata.json``.
 
     Returns:
         One row per (dataset, rule) in the order of ``metadata.json`` with
@@ -138,8 +128,7 @@ def unstable_mask(patterns: np.ndarray, fields: np.ndarray, zero_field: str) -> 
     Args:
         patterns: Patterns with values ``1`` and ``-1``, any shape.
         fields: Aligned fields ``xi_i^mu h_i`` of the same shape.
-        zero_field: ``keep`` (a zero field keeps the neuron) or ``plus-one``
-            (a zero field sets it to ``+1``, which changes a ``-1``).
+        zero_field: ``keep`` or ``plus-one`` (a zero field sets the neuron to ``+1``).
 
     Returns:
         ``True`` where the field is negative or, with ``plus-one``, zero at
@@ -166,9 +155,6 @@ def plot_stable(table: pl.DataFrame) -> Figure:
     Args:
         table: Rows of :func:`load_stability`, possibly of several
             experiments concatenated.
-
-    Returns:
-        The figure in the report style with Polish labels.
 
     Raises:
         ValueError: If a (dataset, rule) pair occurs more than once, e.g.
@@ -225,12 +211,7 @@ def plot_fields(
     Args:
         fields: Table from :func:`load_fields`.
         datasets: Datasets to show, in this order; all by default.
-        log: Logarithmic count axis, so the narrow peak of one rule does not
-            flatten the spread of another and single unstable neurons stay
-            visible.
-
-    Returns:
-        The figure in the report style with Polish labels.
+        log: Logarithmic count axis, which keeps single unstable neurons visible.
 
     Raises:
         ValueError: If a requested dataset has no fields.
@@ -271,15 +252,13 @@ def plot_fields(
 def plot_unstable(patterns: np.ndarray, unstable: np.ndarray, columns: int = 6) -> Figure:
     """Shows the stored patterns with their unstable pixels in red.
 
+    Panels are titled ``wzorzec 0``, ``wzorzec 1``, ... with the number of
+    unstable pixels below each.
+
     Args:
         patterns: Patterns of shape ``(p, height, width)``.
         unstable: Mask of the same shape from :func:`unstable_mask`.
         columns: Largest number of panels in a row.
-
-    Returns:
-        The figure in the report style, panels titled ``wzorzec 0``, ...
-        with the number of unstable pixels below each panel, explained by
-        the common label under the grid.
 
     Raises:
         ValueError: If the shapes differ.
@@ -320,9 +299,6 @@ def plot_overlaps(datasets: dict[str, dict[str, Any]], names: list[str] | None =
     Args:
         datasets: Statistics from :func:`load_datasets`.
         names: Datasets to show, in this order; all by default.
-
-    Returns:
-        The figure in the report style with Polish labels.
 
     Raises:
         ValueError: If a requested dataset is missing.

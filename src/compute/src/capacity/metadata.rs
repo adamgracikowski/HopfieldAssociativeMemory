@@ -8,7 +8,7 @@ use crate::run::DatasetInfo;
 use crate::run::metadata::timestamp;
 
 /// Contents of the `metadata.json` of a capacity run: what was run, with
-/// which code and settings. Running it again changes only `created`.
+/// which code and settings.
 #[derive(Debug, Clone, Serialize)]
 pub struct CapacityMetadata<'a> {
     /// Subcommand, `capacity`.

@@ -94,10 +94,9 @@ def test_save_embeds_bitmaps_unresampled_in_the_pdf(tmp_path):
 
 
 def test_save_repeats_the_pixels_of_an_enlarged_image_in_the_pdf(tmp_path):
-    """A 14 x 20 bitmap (14 columns) with a masked overlay in a 2 x 2 inch
-    figure: the panel is wider than 14 pixels at 300 dpi, so the PDF holds
-    a raster with ``14 k`` columns for an integer ``k > 1``, made of whole
-    copies of every pixel. The data of both images is restored afterwards."""
+    """A 14-column bitmap with a masked overlay, shown wider than 14 pixels at
+    300 dpi: every PDF raster has ``14 k`` columns, ``k > 1``; the data of both
+    images is restored."""
     rng = np.random.default_rng(0)
     bitmap = np.where(rng.random((20, 14)) < 0.5, 1, -1)
     mask = rng.random((20, 14)) < 0.2

@@ -47,17 +47,12 @@ pub struct Dynamics {
     /// Largest number of steps (synchronous updates or asynchronous
     /// sweeps).
     pub max_steps: usize,
-    /// Asynchronous mode only: a frame is recorded every `record_every`
-    /// neuron updates (if the state changed since the previous frame).
-    /// `None` means once per sweep, i.e. every `N` updates. The synchronous
-    /// mode records every step.
+    /// Asynchronous mode only: record a frame every `record_every` updates;
+    /// `None` means once per sweep.
     pub record_every: Option<usize>,
 }
 
 impl Default for Dynamics {
-    /// Asynchronous mode with a new random permutation in every sweep,
-    /// `sgn(0)` keeps the previous state, at most 1000 steps, a frame per
-    /// sweep.
     fn default() -> Self {
         Self {
             mode: Mode::Asynchronous,
@@ -70,10 +65,8 @@ impl Default for Dynamics {
 }
 
 impl Dynamics {
-    /// Runs the network with `weights` from `initial` and passes the
-    /// frames to `recorder`: the initial state, the states between steps
-    /// and the final state, consecutive frames always different. `rng`
-    /// drives the random update orders of the asynchronous mode.
+    /// Runs the network from `initial`, passing the frames to `recorder`;
+    /// `rng` drives the random update orders of the asynchronous mode.
     pub fn run<R, H>(
         &self,
         weights: &Weights,
@@ -184,8 +177,8 @@ mod tests {
         assert_eq!(history.changes(), [0, 2]);
     }
 
-    /// The cycle of the previous test appears after one step, so a limit
-    /// of one step still reports it rather than the step limit.
+    /// From `(1, -1)` the 2-cycle appears after one step, so a limit of one
+    /// step reports it rather than the step limit.
     #[test]
     fn a_two_cycle_at_the_step_limit_is_recognized() {
         let (outcome, _) = run(synchronous(1), &two_neurons(), &pattern(array![1, -1]));
@@ -230,10 +223,9 @@ mod tests {
         assert_eq!(outcome.state, pattern(array![1, 1, 1]));
     }
 
-    /// Antisymmetric `W = [[0, -1], [1, 0]]` gives `h = (-x_1, x_0)`:
-    /// `(1, 1) -> (-1, 1) -> (-1, -1) -> (1, -1) -> (1, 1)`, a cycle of
-    /// length 4 (Bruck 1990, Theorem 4.3) with one change per step. After
-    /// the limit of 10 steps the state is `x(10) = x(2) = (-1, -1)`.
+    /// `W = [[0, -1], [1, 0]]` gives `h = (-x_1, x_0)`: a 4-cycle
+    /// `(1, 1) -> (-1, 1) -> (-1, -1) -> (1, -1)` with one change per step,
+    /// so `x(10) = x(2) = (-1, -1)`.
     #[test]
     fn longer_cycles_end_at_the_step_limit() {
         let weights = Weights::from(DenseWeights::new(array![[0.0, -1.0], [1.0, 0.0]]).unwrap());

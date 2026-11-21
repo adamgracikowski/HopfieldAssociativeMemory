@@ -4,27 +4,8 @@ use serde::{Deserialize, Serialize};
 
 use super::Damage;
 
-/// The `[input]` table of an experiment, whose `source` key names the kind
-/// of initial state:
-///
-/// ```toml
-/// [input]
-/// source = "pattern"           # every stored pattern with flipped pixels
-/// noise = [0.0, 0.1, 0.2]      # fractions of flipped pixels, one grid axis
-/// ```
-///
-/// `source = "occlusion"` covers a band of rows of every stored pattern
-/// instead:
-///
-/// ```toml
-/// [input]
-/// source = "occlusion"
-/// occlusion = [0.0, 0.3, 0.6]  # fractions of covered rows, one grid axis
-/// ```
-///
-/// `source = "random"` takes no parameters: every trial starts from one
-/// random state. Noise and occlusion fractions are the damage levels of the
-/// grid cells.
+/// The `[input]` table of an experiment: the kind of initial state (`source`)
+/// and its damage levels, one grid axis.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(tag = "source", rename_all = "kebab-case", deny_unknown_fields)]
 pub enum ExperimentInput {
@@ -84,16 +65,13 @@ impl ExperimentInput {
         }
     }
 
-    /// Number of pixels flipped at noise level `noise` in a network of
-    /// `neurons` neurons: `noise * N` rounded to the nearest integer, halves
-    /// away from zero.
+    /// Number of pixels flipped at noise level `noise`: `noise * N` rounded.
     pub fn flips(noise: f64, neurons: usize) -> usize {
         (noise * neurons as f64).round() as usize
     }
 
-    /// Number of rows covered at occlusion level `occlusion` of a bitmap
-    /// with `height` rows: `occlusion * height` rounded to the nearest
-    /// integer, halves away from zero.
+    /// Number of rows covered at occlusion level `occlusion`:
+    /// `occlusion * height` rounded.
     pub fn rows(occlusion: f64, height: usize) -> usize {
         (occlusion * height as f64).round() as usize
     }
@@ -148,9 +126,9 @@ mod tests {
         assert_eq!(ExperimentInput::flips(1.0, 49), 49);
     }
 
-    /// Occlusion levels `0.15, 0.3, 0.45, 0.6, 0.75` of 7 rows are `1.05,
-    /// 2.1, 3.15, 4.2, 5.25`, rounded to 1-5 rows; of a 25 x 25 bitmap
-    /// `0.3 * 25 = 7.5` rounds to 8 rows, 200 pixels.
+    /// Levels `0.15, 0.3, 0.45, 0.6, 0.75` of 7 rows are
+    /// `1.05, 2.1, 3.15, 4.2, 5.25`, rounded to 1-5 rows; of a 25 x 25
+    /// bitmap `0.3 * 25 = 7.5` rounds to 8 rows, 200 pixels.
     #[test]
     fn rounds_the_number_of_rows() {
         let rows: Vec<usize> = [0.0, 0.15, 0.3, 0.45, 0.6, 0.75, 1.0]

@@ -3,9 +3,6 @@
 use serde::Serialize;
 
 /// Why a simulation stopped.
-///
-/// [`Display`](std::fmt::Display) and `&'static str` conversion give the
-/// name used in output files (`fixed-point`, `two-cycle`, `step-limit`).
 #[derive(
     Debug,
     Clone,
@@ -22,11 +19,9 @@ use serde::Serialize;
 pub enum Termination {
     /// The state is a fixed point: updating any neuron leaves it unchanged.
     FixedPoint,
-    /// Synchronous mode only: the next state equals the previous one, so
-    /// the network alternates between two states.
+    /// Synchronous mode only: the next state equals the previous one.
     TwoCycle,
-    /// The step limit was reached without a fixed point or a cycle of
-    /// length 2.
+    /// The step limit was reached.
     StepLimit,
 }
 

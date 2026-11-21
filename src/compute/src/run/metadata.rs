@@ -41,8 +41,7 @@ impl From<&Trained> for TrainingInfo {
 
 /// Contents of `metadata.json`: what was run, with which code and settings,
 /// and the command-specific `result`, whose fields are written at the top
-/// level. Running a command again with the same configuration and code
-/// changes only `created`.
+/// level.
 #[derive(Debug, Clone, Serialize)]
 pub struct Metadata<'a, R: Serialize> {
     /// Subcommand (`train`, `recall`).

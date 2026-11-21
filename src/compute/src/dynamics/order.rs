@@ -5,12 +5,7 @@ use rand::{Rng, RngExt};
 use serde::{Deserialize, Serialize};
 
 /// Order in which the asynchronous mode updates the neurons within one
-/// sweep of `N` updates. Random orders draw from the generator passed to the
-/// simulation, so a seeded generator makes every run reproducible.
-///
-/// [`Display`](std::fmt::Display) and `&'static str` conversion give the
-/// name used in configuration files (`permutation`, `random`,
-/// `sequential`).
+/// sweep of `N` updates.
 #[derive(
     Debug,
     Clone,
@@ -27,12 +22,10 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum UpdateOrder {
-    /// A new random permutation of all neurons in every sweep, so every
-    /// neuron is updated exactly once per sweep.
+    /// A new random permutation of all neurons in every sweep.
     #[default]
     Permutation,
-    /// `N` neurons drawn uniformly with repetition, as in Hopfield's (1982)
-    /// model with random update times. A sweep may skip some neurons.
+    /// `N` neurons drawn uniformly with repetition (Hopfield 1982).
     Random,
     /// Neurons `0, 1, ..., N - 1` in every sweep.
     Sequential,

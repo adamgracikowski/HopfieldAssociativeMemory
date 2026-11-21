@@ -1,13 +1,7 @@
-# Oscillation between two states: the Hebbian network of the four shapes of
-# cycle-5x5 (T, L, H, +) started from the 5x5 checkerboard
-# (checkerboard.npy, 1 at the corners), synchronous updates. The
-# checkerboard has overlap 1/25 with every shape, so its local fields are
-# h = (1/25) sum_mu xi^mu - (4/25) x, opposite to x at every pixel: the
-# state flips to the negated checkerboard and back, a cycle of length 2.
+# The checkerboard has overlap 1/25 with every shape, so its Hebbian fields
+# h = (1/25) sum_mu xi^mu - (4/25) x are opposite to x: a cycle of length 2.
 #
-# Run from src/compute:
 #   cargo run --release -- recall --config ../../data/experiments/cycle/recall-cycle.toml --out ../../data/experiments/cycle/runs/recall-cycle
-# Report figures, from src/analysis:
 #   uv run hopfield-analysis patterns cycle-5x5 --width 0.6 --out ../../data/experiments/cycle/figures/patterns
 #   uv run hopfield-analysis frames ../../data/experiments/cycle/runs/recall-cycle --width 0.3 --out ../../data/experiments/cycle/figures/frames
 

@@ -12,14 +12,9 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
-# Experiment artifacts
-data/experiments/**/artifacts/
+# Experiment outputs not committed
 data/experiments/**/runs/
-data/experiments/*/*/results/*.png
 data/experiments/**/plots/
-
-# Logs of scripts
-logs/
 
 # Report build output
 docs/.latexbuild/

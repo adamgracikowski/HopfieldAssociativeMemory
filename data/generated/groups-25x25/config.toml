@@ -1,10 +1,6 @@
-# Groups of similar patterns for the comparison with the diverse
-# large-25x25.plus (15 different pictures): three pictures of large-25x25
-# with pairwise |m| <= 0.12 as prototypes, five variants of each, with a
-# fraction `flip` of the pixels flipped (overlap 1 - 2 flip with the
-# prototype), N = 625 and p = 15 in every set.
+# Three large-25x25 prototypes (pairwise |m| < 0.13), five variants each with a
+# fraction `flip` of the pixels flipped (overlap 1 - 2 flip).
 #
-# Run from src/compute:
 #   cargo run --release -- generate --config ../../data/generated/groups-25x25/config.toml
 
 seed = 20261110

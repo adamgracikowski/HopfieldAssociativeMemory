@@ -24,11 +24,6 @@ pub fn read_csv(path: &Path, width: usize, height: usize, separator: u8) -> Resu
 }
 
 /// Parses CSV data of a pattern set. `path` is used only in error messages.
-///
-/// The input is read line by line (`\n` or `\r\n`) and every line is split
-/// into fields by the `csv` crate. Counting lines here, not in the `csv`
-/// reader, keeps the line numbers in errors equal to the lines of the file,
-/// also after skipped lines and in CRLF files.
 pub fn parse_csv(
     reader: impl Read,
     path: &Path,

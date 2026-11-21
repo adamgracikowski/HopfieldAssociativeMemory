@@ -105,8 +105,7 @@ fn strings<'a>(values: impl Iterator<Item = &'a str>) -> ArrayRef {
     Arc::new(StringArray::from_iter_values(values))
 }
 
-/// `value` as `u32`; numbers of neurons, patterns, repeats, epochs and
-/// steps fit.
+/// `value` as `u32`.
 fn to_u32(value: usize) -> u32 {
     u32::try_from(value).expect("count fits in u32")
 }

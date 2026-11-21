@@ -51,14 +51,7 @@ class Registry:
 
     @classmethod
     def from_file(cls, path: Path) -> "Registry":
-        """Reads a registry file.
-
-        Args:
-            path: The ``datasets.toml`` file.
-
-        Returns:
-            The registry, with pattern files resolved against its directory.
-        """
+        """Reads a ``datasets.toml`` file; pattern files are resolved against its directory."""
         with path.open("rb") as file:
             datasets = tomllib.load(file)["datasets"]
         entries = {
@@ -76,13 +69,7 @@ class Registry:
 
     @classmethod
     def discover(cls, start: Path) -> "Registry":
-        """Finds ``data/datasets/datasets.toml`` in ``start`` or a parent.
-
-        Args:
-            start: Directory where the search starts.
-
-        Returns:
-            The nearest registry.
+        """Reads the nearest ``data/datasets/datasets.toml`` in ``start`` or a parent.
 
         Raises:
             FileNotFoundError: If no directory up to the root has a registry.
@@ -109,9 +96,6 @@ class Registry:
 
     def load(self, name: str) -> np.ndarray:
         """Reads the patterns of dataset ``name``.
-
-        Args:
-            name: Dataset name.
 
         Returns:
             ``int8`` patterns of shape ``(p, height, width)``.
@@ -148,18 +132,15 @@ def plot_patterns(
     """Shows every pattern of a set as a bitmap in a grid.
 
     A figure narrower than the text width, placed in the report at its own
-    size, keeps the 9 pt text of the other figures; the short titles let
-    narrow panels sit side by side without overlapping titles.
+    size, keeps the 9 pt text of the other figures.
 
     Args:
         patterns: Patterns of shape ``(p, height, width)``.
         columns: Largest number of panels in a row.
         width: Figure width in inches, the report text width by default.
         numbers: Whether the panels are titled with the pattern number
-            alone instead of ``wzorzec 0``, ``wzorzec 1``, ...
-
-    Returns:
-        The figure in the report style, one titled panel per pattern.
+            alone instead of ``wzorzec 0``, ``wzorzec 1``, ..., which lets
+            narrow panels sit side by side.
     """
     count, height, bitmap_width = patterns.shape
     columns = min(columns, count)
