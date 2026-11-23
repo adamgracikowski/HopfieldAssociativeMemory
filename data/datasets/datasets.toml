@@ -1,7 +1,5 @@
 # Registry of pattern sets: `[datasets.<name>]` with `file` (relative `.csv` or
 # `.npy`), `width`, `height`, optional `separator` (CSV) and `description`.
-#
-#   or `.npy` with shape (p, height, width)),
 
 [datasets.small-7x7]
 file = "small-7x7.csv"
