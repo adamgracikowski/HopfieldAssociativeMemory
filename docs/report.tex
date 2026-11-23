@@ -8,7 +8,6 @@
 \usepackage{microtype}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
-\usepackage{listings}
 \usepackage{etoolbox}
 \usepackage{booktabs}
 \usepackage{algorithm}
@@ -61,23 +60,7 @@
 \usepackage{tikz}
 \usetikzlibrary{positioning, arrows.meta}
 
-% Listingi plików konfiguracyjnych TOML
-\lstdefinelanguage{toml}{
-    morecomment=[l]{\#},
-    morestring=[b]",
-    sensitive=true,
-}
-\lstdefinestyle{config}{
-    language=toml,
-    basicstyle=\ttfamily\footnotesize,
-    commentstyle=\color{consoleGray},
-    stringstyle=\color{consoleBlue},
-    columns=fullflexible,
-    keepspaces=true,
-    breaklines=true,
-    breakatwhitespace=true,
-}
-% Proste apostrofy i grawisy w listingach i Verbatim, tak jak w plikach
+% Proste apostrofy i grawisy w Verbatim, tak jak w plikach
 \usepackage{upquote}
 
 % Definicje kolorów
@@ -112,10 +95,6 @@
 
 % Pytanie z zadania w podsumowaniu: wyszarzone, odpowiedź zaczyna się w nowej linii
 \newcommand{\pytanie}[1]{{\hypersetup{linkcolor=consoleGray}\textcolor{consoleGray}{#1}}\par\noindent\ignorespaces}
-
-\lstset{
-    basicstyle=\ttfamily, % Ustawienie czcionki monospaced
-}
 
 \newcommand{\nazwaprzedmiotu}{Sieci neuronowe}
 \newcommand{\tytulprojektu}{Pamięć skojarzeniowa z użyciem sieci Hopfielda}
@@ -174,8 +153,8 @@
 %----------------------------------------------------------------------
 \appendix
 \clearpage
-\input{sections/11-photo-sources}
+\input{sections/11-reproduction}
 \clearpage
-\input{sections/12-reproduction}
+\input{sections/12-photo-sources}
 
 \end{document}

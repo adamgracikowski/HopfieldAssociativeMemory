@@ -1,0 +1,18 @@
+\section{Odtwarzanie wyników}
+\label{app:odtwarzanie}
+
+Wszystkie wyniki i rysunki można odtworzyć z plików konfiguracyjnych zapisanych w katalogach eksperymentów. Potrzebne są Rust w wersji 1.88.0, instalowany przez \texttt{rustup} na podstawie pliku \texttt{rust-toolchain.toml}, oraz narzędzie uv, które instaluje Pythona 3.13 i zależności w wersjach zapisanych w pliku \texttt{uv.lock}. Zbiory wzorców, także zbiory grupowe i bitmapy zdjęć, są dołączone do programu jako pliki, więc nie trzeba ich tworzyć od nowa.
+
+Całość odtwarza jeden skrypt uruchamiany w głównym katalogu repozytorium (Listing~\ref{lst:polecenia}). Wykonuje on kolejno polecenia zapisane w komentarzach na początku plików konfiguracyjnych wszystkich eksperymentów: najpierw obliczenia w katalogu \texttt{src/compute}, potem rysunki w katalogu \texttt{src/analysis}. Wyniki i metadane (pełna konfiguracja, wersja programu) trafiają do katalogu \texttt{results} obok pliku konfiguracji, a rysunki raportu do katalogu \texttt{figures}. Pomiar czasu i pamięci zależy od komputera, dlatego skrypt wykonuje go tylko z opcją \texttt{-{}-benchmark} (\texttt{-Benchmark} w PowerShellu).
+
+\begin{code}[H]
+\begin{Verbatim}[fontsize=\small, commandchars=\\\{\}]
+\txtGray{# Linux, macOS lub Git Bash w systemie Windows}
+\txtYellow{scripts/reproduce.sh}
+
+\txtGray{# Windows, PowerShell}
+\txtYellow{pwsh} -File scripts/reproduce.ps1
+\end{Verbatim}
+    \caption{Polecenia odtwarzające wszystkie eksperymenty i rysunki.}
+    \label{lst:polecenia}
+\end{code}
